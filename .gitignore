@@ -1,0 +1,65 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+
+# Google Cloud credentials
+application_default_credentials.json
+service-account*.json
+credentials*.json
+
+# dbt generated artifacts
+target/
+dbt_packages/
+logs/
+*.log
+
+# dbt local user configuration
+profiles.yml
+
+# Power BI temporary and local files
+*.pbit.tmp
+*.pbix.autosave
+*.pbix.lock
+~$*.pbix
+
+# Local datasets and exports
+data/
+exports/
+*.csv
+*.parquet
+*.xlsx
+*.db
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter generated files
+.ipynb_checkpoints/
+
+# Test and coverage output
+.coverage
+htmlcov/
+coverage.xml
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

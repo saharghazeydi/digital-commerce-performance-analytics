@@ -1,0 +1,17 @@
+* text=auto
+
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pbix binary
+*.pbit binary
