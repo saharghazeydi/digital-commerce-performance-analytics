@@ -4,189 +4,299 @@
 
 Digital Commerce Performance Analytics
 
+---
+
 ## Business Objective
 
-Build a production-oriented analytics solution that transforms raw GA4 ecommerce event data into tested, documented, and business-ready datasets for acquisition, customer journey, conversion, and revenue analysis.
+Build a production-oriented analytics engineering solution that transforms raw GA4 ecommerce event data into tested, documented, governed, and business-ready analytical models for acquisition, customer behaviour, conversion, and revenue analysis.
 
-## Primary Users
+---
 
-- Commercial and marketing managers
+## Target Audience
+
+Primary consumers of this project include:
+
+- Commercial managers
+- Marketing managers
 - Growth and acquisition teams
 - Ecommerce stakeholders
 - Data analysts
 - BI developers
 
-## Core Business Questions
+---
+
+## Business Objectives
+
+The analytical platform should enable stakeholders to answer the following business questions:
 
 1. Which acquisition channels generate the highest-quality traffic?
-2. Where do users drop out of the ecommerce funnel?
-3. Which channels contribute most to conversions and revenue?
-4. How do sessions, conversion rate, transactions, and revenue change over time?
-5. Are business KPIs reliable and reconciled across the analytics and BI layers?
+2. Where do users leave the ecommerce journey before converting?
+3. Which channels contribute most to transactions and revenue?
+4. How do sessions, conversion rate, transactions, and revenue evolve over time?
+5. Can executive KPIs be trusted across every analytical layer?
+
+---
 
 ## Technology Stack
 
-- Google BigQuery
-- dbt Core
-- SQL
-- Python
-- Git and GitHub
-- VS Code
-- Power BI
+| Layer | Technology |
+|---|---|
+| Cloud Data Warehouse | Google BigQuery |
+| Transformation Framework | dbt Core |
+| Query Language | SQL |
+| Supporting Scripts | Python |
+| Version Control | Git |
+| Repository Hosting | GitHub |
+| Development Environment | VS Code |
+| Business Intelligence | Power BI |
+
+---
 
 ## High-Level Architecture
 
-GA4 public ecommerce data  
-→ BigQuery raw source  
-→ dbt staging models  
-→ dbt intermediate models  
-→ dimensions and facts  
-→ business marts  
-→ BI serving layer  
-→ Power BI semantic model and dashboards
+```text
+GA4 Public Ecommerce Dataset
+            │
+            ▼
+BigQuery Source Layer
+            │
+            ▼
+dbt Source Definitions
+            │
+            ▼
+dbt Staging Layer
+            │
+            ▼
+dbt Intermediate Layer
+            │
+            ▼
+Core Warehouse
+(Dimensions & Facts)
+            │
+            ▼
+Business Marts
+            │
+            ▼
+BI Serving Layer
+            │
+            ▼
+Power BI Semantic Model
+            │
+            ▼
+Executive Dashboards
+```
 
-## Analytics Layers
+---
 
-### Source Layer
+# Analytics Architecture
 
-Raw GA4 public ecommerce event tables stored in BigQuery.
+## Source Layer
 
-### Staging Layer
+Raw GA4 public ecommerce tables stored in BigQuery.
 
-Source-aligned models used to:
+Responsibilities:
 
-- extract nested GA4 parameters
-- standardize field names
-- cast data types
-- create technical identifiers
-- preserve source meaning
-- apply limited cleaning
+- preserve source data
+- define source metadata
+- provide traceability to upstream tables
 
-### Intermediate Layer
+---
 
-Reusable transformation models used to:
+## Staging Layer
 
-- construct sessions
-- prepare funnel events
-- deduplicate transactions
-- normalize acquisition channels
-- resolve reusable business logic
+Source-aligned transformation models responsible for:
 
-### Core Warehouse Layer
+- extracting nested GA4 parameters
+- standardizing naming conventions
+- casting data types
+- generating technical identifiers
+- preserving source semantics
+- applying minimal cleaning only
 
-Conformed dimensions and fact models with clearly defined grains.
+---
 
-### Business Mart Layer
+## Intermediate Layer
 
-Business-facing models for:
+Reusable transformation models responsible for:
 
-- channel performance
+- session construction
+- funnel-event preparation
+- transaction deduplication
+- acquisition normalization
+- reusable business transformations
+
+---
+
+## Core Warehouse Layer
+
+Business-independent analytical warehouse consisting of:
+
+- conformed dimensions
+- governed fact tables
+- documented grains
+- reusable analytical entities
+
+---
+
+## Business Mart Layer
+
+Business-facing analytical models supporting:
+
+- acquisition performance
 - funnel performance
 - commercial performance
-- engagement performance
-- daily trends
+- customer behaviour
+- engagement analysis
+- time-series reporting
 
-### BI Serving Layer
+---
 
-Power BI-ready models containing stable dimensions, measures, and reporting grains.
+## BI Serving Layer
 
-## Development Principles
+Presentation-ready models optimized for Power BI.
 
-- Every model must have a clearly documented grain.
-- SQL logic must be modular and reusable.
-- Source fields must not be renamed without business justification.
-- Final models must not use SELECT *.
+Responsibilities:
+
+- business-readable naming
+- stable reporting grains
+- optimized query performance
+- governed KPI exposure
+
+---
+
+# Development Principles
+
+The project follows the following engineering principles.
+
+- Every model must have a documented grain.
+- SQL transformations must remain modular.
+- Business logic must be reusable.
+- Source columns must not be renamed without business justification.
+- Final analytical models must never use `SELECT *`.
 - KPI definitions must exist in one authoritative layer.
-- Revenue must be reconciled against source data.
-- Row multiplication must be explicitly tested.
-- Models must be documented alongside the code.
-- Tests must cover technical quality and business logic.
-- Power BI must consume only approved BI serving models.
+- Revenue must reconcile with source data.
+- Grain changes must be explicitly documented.
+- Row multiplication must be tested.
+- Models must be documented together with the code.
+- Testing must include technical integrity and business validation.
+- Power BI may consume only approved BI serving models.
 
-## Testing Strategy
+---
 
-### Generic dbt Tests
+# Testing Strategy
+
+## Generic dbt Tests
 
 - not_null
 - unique
 - relationships
 - accepted_values
 
-### Singular Business Tests
+## Business Validation Tests
 
 - session grain uniqueness
 - transaction revenue reconciliation
-- no invalid funnel sequence totals
-- no negative transaction counts
+- funnel sequence validation
+- transaction count validation
 - conversion counts do not exceed session counts
-- BI model totals reconcile with upstream marts
+- BI totals reconcile with upstream marts
 
-## Materialization Strategy
+---
 
-- Sources: external BigQuery tables
-- Staging: views
-- Intermediate: views or ephemeral models based on reuse and cost
-- Dimensions: tables
-- Facts: partitioned tables where appropriate
-- Business marts: tables
-- BI serving models: views or tables based on Power BI performance requirements
+# Materialization Strategy
 
-## BigQuery Dataset Strategy
+| Layer | Materialization |
+|---|---|
+| Sources | External BigQuery tables |
+| Staging | Views |
+| Intermediate | Views or Ephemeral |
+| Dimensions | Tables |
+| Facts | Partitioned Tables where appropriate |
+| Business Marts | Tables |
+| BI Serving | Views or Tables depending on reporting performance |
 
-Planned logical datasets:
+---
 
-- raw source dataset: external public GA4 dataset
-- development dataset: dbt developer models
-- analytics dataset: approved warehouse and mart models
-- BI dataset: Power BI serving models
+# BigQuery Dataset Strategy
+
+Planned logical datasets include:
+
+| Dataset Purpose | Description |
+|---|---|
+| Source | External GA4 public dataset |
+| Development | dbt developer workspace |
+| Analytics | Approved warehouse and business marts |
+| BI | Power BI serving models |
 
 Exact dataset names will be finalized during environment configuration.
 
-## Git Workflow
+---
 
-- main: stable and reviewed project state
-- feature branches: one branch per development phase or logical change
-- small, meaningful commits
-- no direct development on main after project initialization
-- pull request-style review before merging feature work
+# Git Workflow
 
-## Commit Convention
+Development follows an enterprise feature-branch workflow.
+
+- `main` always represents the latest reviewed project state.
+- Every logical change uses a dedicated feature branch.
+- Commits remain small and focused.
+- Direct development on `main` is prohibited.
+- Every feature is reviewed through a Pull Request before merge.
+
+---
+
+# Commit Convention
 
 Examples:
 
-- feat: add GA4 source definitions
-- feat: build session fact model
-- test: add revenue reconciliation test
-- docs: document channel attribution logic
-- refactor: simplify session construction logic
-- fix: prevent duplicate transaction revenue
-- chore: configure dbt project settings
+```text
+feat: add GA4 source definitions
+feat: build session fact model
+test: add revenue reconciliation test
+docs: document channel attribution
+refactor: simplify session construction
+fix: prevent duplicate transaction revenue
+chore: configure dbt project
+```
 
-## Documentation Deliverables
+---
 
-- README.md
-- project blueprint
-- architecture documentation
-- project tracker
-- KPI dictionary
-- data dictionary
-- data-quality documentation
-- decision log
-- dbt model and column documentation
-- Power BI model documentation
+# Documentation Deliverables
 
-## Dashboard Scope
+The completed repository will include:
+
+- README
+- Project Blueprint
+- Project Tracker
+- Phase Checkpoints
+- Architecture Documentation
+- KPI Dictionary
+- Data Dictionary
+- Data Quality Documentation
+- Architecture Decision Records
+- dbt Model Documentation
+- Power BI Model Documentation
+
+---
+
+# Dashboard Scope
+
+The Power BI solution will contain:
 
 1. Executive Overview
-2. Acquisition and Channel Performance
-3. Customer Journey and Conversion Funnel
-4. Ecommerce Revenue Performance
+2. Acquisition & Channel Performance
+3. Customer Journey & Conversion Funnel
+4. Revenue & Commercial Performance
 
-## Out of Scope
+---
+
+# Out of Scope
+
+The following items are intentionally excluded.
 
 - unrelated external datasets
-- cross-domain row-level data integration
-- complex workflow orchestration
-- machine-learning models without a defined business requirement
-- infrastructure that does not support the analytics use case
-- real-time streaming or production application development
+- cross-domain row-level integration
+- workflow orchestration platforms
+- machine learning without a defined business requirement
+- infrastructure unrelated to analytical delivery
+- real-time streaming pipelines
+- production application development
