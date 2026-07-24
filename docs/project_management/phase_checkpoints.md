@@ -149,3 +149,153 @@ Validate an enterprise Git and GitHub workflow suitable for team development.
 ## Next Approved Work Package
 
 P1A — Python Virtual Environment
+
+---
+
+# Checkpoint 1.1 — dbt Development Environment Accepted
+
+## Objective
+
+Establish and validate a reproducible local dbt Core development environment connected securely to the BigQuery development project.
+
+## Work Completed
+
+- created and validated an isolated Python virtual environment
+- installed dbt Core and the BigQuery adapter
+- recorded Python dependencies
+- initialized the dbt project
+- removed example dbt models and unnecessary scaffold artifacts
+- configured local dbt profile settings
+- configured Google Cloud authentication
+- validated BigQuery connectivity
+- reviewed generated-file exclusions
+- delivered the environment through the repository Pull Request workflow
+
+## Validation Performed
+
+- confirmed the active Python interpreter belongs to the repository virtual environment
+- confirmed dbt Core and BigQuery adapter versions
+- verified local profile resolution
+- validated Google Cloud authentication
+- executed `dbt debug`
+- confirmed `All checks passed!`
+- reviewed repository status after merge
+- synchronized local `main` with `origin/main`
+
+## Evidence
+
+- `requirements.txt`
+- `digital_commerce_performance_analytics/dbt_project.yml`
+- `.gitignore`
+- `.env.example`
+- Pull Request #3
+
+## Decisions Made
+
+- dbt Core is the transformation framework
+- BigQuery is the dbt warehouse target
+- credentials remain outside version control
+- generated dbt artifacts are excluded from the repository
+- development and validation will be performed through the local virtual environment
+
+## Known Limitations
+
+- automated CI validation has not yet been introduced
+- dbt source definitions and transformation models have not yet been implemented
+
+## Next Approved Work Package
+
+P2A — Source Scope and Access
+
+---
+
+# Checkpoint 2.1 — GA4 Source Feasibility Accepted
+
+## Objective
+
+Determine whether the selected GA4 ecommerce source can support the intended analytical entities, transformation design, business metrics, and downstream reporting requirements.
+
+## Work Completed
+
+- confirmed source dataset and daily table scope
+- validated source access
+- established historical date coverage
+- profiled daily event volume
+- confirmed continuous daily-table coverage
+- inventoried event names and ecommerce events
+- assessed user and session identifiers
+- validated composite session identity
+- profiled transaction identifiers
+- identified invalid transaction identifiers
+- assessed purchase-event duplication
+- validated composite user-transaction identity
+- measured purchase-deduplication impact
+- reconciled order-level revenue fields
+- profiled repeated item structures
+- reconciled item quantity and revenue
+- assessed product identity and attribute stability
+- identified placeholder item records and quantity outliers
+- assessed source physical storage structure
+- reviewed query-scan and development cost considerations
+- documented source risks, limitations, and downstream controls
+- documented the GA4 order-identity and deduplication decision
+
+## Validation Performed
+
+- confirmed 92 daily source tables
+- confirmed date coverage from 2020-11-01 through 2021-01-31
+- confirmed no missing daily source tables
+- profiled 4,295,584 raw event rows
+- confirmed `user_pseudo_id` completeness
+- confirmed composite session identity based on `user_pseudo_id + ga_session_id`
+- identified 4,786 purchase events with valid transaction identifiers
+- identified 4,466 distinct composite user-transaction identities
+- confirmed 320 duplicate valid purchase events under the approved composite identity
+- validated consistent revenue, quantity, and item payloads for duplicated composite transaction keys
+- identified 883 `(not set)` transaction IDs and 23 null transaction IDs
+- validated collision-free profiling fallback keys for invalid transaction identifiers
+- reconciled purchase and item-level revenue
+- confirmed item-level coupon adjustments explain observed price-times-quantity differences
+- confirmed daily sharded source tables with no additional table partitioning
+- reviewed broad-query scan estimates and established bounded development-query requirements
+
+## Evidence
+
+- `docs/data_quality/ga4_source_feasibility_assessment.md`
+- `docs/decisions/ADR-002-ga4-order-identity-and-deduplication.md`
+- `docs/project_management/project_tracker.md`
+## Decisions Made
+
+- the GA4 public ecommerce source is accepted for project implementation
+- `user_pseudo_id` is the available analytical user identifier
+- session identity requires `user_pseudo_id + ga_session_id`
+- valid transaction identity requires `user_pseudo_id + transaction_id`
+- repeated valid purchase events require deterministic dbt deduplication
+- invalid transaction identifiers must be handled separately rather than discarded
+- order-level revenue must originate from the governed transaction entity
+- item arrays must be unnested with transaction context preserved
+- product attributes require deterministic canonicalization
+- development queries must use `_TABLE_SUFFIX` filtering and bounded date windows
+
+## Known Limitations
+
+- the source is an obfuscated public GA4 sample rather than a production dataset
+- only approximately three months of history are available
+- authenticated `user_id` is unavailable
+- some ecommerce funnel events are incompletely tracked
+- transaction identifiers are not universally valid
+- duplicate purchase events are present
+- product descriptive attributes are not perfectly stable
+- physical `TABLE_STORAGE` metadata was unavailable in the current public-dataset query context
+- automated source-quality CI checks have not yet been implemented
+
+
+## Phase Decision
+
+**Feasibility approved; Phase 3 progression is authorized after Pull Request review and merge.**
+
+No identified source limitation blocks development of the governed dbt source and staging layer.
+
+## Next Approved Work Package
+
+P3A — Source Definitions
