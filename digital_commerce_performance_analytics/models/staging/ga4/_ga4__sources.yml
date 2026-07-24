@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: ga4
+    description: >
+      Google Analytics 4 public ecommerce event data used as the analytical
+      source for the Digital Commerce Performance Analytics project. Source
+      feasibility and data-quality characteristics were validated during
+      Phase 2 before transformation development began.
+
+    database: bigquery-public-data
+    schema: ga4_obfuscated_sample_ecommerce
+
+    tables:
+      - name: events
+        identifier: events_*
+        description: >
+          Daily GA4 ecommerce event tables exposed through the BigQuery
+          wildcard pattern events_*. The approved project source window
+          contains 92 daily shards covering 2020-11-01 through 2021-01-31.
+          Downstream models must restrict wildcard scans using _TABLE_SUFFIX
+          and explicit bounded date windows.
