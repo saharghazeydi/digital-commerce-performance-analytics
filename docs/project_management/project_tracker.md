@@ -6,11 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 2 — Source Feasibility & Profiling |
-| Last Completed Phase | Phase 1 — dbt Development Environment |
-| Next Approved Work Package | P3A — Source Definitions, pending Phase 2 review and merge |
-| Repository Baseline | `main` through PR #4 |
-| Overall Delivery Progress | Phase 0 foundation and Phase 1 delivery complete; Phase 2 profiling and feasibility assessment complete and in review |
+| Current Delivery Phase | Phase 3 — dbt Source and Staging Layer |
+| Last Completed Phase | Phase 2 — Source Feasibility & Profiling |
+| Current Work Package | P3A — Source Definitions |
+| Next Approved Work Package | P3B — Staging Architecture, pending P3A review and merge |
+| Repository Baseline | `main` through PR #6 |
+| Overall Delivery Progress | Phase 0 foundation, Phase 1 development environment, and Phase 2 source feasibility complete; Phase 3 source-layer implementation is in progress |
 | Last Updated | 2026-07-24 |
 
 ## Tracker Purpose
@@ -78,32 +79,30 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
 |---|---|---|---|---|---|
-| P2A | Source Scope and Access | Approved source inventory, access confirmation, location, date coverage, and intended analytical use | In Review | Public GA4 source confirmed; 92 daily tables covering 2020-11-01 through 2021-01-31; query access validated | Pending |
-| P2B | Table Inventory | Source tables, naming patterns, physical structure, date ranges, and row volumes documented | In Review | Daily `events_YYYYMMDD` base tables confirmed; no missing daily shards; approximately 4.30M event rows profiled | Pending |
-| P2C | Schema and Grain Profiling | Source grain, nested structures, identifiers, data types, and key fields assessed | In Review | Event grain, repeated item arrays, user identifiers, session parameters, transaction identifiers, and product identifiers assessed | Pending |
-| P2D | Data Quality Profiling | Nulls, duplicates, missing identifiers, invalid values, and structural anomalies assessed | In Review | Duplicate purchases, invalid transaction IDs, placeholder item rows, quantity outliers, and revenue reconciliation reviewed | Pending |
-| P2E | Analytical Entity Feasibility | Feasibility of users, sessions, transactions, products, and acquisition entities assessed | In Review | Composite session identity and composite user-transaction identity validated; product and acquisition feasibility confirmed | Pending |
-| P2F | KPI Feasibility | Feasibility of revenue, transactions, sessions, conversion rate, AOV, and related KPIs assessed | In Review | Revenue, purchase, session, funnel, and product fields assessed; governed entities required before KPI aggregation | Pending |
-| P2G | Cost and Performance Review | Query volume, shard filtering, development windows, and cost controls documented | In Review | Daily sharded structure confirmed; `_TABLE_SUFFIX` filtering and bounded development windows required; broad scan estimates reviewed | Pending |
-| P2H | Risks and Assumptions | Source limitations, assumptions, exclusions, and mitigation decisions documented | In Review | Source limitations documented in feasibility assessment; order identity and deduplication decision captured in ADR-002 | Pending |
-| P2I | Phase Validation | Source feasibility decision and Phase 3 entry recommendation documented | In Review | GA4 source accepted as feasible; no blocking source limitation identified; Phase 3 recommended after review and merge | Pending |
+| P2A | Source Scope and Access | Approved source inventory, access confirmation, location, date coverage, and intended analytical use | Complete | Public GA4 source confirmed; 92 daily tables covering 2020-11-01 through 2021-01-31; query access validated | PR #6 |
+| P2B | Table Inventory | Source tables, naming patterns, physical structure, date ranges, and row volumes documented | Complete | Daily `events_YYYYMMDD` base tables confirmed; no missing daily shards; approximately 4.30M event rows profiled | PR #6 |
+| P2C | Schema and Grain Profiling | Source grain, nested structures, identifiers, data types, and key fields assessed | Complete | Event grain, repeated item arrays, user identifiers, session parameters, transaction identifiers, and product identifiers assessed | PR #6 |
+| P2D | Data Quality Profiling | Nulls, duplicates, missing identifiers, invalid values, and structural anomalies assessed | Complete | Duplicate purchases, invalid transaction IDs, placeholder item rows, quantity outliers, and revenue reconciliation reviewed | PR #6 |
+| P2E | Analytical Entity Feasibility | Feasibility of users, sessions, transactions, products, and acquisition entities assessed | Complete | Composite session identity and composite user-transaction identity validated; product and acquisition feasibility confirmed | PR #6 |
+| P2F | KPI Feasibility | Feasibility of revenue, transactions, sessions, conversion rate, AOV, and related KPIs assessed | Complete | Revenue, purchase, session, funnel, and product fields assessed; governed entities required before KPI aggregation | PR #6 |
+| P2G | Cost and Performance Review | Query volume, shard filtering, development windows, and cost controls documented | Complete | Daily sharded structure confirmed; `_TABLE_SUFFIX` filtering and bounded development windows required; broad scan estimates reviewed | PR #6 |
+| P2H | Risks and Assumptions | Source limitations, assumptions, exclusions, and mitigation decisions documented | Complete | Source limitations documented in feasibility assessment; order identity and deduplication decision captured in ADR-002 | PR #6 |
+| P2I | Phase Validation | Source feasibility decision and Phase 3 entry recommendation documented | Complete | GA4 source accepted as feasible; no blocking source limitation identified; progression to Phase 3 approved | PR #6 |
 
 ## Phase 3 — dbt Source and Staging Layer
 
-**Phase status:** Not Started
+**Phase status:** In Progress
 **Delivery outcome:** Define governed dbt sources and create standardized, tested, documented staging models.
 
-| ID | Work Package | Deliverable | Status |
-|---|---|---|---|
-| P3A | Source Definitions | dbt source configuration and metadata | Not Started |
-| P3B | Staging Architecture | Staging directories, naming standards, and model contracts | Not Started |
-| P3C | Base Extraction Logic | Required source fields and nested attributes extracted | Not Started |
-| P3D | Staging Models | Standardized source-aligned dbt models | Not Started |
-| P3E | Staging Tests | Generic and targeted staging tests | Not Started |
-| P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Not Started |
-| P3G | Staging Validation | Successful `dbt build` and source-to-staging reconciliation | Not Started |
-
----
+| ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
+|---|---|---|---|---|---|
+| P3A | Source Definitions | Governed dbt source configuration and metadata for the GA4 daily event shards | In Review | `dbt parse` passed; source discovered with `dbt ls`; wildcard source resolved successfully through `dbt show`; 31,272 events validated for 2020-11-01 | Pending |
+| P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | Not Started | Not yet executed | — |
+| P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | Not Started | Not yet executed | — |
+| P3D | Staging Models | Standardized source-aligned dbt models | Not Started | Not yet executed | — |
+| P3E | Staging Tests | Generic and targeted staging tests | Not Started | Not yet executed | — |
+| P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Not Started | Not yet executed | — |
+| P3G | Staging Validation | Successful `dbt build` and source-to-staging reconciliation | Not Started | Not yet executed | — |
 
 ## Phase 4 — Intermediate Models
 
@@ -256,44 +255,38 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 2 — Source Feasibility & Profiling
+### Phase 3 — dbt Source and Staging Layer
 
-Source profiling, feasibility analysis, data-quality review, transaction-identity assessment, revenue reconciliation, product profiling, and source cost/performance assessment have been completed.
+The current work package is:
 
-The current work package is in documentation and Pull Request review.
+**P3A — Source Definitions**
 
-No dbt staging implementation should begin until the Phase 2 documentation has been reviewed and merged.
+The GA4 source definition has been implemented and technically validated.
+
+Validation completed:
+
+- `dbt parse`
+- `dbt ls --resource-type source`
+- wildcard source resolution through `dbt show`
+- validated 31,272 events for 2020-11-01
+
+The work package is currently in review and has not yet been merged.
 
 ## Next Approved Work Package
 
-### P3A — Source Definitions
+### P3B — Staging Architecture
 
-Following Phase 2 acceptance and merge, the next work package will establish governed dbt source definitions for the GA4 daily event source.
+After P3A is reviewed and merged, the next work package will define the staging architecture before transformation models are introduced.
 
-The work package will define:
+The work package will establish:
 
-- dbt source metadata;
-- the GA4 source dataset and table pattern;
-- source naming and documentation standards;
-- source freshness applicability;
-- development-date filtering strategy;
-- source-level tests where technically appropriate.
+- staging directory and file organization;
+- model naming conventions;
+- staging model boundaries and responsibilities;
+- expected model grains;
+- nested-field extraction strategy;
+- source-window handling conventions;
+- staging materialization strategy;
+- documentation and testing responsibilities.
 
-Staging transformation logic must not be introduced until the source-definition layer has been validated.
-
-## Recently Completed
-
-- Phase 0 — Project Foundation and Governance
-- Phase 1 — dbt Development Environment
-- Phase 2 — GA4 source profiling and feasibility analysis
-- GA4 transaction-identity and purchase-deduplication assessment
-- GA4 product, item, revenue, and session feasibility assessment
-- repository development workflow documentation
-
-## Upcoming Milestones
-
-1. Review and merge the Phase 2 source-feasibility Pull Request.
-2. Synchronize local `main` and remove the completed profiling branch.
-3. Begin P3A — dbt Source Definitions.
-4. Validate dbt source configuration.
-5. Begin staging architecture and base extraction design.
+Base event extraction will begin only after the staging architecture has been reviewed and approved.
