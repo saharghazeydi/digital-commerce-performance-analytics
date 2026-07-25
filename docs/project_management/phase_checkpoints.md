@@ -299,3 +299,63 @@ No identified source limitation blocks development of the governed dbt source an
 ## Next Approved Work Package
 
 P3A — Source Definitions
+
+---
+
+# Checkpoint 3.1 — GA4 Source Definitions Accepted
+
+## Objective
+
+Establish and validate the governed dbt source definition for the approved GA4 ecommerce event source before staging transformation begins.
+
+## Work Completed
+
+- created the GA4 dbt source definition
+- configured the public BigQuery source project
+- configured the GA4 ecommerce source dataset
+- defined the wildcard daily event-table relation
+- documented the approved source date window
+- documented `_TABLE_SUFFIX` scan-control requirements
+- removed obsolete example-model configuration from `dbt_project.yml`
+- validated dbt source discovery
+- validated live BigQuery source resolution through dbt
+
+## Validation Performed
+
+- executed `dbt debug`
+- confirmed BigQuery connectivity
+- executed `dbt parse`
+- confirmed the dbt project parses successfully
+- executed `dbt ls --resource-type source`
+- confirmed `ga4.events` is registered as a dbt source
+- executed a live `dbt show` query against the wildcard source
+- validated 31,272 events for source shard `20201101`
+- confirmed no generated dbt artifacts were introduced into version control
+- reviewed and merged Pull Request #7
+
+## Evidence
+
+- `digital_commerce_performance_analytics/models/staging/ga4/_ga4__sources.yml`
+- `digital_commerce_performance_analytics/dbt_project.yml`
+- `docs/project_management/project_tracker.md`
+- Pull Request #7
+
+## Decisions Made
+
+- the governed GA4 dbt source is named `ga4.events`
+- the physical source relation uses the BigQuery `events_*` wildcard pattern
+- downstream development must restrict scans using `_TABLE_SUFFIX`
+- the approved historical source window is 2020-11-01 through 2021-01-31
+- source freshness is intentionally not configured for the static historical public dataset
+- business-quality testing is deferred to staging and downstream analytical entities
+
+## Known Limitations
+
+- the source is a static public GA4 sample rather than a production feed
+- freshness monitoring is not applicable
+- wildcard scans require explicit date filtering to control processed data volume
+- no transformation models have yet been introduced
+
+## Next Approved Work Package
+
+P3B — Staging Architecture
