@@ -96,8 +96,8 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
 |---|---|---|---|---|---|
-| P3A | Source Definitions | Governed dbt source configuration and metadata for the GA4 daily event shards | In Review | `dbt parse` passed; source discovered with `dbt ls`; wildcard source resolved successfully through `dbt show`; 31,272 events validated for 2020-11-01 | Pending |
-| P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | Not Started | Not yet executed | — |
+| P3A | Source Definitions | Governed dbt source configuration and metadata for the GA4 daily event shards | Complete | `dbt parse` passed; source discovered with `dbt ls`; wildcard source resolved successfully through `dbt show`; 31,272 events validated for 2020-11-01 | PR #7 |
+| P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | In Progress | Not yet executed | — |
 | P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | Not Started | Not yet executed | — |
 | P3D | Staging Models | Standardized source-aligned dbt models | Not Started | Not yet executed | — |
 | P3E | Staging Tests | Generic and targeted staging tests | Not Started | Not yet executed | — |
@@ -259,34 +259,26 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 The current work package is:
 
-**P3A — Source Definitions**
+**P3B — Staging Architecture**
 
-The GA4 source definition has been implemented and technically validated.
+The governed GA4 source definition has been accepted and merged through Pull Request #7.
 
-Validation completed:
+The current objective is to define the staging-layer architecture before transformation SQL is introduced.
 
-- `dbt parse`
-- `dbt ls --resource-type source`
-- wildcard source resolution through `dbt show`
-- validated 31,272 events for 2020-11-01
-
-The work package is currently in review and has not yet been merged.
-
-## Next Approved Work Package
-
-### P3B — Staging Architecture
-
-After P3A is reviewed and merged, the next work package will define the staging architecture before transformation models are introduced.
-
-The work package will establish:
+The staging architecture will establish:
 
 - staging directory and file organization;
 - model naming conventions;
-- staging model boundaries and responsibilities;
+- model responsibilities and boundaries;
 - expected model grains;
 - nested-field extraction strategy;
 - source-window handling conventions;
-- staging materialization strategy;
-- documentation and testing responsibilities.
+- materialization strategy;
+- testing responsibilities;
+- documentation responsibilities.
 
-Base event extraction will begin only after the staging architecture has been reviewed and approved.
+## Next Approved Work Package
+
+### P3C — Base Extraction Logic
+
+After the staging architecture is reviewed and merged, the next work package will define the controlled extraction of required GA4 event, parameter, ecommerce, and item fields.
