@@ -8,11 +8,11 @@
 | Delivery Model | Analytics engineering and business intelligence |
 | Current Delivery Phase | Phase 3 — dbt Source and Staging Layer |
 | Last Completed Phase | Phase 2 — Source Feasibility & Profiling |
-| Current Work Package | P3A — Source Definitions |
-| Next Approved Work Package | P3B — Staging Architecture, pending P3A review and merge |
-| Repository Baseline | `main` through PR #6 |
+| Current Work Package | P3C — Base Extraction Logic |
+| Next Approved Work Package | P3D — Staging Models, pending P3C review and merge |
+| Repository Baseline | `main` through PR #8 |
 | Overall Delivery Progress | Phase 0 foundation, Phase 1 development environment, and Phase 2 source feasibility complete; Phase 3 source-layer implementation is in progress |
-| Last Updated | 2026-07-24 |
+| Last Updated | 2026-07-25 |
 
 ## Tracker Purpose
 
@@ -97,8 +97,8 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
 |---|---|---|---|---|---|
 | P3A | Source Definitions | Governed dbt source configuration and metadata for the GA4 daily event shards | Complete | `dbt parse` passed; source discovered with `dbt ls`; wildcard source resolved successfully through `dbt show`; 31,272 events validated for 2020-11-01 | PR #7 |
-| P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | In Progress | Not yet executed | — |
-| P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | Not Started | Not yet executed | — |
+| P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | Complete | Architecture reviewed; event and item grains defined; nested-field boundaries established; wildcard scan controls documented | PR #8 |
+| P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | In Progress | Field-level source profiling completed; extraction contract drafted and under review | — |
 | P3D | Staging Models | Standardized source-aligned dbt models | Not Started | Not yet executed | — |
 | P3E | Staging Tests | Generic and targeted staging tests | Not Started | Not yet executed | — |
 | P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Not Started | Not yet executed | — |
@@ -257,28 +257,22 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ### Phase 3 — dbt Source and Staging Layer
 
-The current work package is:
-
-**P3B — Staging Architecture**
-
-The governed GA4 source definition has been accepted and merged through Pull Request #7.
-
-The current objective is to define the staging-layer architecture before transformation SQL is introduced.
-
-The staging architecture will establish:
-
-- staging directory and file organization;
-- model naming conventions;
-- model responsibilities and boundaries;
-- expected model grains;
-- nested-field extraction strategy;
-- source-window handling conventions;
-- materialization strategy;
-- testing responsibilities;
-- documentation responsibilities.
-
-## Next Approved Work Package
+## Current Work Package
 
 ### P3C — Base Extraction Logic
 
-After the staging architecture is reviewed and merged, the next work package will define the controlled extraction of required GA4 event, parameter, ecommerce, and item fields.
+The current work package defines and implements the controlled extraction of required GA4 event, parameter, ecommerce, and item fields.
+
+Field-level profiling has confirmed the required source paths and observed value types.
+
+The extraction contract is documented in:
+
+`docs/architecture/ga4_base_extraction_contract.md`
+
+The work package will preserve raw event grain, isolate item-array expansion, retain source-level transaction multiplicity, and enforce bounded wildcard reads.
+
+## Next Approved Work Package
+
+### P3D — Staging Models
+
+P3D may begin after the P3C extraction logic has been implemented, validated, reviewed, and merged.

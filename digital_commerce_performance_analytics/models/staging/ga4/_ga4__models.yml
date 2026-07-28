@@ -1,0 +1,86 @@
+version: 2
+
+models:
+  - name: stg_ga4__events
+    description: >
+      Event-grain staging model built directly from the GA4 export.
+      The model performs bounded extraction, typed scalar field extraction,
+      and preserves one row per raw GA4 event without applying business logic.
+
+    columns:
+      - name: event_date
+        description: Event date parsed from the raw GA4 export date string.
+        data_tests:
+          - not_null
+
+      - name: event_timestamp
+        description: Timestamp at which the GA4 event was recorded.
+        data_tests:
+          - not_null
+
+      - name: event_name
+        description: Name of the GA4 event, such as page_view, add_to_cart, or purchase.
+        data_tests:
+          - not_null
+
+      - name: user_pseudo_id
+        description: GA4 anonymous user identifier associated with the event.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform from which the event was generated, such as WEB.
+
+      - name: ga_session_id
+        description: GA4 session identifier extracted from event_params.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: Sequential GA4 session number for the user, extracted from event_params.
+        data_tests:
+          - not_null
+
+      - name: page_location
+        description: Full page URL associated with the event, extracted from event_params.
+        data_tests:
+          - not_null
+
+      - name: page_title
+        description: Page title associated with the event when supplied by GA4.
+
+      - name: page_referrer
+        description: Referring page URL associated with the event when supplied by GA4.
+
+      - name: source
+        description: Traffic source value extracted from event_params when available.
+
+      - name: medium
+        description: Traffic medium value extracted from event_params when available.
+
+      - name: campaign
+        description: Campaign value extracted from event_params when available.
+
+      - name: transaction_id
+        description: >
+          Source-provided ecommerce transaction identifier. The raw GA4 export
+          may use the literal placeholder '(not set)' on non-purchase events,
+          so a populated value does not by itself represent a valid transaction.
+
+      - name: purchase_revenue
+        description: Purchase revenue recorded by GA4 for applicable ecommerce events.
+
+      - name: refund_value
+        description: Refund value recorded by GA4 for applicable ecommerce events.
+
+      - name: shipping_value
+        description: Shipping value recorded by GA4 for applicable ecommerce events.
+
+      - name: tax_value
+        description: Tax value recorded by GA4 for applicable ecommerce events.
+
+      - name: total_item_quantity
+        description: Total item quantity associated with the event when populated by GA4.
+
+      - name: unique_items
+        description: Number of unique items associated with the event when populated by GA4.
