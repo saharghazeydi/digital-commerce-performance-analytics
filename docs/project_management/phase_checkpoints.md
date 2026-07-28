@@ -359,3 +359,64 @@ Establish and validate the governed dbt source definition for the approved GA4 e
 ## Next Approved Work Package
 
 P3B — Staging Architecture
+
+---
+
+# Checkpoint 3.2 — GA4 Staging Architecture Accepted
+
+## Objective
+
+Define and approve the source-aligned staging architecture before field extraction and dbt transformation implementation begins.
+
+## Work Completed
+
+- defined the GA4 staging-layer purpose and responsibilities
+- established staging naming and directory conventions
+- defined `stg_ga4__events` at one row per raw GA4 event
+- defined `stg_ga4__items` at one row per item occurrence within a raw GA4 event
+- separated scalar event-parameter extraction from repeated item expansion
+- defined session-identity responsibilities
+- defined transaction-identity boundaries
+- kept final purchase-event deduplication downstream of staging
+- established deterministic nested-field handling rules
+- documented bounded `_TABLE_SUFFIX` scan requirements
+- documented staging-layer exclusions and downstream responsibilities
+- reviewed and merged the staging architecture through the repository Pull Request workflow
+
+## Validation Performed
+
+- reviewed staging grains for consistency with the profiled GA4 source
+- confirmed event and item repeated structures are not unnested into the same final grain
+- confirmed `ga_session_id` extraction remains compatible with the approved composite session identity
+- confirmed transaction deduplication remains downstream
+- confirmed the staging architecture is consistent with the Phase 2 feasibility assessment
+- confirmed the architecture is consistent with ADR-002
+- confirmed repository documentation passed `git diff --check`
+
+## Evidence
+
+- `docs/architecture/ga4_staging_architecture.md`
+- `docs/data_quality/ga4_source_feasibility_assessment.md`
+- `docs/decisions/ADR-002-ga4-order-identity-and-deduplication.md`
+- Pull Request #8
+
+## Decisions Made
+
+- `stg_ga4__events` preserves one row per raw GA4 event
+- frequently required scalar `event_params` values may be promoted into the event staging model
+- a generic `stg_ga4__event_params` model will not be created without a justified downstream grain or use case
+- `items` remains isolated in `stg_ga4__items`
+- final session construction is downstream of staging
+- final transaction deduplication is downstream of staging
+- all direct wildcard source reads require bounded `_TABLE_SUFFIX` filtering
+
+## Known Limitations
+
+- staging implementation has not yet been completed
+- field-level extraction SQL has not yet been implemented
+- dbt staging tests have not yet been introduced
+- source limitations documented during Phase 2 remain applicable
+
+## Next Approved Work Package
+
+P3C — Base Extraction Logic
