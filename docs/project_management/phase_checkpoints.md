@@ -420,3 +420,60 @@ Define and approve the source-aligned staging architecture before field extracti
 ## Next Approved Work Package
 
 P3C — Base Extraction Logic
+
+---
+
+# Checkpoint 3.3 — GA4 Event Base Extraction Accepted
+
+## Objective
+
+Implement and validate the source-aligned GA4 event staging model under the approved base extraction contract.
+
+## Work Completed
+
+- implemented `stg_ga4__events`
+- preserved one row per raw GA4 event
+- extracted typed scalar values from `event_params`
+- retained source-aligned ecommerce fields
+- preserved repeated transaction-bearing events
+- documented model grain, fields, assumptions, and transaction placeholder behavior
+- added dbt model and column documentation
+- added required `not_null` tests
+- reviewed and merged the implementation through Pull Request #9
+
+## Validation Performed
+
+- reconciled 4,295,584 raw source events to 4,295,584 staged events
+- confirmed zero row-count difference
+- confirmed complete date coverage from 2020-11-01 to 2021-01-31
+- confirmed 92 distinct event dates
+- confirmed required identifier completeness
+- confirmed all 7 data tests passed
+- confirmed `dbt build --select stg_ga4__events` completed successfully
+- confirmed repository whitespace checks passed
+
+## Evidence
+
+- `digital_commerce_performance_analytics/models/staging/ga4/stg_ga4__events.sql`
+- `digital_commerce_performance_analytics/models/staging/ga4/_ga4__models.yml`
+- `docs/architecture/ga4_base_extraction_contract.md`
+- Pull Request #9
+
+## Decisions Made
+
+- event staging preserves source multiplicity
+- scalar `event_params` are extracted without exploding event grain
+- transaction placeholder values remain source-aligned
+- transaction normalization and deduplication remain downstream
+- item-array expansion remains isolated to `stg_ga4__items`
+
+## Known Limitations
+
+- item staging implementation was not included in P3C
+- session construction remains downstream
+- governed order construction remains downstream
+- final KPI logic remains downstream
+
+## Next Approved Work Package
+
+P3D — Staging Models

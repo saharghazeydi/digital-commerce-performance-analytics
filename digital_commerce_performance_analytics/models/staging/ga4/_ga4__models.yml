@@ -84,3 +84,93 @@ models:
 
       - name: unique_items
         description: Number of unique items associated with the event when populated by GA4.
+
+  - name: stg_ga4__items
+    description: >
+      Item-grain staging model built from the repeated GA4 items array.
+      The model preserves one row per item occurrence within a raw GA4 event
+      and retains the item position through item_offset.
+
+    columns:
+      - name: event_date
+        description: Event date parsed from the raw GA4 export date string.
+        data_tests:
+          - not_null
+
+      - name: event_timestamp
+        description: Timestamp at which the parent GA4 event was recorded.
+        data_tests:
+          - not_null
+
+      - name: event_name
+        description: Name of the parent GA4 event associated with the item.
+        data_tests:
+          - not_null
+
+      - name: user_pseudo_id
+        description: GA4 anonymous user identifier associated with the parent event.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform from which the parent event was generated.
+
+      - name: ga_session_id
+        description: GA4 session identifier extracted from the parent event parameters.
+        data_tests:
+          - not_null
+
+      - name: transaction_id
+        description: >
+          Source-provided ecommerce transaction identifier from the parent event.
+          The raw GA4 export may use the literal placeholder '(not set)', so a
+          populated value does not by itself represent a valid transaction.
+
+      - name: item_offset
+        description: Zero-based position of the item within the parent event items array.
+        data_tests:
+          - not_null
+
+      - name: item_id
+        description: Source-provided identifier of the item.
+        data_tests:
+          - not_null
+
+      - name: item_name
+        description: Source-provided name of the item.
+        data_tests:
+          - not_null
+
+      - name: item_brand
+        description: Source-provided brand of the item.
+        data_tests:
+          - not_null
+
+      - name: item_variant
+        description: Source-provided item variant.
+        data_tests:
+          - not_null
+
+      - name: item_category
+        description: Source-provided primary item category.
+        data_tests:
+          - not_null
+
+      - name: price
+        description: Source-provided item price when populated by GA4.
+
+      - name: quantity
+        description: Source-provided item quantity when populated by GA4.
+
+      - name: item_revenue
+        description: Source-provided item-level revenue when populated by GA4.
+
+      - name: coupon
+        description: Source-provided coupon value associated with the item.
+        data_tests:
+          - not_null
+
+      - name: affiliation
+        description: Source-provided affiliation value associated with the item.
+        data_tests:
+          - not_null
