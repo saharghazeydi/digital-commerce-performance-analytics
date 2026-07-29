@@ -162,17 +162,98 @@ The `event_params` array must not be unnested into the final event result in a w
 
 ## Items
 
-The `items` repeated structure must not be unnested inside `stg_ga4__events`.
-
-Item extraction belongs to:
+Item extraction is implemented in:
 
 `stg_ga4__items`
 
-with a target grain of:
+### Grain
 
-one row per item occurrence within a raw GA4 event.
+One row per item occurrence within a raw GA4 event.
 
-The item staging model must preserve sufficient event and transaction context for downstream reconciliation.
+The model expands only the repeated `items` array and preserves parent-event context required for downstream reconciliation.
+
+### Parent Event Context
+
+The item staging model retains:
+
+- `event_date`
+- `event_timestamp`
+- `event_name`
+- `user_pseudo_id`
+- `platform`
+- `ga_session_id`
+- `transaction_id`
+
+### Item Fields
+
+The model extracts:
+
+- `item_offset`
+- `item_id`
+- `item_name`
+- `item_brand`
+- `item_variant`
+- `item_category`
+- `price`
+- `quantity`
+- `item_revenue`
+- `coupon`
+- `affiliation`
+
+`item_offset` is the zero-based position of the item within the parent event's `items` array.
+
+It is retained to preserve item occurrence identity when multiple items within the same event share identical business attributes.
+
+### Validation Results
+
+The item staging model was validated against the approved bounded GA4 source window.
+
+| Validation Metric | Result |
+|---|---:|
+| Events containing at least one item | 512,346 |
+| Total item rows | 3,982,732 |
+| Average items per item-bearing event | 7.77 |
+| Minimum items per event | 1 |
+| Maximum items per event | 31 |
+| Events containing multiple items | 337,481 |
+| Events containing a single item | 174,865 |
+
+The staged row count reconciles exactly with the raw `UNNEST(items)` result:
+
+| Validation Metric | Result |
+|---|---:|
+| Raw item rows | 3,982,732 |
+| Staged item rows | 3,982,732 |
+| Row-count difference | 0 |
+
+Date coverage was also validated:
+
+| Validation Metric | Result |
+|---|---|
+| Minimum event date | 2020-11-01 |
+| Maximum event date | 2021-01-31 |
+| Distinct event dates | 92 |
+
+`item_offset` validation confirmed:
+
+| Validation Metric | Result |
+|---|---:|
+| Null item offsets | 0 |
+| Minimum item offset | 0 |
+| Maximum item offset | 30 |
+
+Items were observed across multiple GA4 event types, including:
+
+- `view_item`
+- `add_to_cart`
+- `select_item`
+- `view_promotion`
+- `begin_checkout`
+- `purchase`
+- `select_promotion`
+- `view_item_list`
+
+The staging model therefore preserves all item-bearing event types and does not restrict extraction to purchase events.
 
 ---
 
@@ -223,7 +304,7 @@ This extraction contract is accepted when:
 
 Once accepted, implementation may proceed to the dbt staging models.
 
-## Validation Results
+## Event Staging Validation Results
 
 The `stg_ga4__events` model was validated against the bounded GA4 source extraction window after its initial implementation.
 
