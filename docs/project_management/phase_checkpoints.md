@@ -477,3 +477,99 @@ Implement and validate the source-aligned GA4 event staging model under the appr
 ## Next Approved Work Package
 
 P3D — Staging Models
+
+---
+
+# Checkpoint 3.4 — GA4 Staging Layer Accepted
+
+## Objective
+
+Complete and formally validate the governed GA4 staging layer, including the item-grain staging model, generic and singular data-quality tests, model documentation, and final dbt validation.
+
+## Work Completed
+
+- implemented `stg_ga4__items`
+- preserved one row per item occurrence within a raw GA4 event
+- retained parent-event context and deterministic `item_offset`
+- documented both staging models and all published columns
+- documented model grains, assumptions, and transaction-placeholder behaviour
+- added generic schema tests for required staging fields
+- added singular tests for event and item composite-grain uniqueness
+- added singular tests for approved source-date boundaries
+- added parent-event integrity validation for staged item rows
+- added non-negative item-offset validation
+- executed final staging-layer parsing, build, test, and documentation-generation commands
+- reconciled source and staged row counts
+- delivered the event, item, and test implementations through Pull Requests #9, #10, and #11
+
+## Validation Performed
+
+- confirmed `stg_ga4__events` preserves 4,295,584 source event rows
+- confirmed zero source-to-event-staging row-count difference
+- confirmed `stg_ga4__items` contains 3,982,732 item-occurrence rows
+- confirmed event staging grain is unique under the approved composite event key
+- confirmed item staging grain is unique under the approved composite item key
+- confirmed all item rows have a matching staged parent event
+- confirmed all item offsets are non-negative
+- confirmed both staging models remain within the approved source window from 2020-11-01 through 2021-01-31
+- executed `dbt parse --no-partial-parse`
+- confirmed the dbt project parsed successfully
+- executed `dbt build --select stg_ga4__events stg_ga4__items`
+- confirmed 2 staging views were created successfully
+- confirmed all 26 data tests passed
+- confirmed all 28 selected dbt nodes completed successfully
+- confirmed zero warnings, errors, and skipped nodes in the final `dbt build`
+- executed `dbt docs generate`
+- confirmed the dbt catalog was generated successfully
+- confirmed the repository working tree remained clean after technical validation
+- confirmed repository whitespace validation passed through `git diff --check`
+
+## Evidence
+
+- `digital_commerce_performance_analytics/models/staging/ga4/stg_ga4__events.sql`
+- `digital_commerce_performance_analytics/models/staging/ga4/stg_ga4__items.sql`
+- `digital_commerce_performance_analytics/models/staging/ga4/_ga4__models.yml`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__events_composite_key_unique.sql`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__events_within_approved_date_window.sql`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__items_composite_key_unique.sql`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__items_have_matching_parent_event.sql`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__items_item_offset_non_negative.sql`
+- `digital_commerce_performance_analytics/tests/staging/ga4/assert_stg_ga4__items_within_approved_date_window.sql`
+- `docs/architecture/ga4_staging_architecture.md`
+- `docs/architecture/ga4_base_extraction_contract.md`
+- Pull Request #9
+- Pull Request #10
+- Pull Request #11
+
+## Decisions Made
+
+- the governed GA4 staging layer consists of separate event- and item-grain models
+- `stg_ga4__events` preserves raw source event multiplicity
+- `stg_ga4__items` preserves one row per item occurrence within a parent event
+- final session construction remains downstream of staging
+- final transaction normalization and purchase deduplication remain downstream of staging
+- item identity remains source-aligned at staging grain
+- staging tests enforce structural integrity without introducing downstream business logic
+- model and column documentation is maintained in dbt schema YAML
+- the validated staging models are approved as inputs to the intermediate layer
+
+## Known Limitations
+
+- the source remains a static, obfuscated public GA4 sample
+- authenticated `user_id` is unavailable
+- session construction has not yet been implemented
+- transaction normalization and purchase deduplication have not yet been implemented
+- acquisition attribution logic has not yet been implemented
+- business KPI models have not yet been implemented
+- automated CI validation has not yet been introduced
+- `dbt docs generate` emitted non-blocking `table_owner` runtime warnings while still producing the catalog successfully
+
+## Phase Decision
+
+**Phase 3 accepted, subject to closeout Pull Request review and merge.**
+
+The governed GA4 source and staging layer is technically complete. No identified staging-layer issue blocks progression to Phase 4 after formal closeout.
+
+## Next Approved Work Package
+
+P4A — Intermediate Entity Design

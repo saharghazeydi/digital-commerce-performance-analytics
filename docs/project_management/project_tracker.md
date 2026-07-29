@@ -6,12 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 3 — dbt Source and Staging Layer |
+| Current Delivery Phase | Phase 3 — dbt Source and Staging Layer Closeout |
 | Last Completed Phase | Phase 2 — Source Feasibility & Profiling |
-| Current Work Package | P3D — Staging Models |
-| Next Approved Work Package | P3E — Staging Tests, pending P3D review and merge |
-| Repository Baseline | `main` through PR #9 |
-| Overall Delivery Progress | Phase 0 foundation, Phase 1 development environment, and Phase 2 source feasibility complete; Phase 3 source-layer implementation is in progress |
+| Current Work Package | Phase 3 closeout documentation and Pull Request review |
+| Next Approved Work Package | P4A — Intermediate Entity Design, pending Phase 3 closeout review and merge |
+| Repository Baseline | `main` through PR #11 |
+| Overall Delivery Progress | Phase 0 foundation, Phase 1 development environment, Phase 2 source feasibility, and the technical implementation and validation of Phase 3 are complete; formal Phase 3 closeout is in review |
 | Last Updated | 2026-07-29 |
 
 ## Tracker Purpose
@@ -91,18 +91,18 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 3 — dbt Source and Staging Layer
 
-**Phase status:** In Progress
-**Delivery outcome:** Define governed dbt sources and create standardized, tested, documented staging models.
+**Phase status:** In Review
+**Delivery outcome:** Governed GA4 dbt sources and standardized event- and item-grain staging models have been implemented, tested, documented, and reconciled. Technical validation is complete, and formal phase closeout is awaiting Pull Request review and merge.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
 |---|---|---|---|---|---|
 | P3A | Source Definitions | Governed dbt source configuration and metadata for the GA4 daily event shards | Complete | `dbt parse` passed; source discovered with `dbt ls`; wildcard source resolved successfully through `dbt show`; 31,272 events validated for 2020-11-01 | PR #7 |
 | P3B | Staging Architecture | Staging directories, naming standards, model boundaries, and staging grain conventions | Complete | Architecture reviewed; event and item grains defined; nested-field boundaries established; wildcard scan controls documented | PR #8 |
-| P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | Complete | Event staging model implemented and validated; 4,295,584 source events reconciled; 8/8 model and data checks passed | PR #9 |
-| P3D | Staging Models | Standardized source-aligned dbt models | In Progress | `stg_ga4__items` implemented; 3,982,732 item rows reconciled; 13 item-model tests passed | — |
-| P3E | Staging Tests | Generic and targeted staging tests | Not Started | Not yet executed | — |
-| P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Not Started | Not yet executed | — |
-| P3G | Staging Validation | Successful `dbt build` and source-to-staging reconciliation | Not Started | Not yet executed | — |
+| P3C | Base Extraction Logic | Required source fields and nested attributes extracted consistently | Complete | `stg_ga4__events` implemented and validated; 4,295,584 source events reconciled with zero row-count difference | PR #9 |
+| P3D | Staging Models | Standardized source-aligned event- and item-grain dbt models | Complete | `stg_ga4__items` implemented; 3,982,732 item rows reconciled; model implementation reviewed and merged | PR #10 |
+| P3E | Staging Tests | Generic and targeted staging data-quality tests | Complete | 26 generic and singular tests implemented across both staging models; composite grain, date-window, parent-event, item-offset, and required-field controls passed | PR #11 |
+| P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Complete | Both staging models and all published columns documented in `_ga4__models.yml`; source-aligned transaction placeholder behaviour and model grains documented | PR #9 and PR #10 |
+| P3G | Staging Validation | Successful dbt parsing, build, documentation generation, and source-to-staging reconciliation | Complete | `dbt parse --no-partial-parse` passed; `dbt build` completed successfully for 2 models and 26 tests; 28/28 nodes succeeded; `dbt docs generate` produced the catalog successfully | Phase 3 closeout PR |
 
 ## Phase 4 — Intermediate Models
 
@@ -255,24 +255,28 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 3 — dbt Source and Staging Layer
+### Phase 3 — dbt Source and Staging Layer Closeout
 
-## Current Work Package
+The technical scope of Phase 3 is complete.
 
-### P3C — Base Extraction Logic
+The governed GA4 source definition, event staging model, item staging model, generic tests, singular data-quality tests, model documentation, and final dbt validation have been completed.
 
-The current work package defines and implements the controlled extraction of required GA4 event, parameter, ecommerce, and item fields.
+Final validation confirmed:
 
-Field-level profiling has confirmed the required source paths and observed value types.
+- 2 staging models built successfully
+- 26 data tests passed
+- 28 of 28 selected dbt nodes completed successfully
+- no warnings, errors, or skipped nodes were reported by `dbt build`
+- `dbt parse --no-partial-parse` completed successfully
+- `dbt docs generate` produced the dbt catalog successfully
+- the repository working tree remained clean after validation
 
-The extraction contract is documented in:
-
-`docs/architecture/ga4_base_extraction_contract.md`
-
-The work package will preserve raw event grain, isolate item-array expansion, retain source-level transaction multiplicity, and enforce bounded wildcard reads.
+The current activity is limited to updating project-governance documentation, reviewing the Phase 3 acceptance checkpoint, and delivering the closeout through the Pull Request workflow.
 
 ## Next Approved Work Package
 
-### P3D — Staging Models
+### P4A — Intermediate Entity Design
 
-P3D may begin after the P3C extraction logic has been implemented, validated, reviewed, and merged.
+P4A may begin after the Phase 3 closeout documentation has been reviewed and merged.
+
+The initial Phase 4 scope will formalize the grain, key strategy, business rules, and validation requirements for the reusable GA4 intermediate entities, beginning with the session-level model.
