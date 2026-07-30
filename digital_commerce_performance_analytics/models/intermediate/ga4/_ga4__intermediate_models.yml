@@ -120,8 +120,7 @@ models:
 
     columns:
       - name: session_key
-        description: >
-          Unique deterministic key representing one GA4 session.
+        description: Unique deterministic key representing one GA4 session.
         data_tests:
           - not_null
           - unique
@@ -242,3 +241,116 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+
+  - name: int_ga4__transactions
+    description: >
+      Transaction-grain intermediate model containing one row per valid,
+      deduplicated GA4 transaction. The model enriches retained purchase
+      events with their associated session timing, platform, landing-page,
+      and acquisition attributes.
+
+    columns:
+      - name: transaction_id
+        description: >
+          Normalized transaction identifier retained after invalid placeholders
+          are removed and duplicate transaction events are eliminated.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: session_key
+        description: >
+          Deterministic key of the GA4 session in which the transaction
+          occurred.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_ga4__sessions')
+                field: session_key
+
+      - name: user_pseudo_id
+        description: Anonymous GA4 user identifier associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: transaction_date
+        description: Calendar date on which the retained purchase event occurred.
+        data_tests:
+          - not_null
+
+      - name: transaction_timestamp
+        description: Timestamp of the retained purchase event.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: Reported sequence number of the user's GA4 session.
+
+      - name: session_date
+        description: Date of the earliest event in the associated session.
+        data_tests:
+          - not_null
+
+      - name: session_start_timestamp
+        description: Timestamp of the earliest event in the associated session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: Timestamp of the latest event in the associated session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform recorded on the first event of the associated session.
+
+      - name: landing_page
+        description: Landing-page location of the associated session.
+
+      - name: landing_page_title
+        description: Landing-page title of the associated session.
+
+      - name: source
+        description: Selected acquisition source of the associated session.
+
+      - name: medium
+        description: Selected acquisition medium of the associated session.
+
+      - name: campaign
+        description: Selected acquisition campaign of the associated session.
+
+      - name: purchase_revenue
+        description: Purchase revenue recorded for the deduplicated transaction.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Refund value recorded for the deduplicated transaction.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Shipping value recorded for the deduplicated transaction.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Tax value recorded for the deduplicated transaction.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total item quantity recorded for the transaction.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: Unique-item metric recorded for the transaction.
+        data_tests:
+          - not_null
