@@ -1,0 +1,244 @@
+version: 2
+
+models:
+  - name: int_ga4__session_events
+    description: >
+      Event-level intermediate model that assigns GA4 events to a stable
+      session key, sequences events within each session, selects the preferred
+      acquisition event, normalizes transaction identifiers, and flags the
+      first valid occurrence of each transaction.
+
+    columns:
+      - name: session_key
+        description: >
+          Deterministic surrogate key generated from user_pseudo_id and
+          ga_session_id.
+        data_tests:
+          - not_null
+
+      - name: event_date
+        description: Calendar date associated with the GA4 event.
+        data_tests:
+          - not_null
+
+      - name: event_timestamp
+        description: Timestamp at which the GA4 event occurred.
+        data_tests:
+          - not_null
+
+      - name: event_name
+        description: Name of the GA4 event.
+        data_tests:
+          - not_null
+
+      - name: user_pseudo_id
+        description: Anonymous GA4 user identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier extracted from event parameters.
+        data_tests:
+          - not_null
+
+      - name: event_sequence_number
+        description: >
+          Sequential position of the event within the session, ordered from
+          earliest to latest.
+        data_tests:
+          - not_null
+
+      - name: reverse_event_sequence_number
+        description: >
+          Sequential position of the event within the session, ordered from
+          latest to earliest.
+        data_tests:
+          - not_null
+
+      - name: normalized_transaction_id
+        description: >
+          Trimmed transaction identifier after nullifying blank values and
+          placeholder values such as '(not set)'.
+
+      - name: is_valid_purchase
+        description: >
+          Boolean flag identifying purchase events with a valid normalized
+          transaction identifier.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_first_event
+        description: Boolean flag identifying the first event in the session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_last_event
+        description: Boolean flag identifying the last event in the session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_selected_acquisition_event
+        description: >
+          Boolean flag identifying the event selected to represent the
+          session-level source, medium, and campaign.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_first_valid_purchase
+        description: >
+          Boolean flag identifying the retained event after valid transactions
+          are deduplicated by normalized transaction identifier.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+  - name: int_ga4__sessions
+    description: >
+      Session-grain intermediate model containing one row per GA4 session.
+      The model combines session timing, first and last page attributes,
+      acquisition dimensions, and ecommerce metrics aggregated from
+      deduplicated valid purchase events.
+
+    columns:
+      - name: session_key
+        description: >
+          Unique deterministic key representing one GA4 session.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: user_pseudo_id
+        description: Anonymous GA4 user identifier associated with the session.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier associated with the user.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: Reported sequence number of the session for the user.
+
+      - name: session_date
+        description: Date of the earliest event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_start_timestamp
+        description: Timestamp of the earliest event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: Timestamp of the latest event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_duration_seconds
+        description: >
+          Number of seconds between the earliest and latest event timestamps
+          in the session.
+        data_tests:
+          - not_null
+
+      - name: event_count
+        description: Total number of events assigned to the session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform recorded on the first event of the session.
+
+      - name: landing_page
+        description: Page location recorded on the first event of the session.
+
+      - name: landing_page_title
+        description: Page title recorded on the first event of the session.
+
+      - name: exit_page
+        description: Page location recorded on the final event of the session.
+
+      - name: exit_page_title
+        description: Page title recorded on the final event of the session.
+
+      - name: source
+        description: Selected acquisition source for the session.
+
+      - name: medium
+        description: Selected acquisition medium for the session.
+
+      - name: campaign
+        description: Selected acquisition campaign for the session.
+
+      - name: transaction_count
+        description: >
+          Number of distinct valid transactions attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Purchase revenue aggregated from deduplicated valid purchase events.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: >
+          Refund value aggregated from deduplicated valid purchase events.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: >
+          Shipping value aggregated from deduplicated valid purchase events.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Tax value aggregated from deduplicated valid purchase events.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: >
+          Total item quantity aggregated from deduplicated valid purchase
+          events.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: >
+          Unique-item metric aggregated from deduplicated valid purchase events.
+        data_tests:
+          - not_null
+
+      - name: has_purchase
+        description: >
+          Boolean flag indicating whether the session contains at least one
+          valid deduplicated transaction.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
