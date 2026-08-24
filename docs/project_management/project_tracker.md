@@ -6,13 +6,13 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 3 — dbt Source and Staging Layer Closeout |
-| Last Completed Phase | Phase 2 — Source Feasibility & Profiling |
-| Current Work Package | Phase 3 closeout documentation and Pull Request review |
-| Next Approved Work Package | P4A — Intermediate Entity Design, pending Phase 3 closeout review and merge |
-| Repository Baseline | `main` through PR #11 |
-| Overall Delivery Progress | Phase 0 foundation, Phase 1 development environment, Phase 2 source feasibility, and the technical implementation and validation of Phase 3 are complete; formal Phase 3 closeout is in review |
-| Last Updated | 2026-07-29 |
+| Current Delivery Phase | Phase 4 — Intermediate Models |
+| Last Completed Phase | Phase 3 — dbt Source and Staging Layer |
+| Current Work Package | P4G — Add Intermediate Tests |
+| Next Approved Work Package | P4H — Validate Row Counts and Grains, after P4G quality-gate completion |
+| Repository Baseline | `main` through Phase 3 closeout; Phase 4 development is active on `feat/ga4-intermediate-models` |
+| Overall Delivery Progress | Phases 0–3 are complete. Phase 4 intermediate event, session, and transaction models have been implemented and reconciled; final intermediate test coverage and phase-level validation remain before Phase 4 closeout. |
+| Last Updated | 2026-08-24 |
 
 ## Tracker Purpose
 
@@ -91,8 +91,8 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 3 — dbt Source and Staging Layer
 
-**Phase status:** In Review
-**Delivery outcome:** Governed GA4 dbt sources and standardized event- and item-grain staging models have been implemented, tested, documented, and reconciled. Technical validation is complete, and formal phase closeout is awaiting Pull Request review and merge.
+**Phase status:** Complete
+**Delivery outcome:** Governed GA4 dbt sources and standardized event- and item-grain staging models were implemented, tested, documented, reconciled, reviewed, and formally closed. The validated staging layer is approved as the source-aligned input to Phase 4 intermediate modeling.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
 |---|---|---|---|---|---|
@@ -106,18 +106,20 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 4 — Intermediate Models
 
-**Phase status:** Not Started
-**Delivery outcome:** Transform source-aligned data into reusable analytical entities and business-ready transformation components.
+**Phase status:** In Progress
 
-| ID | Work Package | Deliverable | Status |
-|---|---|---|---|
-| P4A | Entity Design | Grain and key strategy for intermediate entities | Not Started |
-| P4B | Event Transformation | Reusable event-level transformation logic | Not Started |
-| P4C | Session Modeling | Session-level entity and session attributes | Not Started |
-| P4D | Transaction Modeling | Transaction and purchase-level analytical entities | Not Started |
-| P4E | Attribution Logic | Acquisition and channel attribution components | Not Started |
-| P4F | Intermediate Tests | Grain, uniqueness, completeness, and reconciliation tests | Not Started |
-| P4G | Intermediate Validation | Source-to-entity reconciliation and duplication review | Not Started |
+**Delivery outcome:** Build governed reusable GA4 intermediate entities at event, session, and transaction grain, with deterministic keys, acquisition logic, purchase deduplication, documented business rules, automated tests, and cross-model reconciliation.
+
+| ID | Work Package | Deliverable | Status | Validation Summary |
+|---|---|---|---|---|
+| P4A | Define Sessionization Rules | Approved session grain, identity, ordering, attribution, and implementation rules | Complete | Composite session identity and deterministic surrogate-key strategy defined; session design documented |
+| P4B | Extract Session Attributes | Reusable session attributes and acquisition-selection logic | Complete | First/last event logic, landing/exit attributes, acquisition selection, and purchase-normalization rules implemented |
+| P4C | Build Event-Level Intermediate Model | `int_ga4__session_events` | Complete | Event grain preserved; deterministic session keys, sequencing, acquisition flags, normalized transaction IDs, and deduplicated purchase flags validated |
+| P4D | Build Session-Level Model | `int_ga4__sessions` | Complete | 360,129 unique sessions produced; session timing, event counts, acquisition attributes, and purchase metrics validated |
+| P4E | Build Transaction-Level Model | `int_ga4__transactions` | Complete | 4,451 unique valid transactions produced; transaction-to-session referential integrity and transaction grain validated |
+| P4F | Reconcile Users, Sessions and Purchases | Manual QA suite and cross-model reconciliation | Complete | 4,033 purchasing sessions, 4,451 transactions, 3,702 purchasing users, 307,640 purchase revenue, and 19,459 item quantity reconciled with zero identified cross-model mismatches |
+| P4G | Add Intermediate Tests | Final automated dbt test coverage for intermediate models | In Progress | Existing schema tests pass; final coverage audit and targeted intermediate quality tests remain |
+| P4H | Validate Row Counts and Grains | Final Phase 4 dbt quality gate and acceptance validation | Planned | Manual grain and reconciliation validation is substantially complete; final validation will run after P4G changes |
 
 ---
 
@@ -255,28 +257,36 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 3 — dbt Source and Staging Layer Closeout
+### Phase 4 — Intermediate Models
 
-The technical scope of Phase 3 is complete.
+The core Phase 4 intermediate entities have been implemented and reconciled.
 
-The governed GA4 source definition, event staging model, item staging model, generic tests, singular data-quality tests, model documentation, and final dbt validation have been completed.
+Completed intermediate models:
 
-Final validation confirmed:
+- `int_ga4__session_events`
+- `int_ga4__sessions`
+- `int_ga4__transactions`
 
-- 2 staging models built successfully
-- 26 data tests passed
-- 28 of 28 selected dbt nodes completed successfully
-- no warnings, errors, or skipped nodes were reported by `dbt build`
-- `dbt parse --no-partial-parse` completed successfully
-- `dbt docs generate` produced the dbt catalog successfully
-- the repository working tree remained clean after validation
+Completed validation confirms:
 
-The current activity is limited to updating project-governance documentation, reviewing the Phase 3 acceptance checkpoint, and delivering the closeout through the Pull Request workflow.
+- 360,129 unique sessions
+- 4,033 purchasing sessions
+- 4,451 unique valid transactions
+- 3,702 purchasing users
+- 307,640 total purchase revenue
+- 19,459 total item quantity
+- zero unmatched transactions
+- zero session transaction-count mismatches
+- zero per-session revenue mismatches
+- zero per-session item-quantity mismatches
+- matching purchasing-user counts between session and transaction models
+
+Manual QA and reconciliation are complete for P4F.
+
+The current activity is P4G — auditing and completing automated dbt test coverage for the intermediate layer before the final P4H quality gate and Phase 4 acceptance decision.
 
 ## Next Approved Work Package
 
-### P4A — Intermediate Entity Design
+### P4G — Add Intermediate Tests
 
-P4A may begin after the Phase 3 closeout documentation has been reviewed and merged.
-
-The initial Phase 4 scope will formalize the grain, key strategy, business rules, and validation requirements for the reusable GA4 intermediate entities, beginning with the session-level model.
+Review existing intermediate model tests, identify material coverage gaps, add only justified automated controls, and execute the final intermediate-layer test suite before P4H validation.
