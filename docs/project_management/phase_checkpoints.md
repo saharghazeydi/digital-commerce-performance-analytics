@@ -573,3 +573,128 @@ The governed GA4 source and staging layer is technically complete. No identified
 ## Next Approved Work Package
 
 P4A — Intermediate Entity Design
+
+---
+
+# Checkpoint 4.1 — GA4 Intermediate Layer Accepted
+
+## Objective
+
+Implement and formally validate the governed GA4 intermediate layer that converts source-aligned staging data into reusable event-, session-, and transaction-grain analytical entities.
+
+## Work Completed
+
+- defined the approved GA4 sessionization and intermediate-entity design
+- implemented deterministic composite session identity using `user_pseudo_id + ga_session_id`
+- implemented `int_ga4__session_events`
+- added deterministic event sequencing within sessions
+- implemented first-event and last-event identification
+- implemented deterministic acquisition-event selection
+- normalized transaction identifiers
+- identified valid purchase events
+- deduplicated repeated valid purchase events
+- implemented `int_ga4__sessions`
+- aggregated event activity to one row per session
+- added session timing and event-count metrics
+- added landing-page, exit-page, platform, and acquisition attributes
+- added session-level purchase and item metrics
+- implemented `int_ga4__transactions`
+- established one row per valid deduplicated transaction
+- enriched transactions with governed session context
+- documented intermediate models and business rules
+- implemented generic schema tests
+- implemented targeted singular business-rule tests
+- completed manual session and transaction QA
+- completed end-to-end cross-model reconciliation
+- documented Phase 4 validation evidence
+
+## Validation Performed
+
+- confirmed 4,295,584 event rows in the intermediate event layer
+- confirmed 360,129 unique sessions
+- confirmed session-key uniqueness
+- confirmed one deterministic first event per session
+- confirmed one deterministic last event per session
+- confirmed at most one selected acquisition event per session
+- confirmed non-negative session duration
+- confirmed positive event counts
+- confirmed session purchase flags are consistent with transaction counts
+- confirmed 4,451 unique valid transactions
+- confirmed transaction-ID uniqueness
+- confirmed all transactions have matching sessions
+- confirmed transaction and session user identities are consistent
+- confirmed transaction timestamps fall within their governed session windows
+- confirmed 4,033 purchasing sessions
+- confirmed 3,702 purchasing users
+- reconciled 307,640 total purchase revenue
+- reconciled 19,459 total item quantity
+- confirmed zero unmatched transactions
+- confirmed zero session transaction-count mismatches
+- confirmed zero per-session revenue mismatches
+- confirmed zero per-session item-quantity mismatches
+- confirmed purchasing-user counts reconcile between session and transaction models
+- executed the final intermediate dbt test suite
+- confirmed all 61 selected intermediate tests passed
+- executed the final dependency-aware dbt build
+- confirmed all 75 selected dbt nodes completed successfully
+- confirmed zero warnings, errors, and skipped nodes in the final build
+- confirmed repository whitespace validation passed
+
+## Evidence
+
+- `digital_commerce_performance_analytics/models/intermediate/ga4/int_ga4__session_events.sql`
+- `digital_commerce_performance_analytics/models/intermediate/ga4/int_ga4__sessions.sql`
+- `digital_commerce_performance_analytics/models/intermediate/ga4/int_ga4__transactions.sql`
+- `digital_commerce_performance_analytics/models/intermediate/ga4/_ga4__intermediate_models.yml`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__session_events_one_first_event_per_session.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__session_events_one_last_event_per_session.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__session_events_max_one_acquisition_event_per_session.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__session_events_first_valid_purchase_unique.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__sessions_duration_non_negative.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__sessions_event_count_positive.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__sessions_purchase_flag_consistent.sql`
+- `digital_commerce_performance_analytics/tests/intermediate/ga4/assert_int_ga4__transactions_within_session_window.sql`
+- `digital_commerce_performance_analytics/docs/technical_design/int_ga4__sessions_design.md`
+- `validation/phase_4/01_session_validation.sql`
+- `validation/phase_4/02_transaction_validation.sql`
+- `validation/phase_4/03_reconciliation.sql`
+- `validation/reports/phase4_validation_summary.md`
+- `docs/project_management/project_tracker.md`
+
+## Decisions Made
+
+- session identity is governed by the composite identity `user_pseudo_id + ga_session_id`
+- intermediate session keys are deterministic and reusable downstream
+- event sequencing within a session must be deterministic
+- session landing attributes originate from the governed first event
+- session exit attributes originate from the governed last event
+- acquisition attribution uses one deterministically selected event per session
+- valid purchase events require normalized valid transaction identifiers
+- repeated valid purchase events are deduplicated before transaction and session purchase metrics are calculated
+- `int_ga4__sessions` is the governed session-grain entity
+- `int_ga4__transactions` is the governed valid transaction-grain entity
+- transaction metrics must reconcile with purchasing-session metrics
+- automated dbt tests enforce stable business invariants
+- manual validation SQL remains supporting QA evidence rather than transformation logic
+- downstream warehouse models must consume governed intermediate entities rather than reconstruct session or transaction logic independently
+
+## Known Limitations
+
+- the source remains a static, obfuscated public GA4 ecommerce sample
+- authenticated `user_id` is unavailable
+- session identity depends on the available GA4 pseudo-user and session identifiers
+- a small number of extreme session-duration records remain as documented source-measurement outliers rather than transformation failures
+- acquisition attribution is constrained by the acquisition information available in the source sample
+- invalid or placeholder transaction identifiers are excluded from the governed valid transaction entity
+- the intermediate layer does not yet define final warehouse facts, dimensions, or business KPI marts
+- automated CI validation has not yet been introduced
+
+## Phase Decision
+
+**Phase 4 accepted, subject to closeout Pull Request review and merge.**
+
+The governed GA4 intermediate layer is technically complete. Event, session, and valid transaction entities have passed automated testing and end-to-end reconciliation. No identified intermediate-layer issue blocks progression to Phase 5 after formal Phase 4 review and merge.
+
+## Next Approved Work Package
+
+P5A — Warehouse Model Design
