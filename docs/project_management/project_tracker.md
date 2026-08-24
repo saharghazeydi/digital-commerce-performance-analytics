@@ -6,12 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 4 — Intermediate Models |
-| Last Completed Phase | Phase 3 — dbt Source and Staging Layer |
-| Current Work Package | P4G — Add Intermediate Tests |
-| Next Approved Work Package | P4H — Validate Row Counts and Grains, after P4G quality-gate completion |
-| Repository Baseline | `main` through Phase 3 closeout; Phase 4 development is active on `feat/ga4-intermediate-models` |
-| Overall Delivery Progress | Phases 0–3 are complete. Phase 4 intermediate event, session, and transaction models have been implemented and reconciled; final intermediate test coverage and phase-level validation remain before Phase 4 closeout. |
+| Current Delivery Phase | Phase 4 — Intermediate Models — Complete |
+| Last Completed Phase | Phase 4 — Intermediate Models |
+| Current Work Package | Phase 4 closeout |
+| Next Approved Work Package | P5A — Warehouse Model Design |
+| Repository Baseline | `main` through Phase 3 closeout; Phase 4 implementation and validation complete on `feat/ga4-intermediate-models`, pending review and merge |
+| Overall Delivery Progress | Phases 0–4 are complete at implementation and validation level. The GA4 intermediate event, session, and transaction models are implemented, documented, tested, and reconciled. Phase 4 is ready for review and merge before Phase 5 begins. |
 | Last Updated | 2026-08-24 |
 
 ## Tracker Purpose
@@ -106,9 +106,9 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 4 — Intermediate Models
 
-**Phase status:** In Progress
+**Phase status:** Complete
 
-**Delivery outcome:** Build governed reusable GA4 intermediate entities at event, session, and transaction grain, with deterministic keys, acquisition logic, purchase deduplication, documented business rules, automated tests, and cross-model reconciliation.
+**Delivery outcome:** Governed reusable GA4 intermediate entities were implemented at event, session, and transaction grain, with deterministic keys, acquisition logic, purchase deduplication, documented business rules, automated tests, and end-to-end cross-model reconciliation.
 
 | ID | Work Package | Deliverable | Status | Validation Summary |
 |---|---|---|---|---|
@@ -118,8 +118,8 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P4D | Build Session-Level Model | `int_ga4__sessions` | Complete | 360,129 unique sessions produced; session timing, event counts, acquisition attributes, and purchase metrics validated |
 | P4E | Build Transaction-Level Model | `int_ga4__transactions` | Complete | 4,451 unique valid transactions produced; transaction-to-session referential integrity and transaction grain validated |
 | P4F | Reconcile Users, Sessions and Purchases | Manual QA suite and cross-model reconciliation | Complete | 4,033 purchasing sessions, 4,451 transactions, 3,702 purchasing users, 307,640 purchase revenue, and 19,459 item quantity reconciled with zero identified cross-model mismatches |
-| P4G | Add Intermediate Tests | Final automated dbt test coverage for intermediate models | In Progress | Existing schema tests pass; final coverage audit and targeted intermediate quality tests remain |
-| P4H | Validate Row Counts and Grains | Final Phase 4 dbt quality gate and acceptance validation | Planned | Manual grain and reconciliation validation is substantially complete; final validation will run after P4G changes |
+| P4G | Add Intermediate Tests | Final automated dbt test coverage for intermediate models | Complete | Targeted business-rule tests added for event sequencing, acquisition selection, purchase uniqueness, session metrics, purchase consistency, and transaction session-window integrity; ffinal intermediate test suite passed with 61/61 tests |
+| P4H | Validate Row Counts and Grains | Final Phase 4 dbt quality gate and acceptance validation | Complete | Final dbt build passed 75/75 nodes with zero warnings or errors; session, transaction, purchasing-session, and revenue grains reconciled successfully across intermediate models |
 
 ---
 
@@ -257,9 +257,9 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 4 — Intermediate Models
+### Phase 4 — Intermediate Models — Complete
 
-The core Phase 4 intermediate entities have been implemented and reconciled.
+Phase 4 implementation and validation are complete.
 
 Completed intermediate models:
 
@@ -267,8 +267,9 @@ Completed intermediate models:
 - `int_ga4__sessions`
 - `int_ga4__transactions`
 
-Completed validation confirms:
+Final validation confirms:
 
+- 4,295,584 event rows
 - 360,129 unique sessions
 - 4,033 purchasing sessions
 - 4,451 unique valid transactions
@@ -280,13 +281,16 @@ Completed validation confirms:
 - zero per-session revenue mismatches
 - zero per-session item-quantity mismatches
 - matching purchasing-user counts between session and transaction models
+- all final grain and revenue reconciliation checks passed
+- final intermediate dbt test suite: 61/61 passed
+- final dependency-aware dbt build: 75/75 passed with zero warnings or errors
 
-Manual QA and reconciliation are complete for P4F.
-
-The current activity is P4G — auditing and completing automated dbt test coverage for the intermediate layer before the final P4H quality gate and Phase 4 acceptance decision.
+Phase 4 is ready for review and merge. Phase 5 must begin only after the Phase 4 branch is reviewed, merged, and the local `main` branch is synchronized.
 
 ## Next Approved Work Package
 
-### P4G — Add Intermediate Tests
+### P5A — Warehouse Model Design
 
-Review existing intermediate model tests, identify material coverage gaps, add only justified automated controls, and execute the final intermediate-layer test suite before P4H validation.
+Define the governed dimensional architecture for the core warehouse layer, including fact and dimension boundaries, model grains, entity relationships, and the analytical role of each warehouse model.
+
+P5A will begin after Phase 4 review, merge, and synchronization with `main`.

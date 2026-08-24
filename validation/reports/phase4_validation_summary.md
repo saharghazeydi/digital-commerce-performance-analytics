@@ -109,3 +109,34 @@ development.
 
 A small number of extreme session-duration records remain documented as source
 measurement outliers rather than transformation errors.
+
+## Final Acceptance Reconciliation
+
+A final end-to-end reconciliation was completed after the dbt business-rule tests were added.
+
+The intermediate models reconcile across their defined grains:
+
+| Validation Check | Result |
+|---|---|
+| Event session keys = session rows | PASS |
+| Session key uniqueness | PASS |
+| Retained purchase events = transaction rows | PASS |
+| Retained transaction IDs = transaction rows | PASS |
+| Session transaction count = transaction rows | PASS |
+| Transaction ID uniqueness | PASS |
+| Purchasing sessions = transaction sessions | PASS |
+| Session purchase revenue = transaction purchase revenue | PASS |
+
+### Final Reconciled Metrics
+
+| Metric | Value |
+|---|---:|
+| Event rows | 4,295,584 |
+| Sessions | 360,129 |
+| Purchasing sessions | 4,033 |
+| Transactions | 4,451 |
+| Purchase revenue | 307,640.0 |
+
+The final dbt build and test suite completed with no warnings or errors.
+
+**Phase 4 validation status: PASS**
