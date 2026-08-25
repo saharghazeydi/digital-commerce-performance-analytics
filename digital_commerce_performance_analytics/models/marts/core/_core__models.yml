@@ -85,6 +85,8 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+
+
   - name: fct_sessions
     description: >
       Canonical session-grain fact table for the core warehouse. Contains
@@ -167,6 +169,17 @@ models:
       - name: campaign
         description: Governed session acquisition campaign.
 
+      - name: channel_key
+        description: >
+          Governed acquisition channel key derived from the session medium and
+          used to join the session fact to dim_channel.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channel')
+                field: channel_key
+
       - name: transaction_count
         description: Number of valid deduplicated transactions in the session.
         data_tests:
@@ -210,6 +223,8 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+
+
   - name: fct_transactions
     description: >
       Canonical transaction-grain fact table for the core warehouse. Contains
@@ -322,3 +337,34 @@ models:
         description: Number of unique purchased items in the transaction.
         data_tests:
           - not_null
+
+
+  - name: dim_channel
+    description: >
+      Governed business-facing acquisition channel dimension. Provides a stable
+      classification layer for session acquisition reporting while preserving
+      detailed source, medium, and campaign attributes in the session fact.
+
+    columns:
+      - name: channel_key
+        description: Stable warehouse key for the governed acquisition channel.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: channel_group
+        description: Business-facing acquisition channel classification.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: channel_description
+        description: Business definition of the governed acquisition channel.
+        data_tests:
+          - not_null
+
+      - name: sort_order
+        description: Stable presentation order for channel reporting.
+        data_tests:
+          - not_null
+          - unique
