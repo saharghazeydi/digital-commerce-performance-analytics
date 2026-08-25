@@ -1,0 +1,370 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      Governed calendar dimension for the core warehouse. Contains one row
+      per calendar date across the date range represented by the validated
+      GA4 session and transaction intermediate models.
+
+    columns:
+      - name: date_day
+        description: Calendar date and primary analytical key.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: year
+        description: Calendar year.
+        data_tests:
+          - not_null
+
+      - name: quarter
+        description: Calendar quarter number from 1 to 4.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+                quote: false
+
+      - name: quarter_name
+        description: Calendar quarter label such as Q1 or Q4.
+        data_tests:
+          - not_null
+
+      - name: month_number
+        description: Calendar month number from 1 to 12.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                quote: false
+
+      - name: month_name
+        description: Full English calendar month name.
+        data_tests:
+          - not_null
+
+      - name: year_month
+        description: Calendar year-month label in YYYY-MM format.
+        data_tests:
+          - not_null
+
+      - name: week_of_year
+        description: BigQuery calendar week number.
+        data_tests:
+          - not_null
+
+      - name: day_of_month
+        description: Day number within the calendar month.
+        data_tests:
+          - not_null
+
+      - name: day_of_week
+        description: >
+          BigQuery day-of-week number where Sunday is 1 and Saturday is 7.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7]
+                quote: false
+
+      - name: day_name
+        description: Full English calendar day name.
+        data_tests:
+          - not_null
+
+      - name: is_weekend
+        description: True when the date is Saturday or Sunday.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+
+  - name: fct_sessions
+    description: >
+      Canonical session-grain fact table for the core warehouse. Contains
+      one row per governed GA4 session and preserves the validated session,
+      behavioral, acquisition, navigation, and commercial measures produced
+      by the intermediate layer.
+
+    columns:
+      - name: session_key
+        description: Governed unique analytical identifier for the session.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: user_pseudo_id
+        description: GA4 pseudonymous user identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier extracted from event parameters.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: GA4 session sequence number for the user.
+
+      - name: session_date
+        description: Calendar date on which the governed session begins.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: session_start_timestamp
+        description: Timestamp of the first governed event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: Timestamp of the last governed event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_duration_seconds
+        description: >
+          Difference in seconds between the governed session start and end
+          timestamps.
+        data_tests:
+          - not_null
+
+      - name: event_count
+        description: Number of events associated with the governed session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: GA4 platform associated with the session.
+
+      - name: landing_page
+        description: Landing-page URL selected from the first session event.
+
+      - name: landing_page_title
+        description: Page title associated with the landing page.
+
+      - name: exit_page
+        description: Exit-page URL selected from the final session event.
+
+      - name: exit_page_title
+        description: Page title associated with the exit page.
+
+      - name: source
+        description: Governed session acquisition source.
+
+      - name: medium
+        description: Governed session acquisition medium.
+
+      - name: campaign
+        description: Governed session acquisition campaign.
+
+      - name: channel_key
+        description: >
+          Governed acquisition channel key derived from the session medium and
+          used to join the session fact to dim_channel.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channel')
+                field: channel_key
+
+      - name: transaction_count
+        description: Number of valid deduplicated transactions in the session.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: Total purchase revenue attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Total refund value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Total shipping value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Total tax value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: Number of unique purchased items attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: has_purchase
+        description: True when the governed session contains a valid purchase.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+
+  - name: fct_transactions
+    description: >
+      Canonical transaction-grain fact table for the core warehouse. Contains
+      one row per valid, deduplicated GA4 transaction and preserves governed
+      session context, acquisition attributes, and commercial measures from
+      the intermediate transaction layer.
+
+    columns:
+      - name: transaction_id
+        description: Governed unique identifier for a valid transaction.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: session_key
+        description: Governed session identifier associated with the transaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_sessions')
+                field: session_key
+
+      - name: user_pseudo_id
+        description: GA4 pseudonymous user identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: GA4 session sequence number for the user.
+
+      - name: transaction_date
+        description: Calendar date of the governed transaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: transaction_timestamp
+        description: Timestamp of the governed purchase event.
+        data_tests:
+          - not_null
+
+      - name: session_date
+        description: Calendar date of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: session_start_timestamp
+        description: Start timestamp of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: End timestamp of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform associated with the governed session.
+
+      - name: landing_page
+        description: Landing-page URL of the associated governed session.
+
+      - name: landing_page_title
+        description: Landing-page title of the associated governed session.
+
+      - name: source
+        description: Governed acquisition source associated with the transaction.
+
+      - name: medium
+        description: Governed acquisition medium associated with the transaction.
+
+      - name: campaign
+        description: Governed acquisition campaign associated with the transaction.
+
+      - name: purchase_revenue
+        description: Purchase revenue associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Refund value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Shipping value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Tax value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity in the transaction.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: Number of unique purchased items in the transaction.
+        data_tests:
+          - not_null
+
+
+  - name: dim_channel
+    description: >
+      Governed business-facing acquisition channel dimension. Provides a stable
+      classification layer for session acquisition reporting while preserving
+      detailed source, medium, and campaign attributes in the session fact.
+
+    columns:
+      - name: channel_key
+        description: Stable warehouse key for the governed acquisition channel.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: channel_group
+        description: Business-facing acquisition channel classification.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: channel_description
+        description: Business definition of the governed acquisition channel.
+        data_tests:
+          - not_null
+
+      - name: sort_order
+        description: Stable presentation order for channel reporting.
+        data_tests:
+          - not_null
+          - unique
