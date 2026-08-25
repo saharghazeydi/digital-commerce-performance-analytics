@@ -85,3 +85,128 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+  - name: fct_sessions
+    description: >
+      Canonical session-grain fact table for the core warehouse. Contains
+      one row per governed GA4 session and preserves the validated session,
+      behavioral, acquisition, navigation, and commercial measures produced
+      by the intermediate layer.
+
+    columns:
+      - name: session_key
+        description: Governed unique analytical identifier for the session.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: user_pseudo_id
+        description: GA4 pseudonymous user identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier extracted from event parameters.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: GA4 session sequence number for the user.
+
+      - name: session_date
+        description: Calendar date on which the governed session begins.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: session_start_timestamp
+        description: Timestamp of the first governed event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: Timestamp of the last governed event in the session.
+        data_tests:
+          - not_null
+
+      - name: session_duration_seconds
+        description: >
+          Difference in seconds between the governed session start and end
+          timestamps.
+        data_tests:
+          - not_null
+
+      - name: event_count
+        description: Number of events associated with the governed session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: GA4 platform associated with the session.
+
+      - name: landing_page
+        description: Landing-page URL selected from the first session event.
+
+      - name: landing_page_title
+        description: Page title associated with the landing page.
+
+      - name: exit_page
+        description: Exit-page URL selected from the final session event.
+
+      - name: exit_page_title
+        description: Page title associated with the exit page.
+
+      - name: source
+        description: Governed session acquisition source.
+
+      - name: medium
+        description: Governed session acquisition medium.
+
+      - name: campaign
+        description: Governed session acquisition campaign.
+
+      - name: transaction_count
+        description: Number of valid deduplicated transactions in the session.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: Total purchase revenue attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Total refund value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Total shipping value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Total tax value attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: Number of unique purchased items attributed to the session.
+        data_tests:
+          - not_null
+
+      - name: has_purchase
+        description: True when the governed session contains a valid purchase.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
