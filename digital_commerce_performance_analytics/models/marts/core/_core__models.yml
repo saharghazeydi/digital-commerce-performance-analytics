@@ -210,3 +210,115 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+  - name: fct_transactions
+    description: >
+      Canonical transaction-grain fact table for the core warehouse. Contains
+      one row per valid, deduplicated GA4 transaction and preserves governed
+      session context, acquisition attributes, and commercial measures from
+      the intermediate transaction layer.
+
+    columns:
+      - name: transaction_id
+        description: Governed unique identifier for a valid transaction.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: session_key
+        description: Governed session identifier associated with the transaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_sessions')
+                field: session_key
+
+      - name: user_pseudo_id
+        description: GA4 pseudonymous user identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_id
+        description: GA4 session identifier.
+        data_tests:
+          - not_null
+
+      - name: ga_session_number
+        description: GA4 session sequence number for the user.
+
+      - name: transaction_date
+        description: Calendar date of the governed transaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: transaction_timestamp
+        description: Timestamp of the governed purchase event.
+        data_tests:
+          - not_null
+
+      - name: session_date
+        description: Calendar date of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: session_start_timestamp
+        description: Start timestamp of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: session_end_timestamp
+        description: End timestamp of the associated governed session.
+        data_tests:
+          - not_null
+
+      - name: platform
+        description: Platform associated with the governed session.
+
+      - name: landing_page
+        description: Landing-page URL of the associated governed session.
+
+      - name: landing_page_title
+        description: Landing-page title of the associated governed session.
+
+      - name: source
+        description: Governed acquisition source associated with the transaction.
+
+      - name: medium
+        description: Governed acquisition medium associated with the transaction.
+
+      - name: campaign
+        description: Governed acquisition campaign associated with the transaction.
+
+      - name: purchase_revenue
+        description: Purchase revenue associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Refund value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Shipping value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Tax value associated with the transaction.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity in the transaction.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: Number of unique purchased items in the transaction.
+        data_tests:
+          - not_null
