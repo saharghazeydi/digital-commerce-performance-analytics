@@ -698,3 +698,202 @@ The governed GA4 intermediate layer is technically complete. Event, session, and
 ## Next Approved Work Package
 
 P5A — Warehouse Model Design
+
+---
+
+# Checkpoint 5.1 — Core Warehouse Implementation Complete
+
+## Objective
+
+Implement the governed core analytical warehouse layer on top of the validated GA4 intermediate entities, with explicit dimensional grains, stable keys, reusable fact tables, governed acquisition classification, and warehouse-level relationship controls.
+
+## Work Completed
+
+- defined the core warehouse architecture and dimensional modeling strategy
+
+- documented model grains, key strategy, relationships, and model contracts
+
+- implemented `dim_date` as the governed calendar dimension
+
+- established one row per calendar date across the approved analytical date range
+
+- implemented `dim_channel` as the governed acquisition-channel dimension
+
+- established stable integer channel keys and controlled business-facing channel groups
+
+- implemented deterministic session-to-channel mapping
+
+- implemented `fct_sessions` at one row per governed GA4 session
+
+- preserved the governed session identity from the intermediate layer
+
+- retained session timing, behavioral, navigation, acquisition, and commercial measures
+
+- added `channel_key` to support the governed session-to-channel relationship
+
+- implemented `fct_transactions` at one row per governed valid transaction
+
+- preserved governed transaction identity and session context from the intermediate layer
+
+- retained transaction-level commercial measures
+
+- established date relationships between warehouse facts and `dim_date`
+
+- established the channel relationship between `fct_sessions` and `dim_channel`
+
+- added model and column documentation for the core warehouse layer
+
+- added generic schema tests for warehouse keys and required fields
+
+- added targeted singular tests for fact-table business invariants and dimensional relationships
+
+## Validation Performed
+
+- confirmed `dim_date` covers the required fact-date range
+
+- confirmed `dim_channel` contains the approved governed channel categories
+
+- confirmed every session maps to a valid `dim_channel` record
+
+- confirmed zero sessions without a valid channel relationship
+
+- confirmed `fct_sessions` contains 360,129 rows
+
+- confirmed 360,129 distinct session keys in `fct_sessions`
+
+- confirmed zero duplicate session keys
+
+- confirmed 4,033 purchasing sessions
+
+- confirmed session fact row counts reconcile exactly with `int_ga4__sessions`
+
+- confirmed session fact distinct-key counts reconcile exactly with `int_ga4__sessions`
+
+- confirmed session transaction counts reconcile with the intermediate session entity
+
+- confirmed session purchase revenue reconciles with the intermediate session entity
+
+- confirmed session refund, shipping, tax, item-quantity, and unique-item measures reconcile with the intermediate session entity
+
+- confirmed zero sessions missing from the warehouse session fact
+
+- confirmed zero unexpected sessions in the warehouse session fact
+
+- confirmed `fct_transactions` contains 4,451 governed transactions
+
+- confirmed 4,451 distinct transaction identifiers
+
+- confirmed transaction fact row counts reconcile exactly with `int_ga4__transactions`
+
+- confirmed transaction purchase revenue reconciles with the intermediate transaction entity
+
+- confirmed transaction refund, shipping, tax, item-quantity, and unique-item measures reconcile with the intermediate transaction entity
+
+- confirmed zero transactions missing from the warehouse transaction fact
+
+- confirmed zero unexpected transactions in the warehouse transaction fact
+
+- confirmed warehouse facts preserve governed intermediate-layer business metrics without independently reconstructing session or transaction logic
+
+## Evidence
+
+- `digital_commerce_performance_analytics/docs/technical_design/core_warehouse_design.md`
+
+- `digital_commerce_performance_analytics/docs/technical_design/core_warehouse_model_contracts.md`
+
+- `digital_commerce_performance_analytics/models/marts/core/dim_date.sql`
+
+- `digital_commerce_performance_analytics/models/marts/core/dim_channel.sql`
+
+- `digital_commerce_performance_analytics/models/marts/core/fct_sessions.sql`
+
+- `digital_commerce_performance_analytics/models/marts/core/fct_transactions.sql`
+
+- `digital_commerce_performance_analytics/models/marts/core/_core__models.yml`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_dim_date_covers_fact_dates.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_sessions_duration_non_negative.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_sessions_event_count_positive.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_sessions_purchase_flag_consistent.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_sessions_channel_mapping_consistent.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_transactions_non_negative_values.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_transactions_quantity_consistent.sql`
+
+- `digital_commerce_performance_analytics/tests/marts/core/assert_fct_transactions_within_session_window.sql`
+
+- `validation/phase_5/01_core_warehouse_validation.sql`
+
+- `validation/phase_5/02_core_reconciliation.sql`
+
+- `validation/reports/phase5_validation_summary.md`
+
+- `docs/project_management/project_tracker.md`
+
+## Decisions Made
+
+- the core warehouse follows a dimensional analytical design rather than exposing intermediate entities directly to downstream BI consumers
+
+- `dim_date` is the governed calendar dimension for warehouse date analysis
+
+- `dim_channel` is the governed acquisition-channel dimension
+
+- channel classification is represented through a stable warehouse key rather than requiring BI consumers to reproduce acquisition classification logic
+
+- `fct_sessions` is the governed session-grain warehouse fact
+
+- `fct_transactions` is the governed valid transaction-grain warehouse fact
+
+- session and transaction facts preserve the identities established in the intermediate layer
+
+- warehouse facts consume governed intermediate entities rather than reconstructing sessionization or transaction deduplication logic
+
+- session-level commercial metrics remain available in `fct_sessions` for session analysis
+
+- transaction-level commercial metrics remain available in `fct_transactions` for transaction analysis
+
+- dimensional relationships must be validated through explicit referential-integrity controls
+
+- automated dbt tests enforce stable warehouse invariants
+
+- manual reconciliation SQL remains supporting QA evidence rather than transformation logic
+
+- downstream KPI and BI models must consume governed warehouse entities rather than source-aligned staging models
+
+## Known Limitations
+
+- the warehouse is built from a static, obfuscated public GA4 ecommerce sample
+
+- authenticated `user_id` remains unavailable
+
+- acquisition classification is constrained by the source and medium values available in the sample dataset
+
+- the governed channel dimension intentionally groups unsupported or unrecognized acquisition values into controlled fallback categories
+
+- invalid or placeholder transaction identifiers remain excluded from the governed transaction fact according to the approved upstream transaction contract
+
+- the current core warehouse does not yet implement final business KPI marts or BI-serving models
+
+- automated CI validation has not yet been introduced
+## Phase Decision
+
+**Phase 5 — Core Warehouse is technically accepted.**
+
+The governed Core Warehouse is complete at the implementation and validation level. The date and channel dimensions and the session and transaction facts are implemented with explicit grains, governed keys, documented relationships, and warehouse-level quality controls.
+
+The final Core Warehouse dbt quality gate passed with 71 of 71 tests successful. The dependency-aware Core Warehouse build passed 75 of 75 selected nodes with zero warnings, errors, or skipped nodes.
+
+Intermediate-to-core reconciliation confirmed zero differences across governed session and transaction row counts, distinct keys, purchasing-session populations, commercial measures, quantities, and key populations. No sessions or transactions are missing from or unexpectedly introduced into the Core Warehouse.
+
+No identified data-quality, referential-integrity, grain, or reconciliation issue blocks downstream analytical development.
+
+Repository documentation, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 6 development begins.
+
+## Next Approved Work Package
+
+P6A — Mart Requirements, after Phase 5 closeout review and merge

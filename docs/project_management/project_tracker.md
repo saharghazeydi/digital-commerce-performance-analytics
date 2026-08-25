@@ -6,13 +6,13 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 4 — Intermediate Models — Complete |
+| Current Delivery Phase | Phase 5 — Core Warehouse |
 | Last Completed Phase | Phase 4 — Intermediate Models |
-| Current Work Package | Phase 4 closeout |
-| Next Approved Work Package | P5A — Warehouse Model Design |
-| Repository Baseline | `main` through Phase 3 closeout; Phase 4 implementation and validation complete on `feat/ga4-intermediate-models`, pending review and merge |
-| Overall Delivery Progress | Phases 0–4 are complete at implementation and validation level. The GA4 intermediate event, session, and transaction models are implemented, documented, tested, and reconciled. Phase 4 is ready for review and merge before Phase 5 begins. |
-| Last Updated | 2026-08-24 |
+| Current Work Package | P5I — Documentation & Phase 5 Closeout |
+| Next Approved Work Package | P6A — Mart Requirements, after Phase 5 closeout review and merge |
+| Repository Baseline | `main` through Phase 4 closeout and PR #13; Phase 5 implementation and validation are complete on `feat/core-warehouse`, with formal closeout in progress |
+| Overall Delivery Progress | Phases 0–4 are complete and merged. Phase 5 core warehouse architecture, dimensions, facts, governed channel classification, automated tests, referential-integrity controls, and intermediate-to-core reconciliation are complete. Phase 5 documentation and repository closeout remain before progression to Phase 6. |
+| Last Updated | 2026-08-25 |
 
 ## Tracker Purpose
 
@@ -118,25 +118,28 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P4D | Build Session-Level Model | `int_ga4__sessions` | Complete | 360,129 unique sessions produced; session timing, event counts, acquisition attributes, and purchase metrics validated |
 | P4E | Build Transaction-Level Model | `int_ga4__transactions` | Complete | 4,451 unique valid transactions produced; transaction-to-session referential integrity and transaction grain validated |
 | P4F | Reconcile Users, Sessions and Purchases | Manual QA suite and cross-model reconciliation | Complete | 4,033 purchasing sessions, 4,451 transactions, 3,702 purchasing users, 307,640 purchase revenue, and 19,459 item quantity reconciled with zero identified cross-model mismatches |
-| P4G | Add Intermediate Tests | Final automated dbt test coverage for intermediate models | Complete | Targeted business-rule tests added for event sequencing, acquisition selection, purchase uniqueness, session metrics, purchase consistency, and transaction session-window integrity; ffinal intermediate test suite passed with 61/61 tests |
+| P4G | Add Intermediate Tests | Final automated dbt test coverage for intermediate models | Complete | Targeted business-rule tests added for event sequencing, acquisition selection, purchase uniqueness, session metrics, purchase consistency, and transaction session-window integrity; final intermediate test suite passed with 61/61 tests |
 | P4H | Validate Row Counts and Grains | Final Phase 4 dbt quality gate and acceptance validation | Complete | Final dbt build passed 75/75 nodes with zero warnings or errors; session, transaction, purchasing-session, and revenue grains reconciled successfully across intermediate models |
 
 ---
 
 ## Phase 5 — Core Warehouse
 
-**Phase status:** Not Started
-**Delivery outcome:** Create reusable facts and dimensions with governed grains, keys, relationships, and data-quality controls.
+**Phase status:** In Progress
 
-| ID | Work Package | Deliverable | Status |
-|---|---|---|---|
-| P5A | Warehouse Model Design | Approved dimensional model and entity relationships | Not Started |
-| P5B | Key Strategy | Natural, composite, and surrogate key standards | Not Started |
-| P5C | Dimensions | Conformed analytical dimensions | Not Started |
-| P5D | Facts | Governed session, transaction, and related fact models | Not Started |
-| P5E | Referential Integrity | Relationship and orphan-record tests | Not Started |
-| P5F | Core Reconciliation | Intermediate-to-core metric and row reconciliation | Not Started |
-| P5G | Warehouse Documentation | Model diagram, grains, keys, and lineage | Not Started |
+**Delivery outcome:** A governed Core Warehouse has been implemented on top of the validated GA4 intermediate layer, providing reusable calendar and channel dimensions plus session- and transaction-grain facts with explicit grains, stable keys, tested relationships, documented business rules, and zero-difference reconciliation to the intermediate layer.
+
+| ID | Work Package | Deliverable | Status | Validation Summary |
+|---|---|---|---|---|
+| P5A | Warehouse Architecture & Grain Design | Approved Core Warehouse architecture, entity boundaries, analytical grains, and dimensionality decisions | Complete | Core Warehouse scope defined as `dim_date`, `dim_channel`, `fct_sessions`, and `fct_transactions`; unnecessary low-value dimensions intentionally avoided |
+| P5B | Key Strategy & Model Contracts | Governed keys, model contracts, upstream dependencies, column ownership, measures, and materialization strategy | Complete | Native date keys, governed session and transaction keys, model grains, source dependencies, reconciliation requirements, and quality gates documented before implementation |
+| P5C | Date Dimension | `dim_date` | Complete | 92 calendar dates generated across the governed analytical date range; date grain, required attributes, accepted values, uniqueness, non-null rules, and fact-date coverage validated |
+| P5D | Channel Dimension | `dim_channel` and governed session channel classification | Complete | Acquisition data profiled before design; 8 governed business-facing channel groups implemented; session channel mapping, dimension uniqueness, and session-to-channel referential integrity validated |
+| P5E | Session Fact | `fct_sessions` | Complete | 360,129 unique session rows preserved from the intermediate layer; session grain, date relationship, channel relationship, behavioral measures, commercial measures, and business rules validated |
+| P5F | Transaction Fact | `fct_transactions` | Complete | 4,451 unique valid transaction rows preserved; transaction grain, transaction-to-session and transaction-to-date relationships, monetary rules, quantity rules, and session-window integrity validated |
+| P5G | Referential Integrity & Warehouse Tests | Core Warehouse generic and business-rule dbt quality gate | Complete | Final warehouse test execution passed 71/71 tests; dependency-aware Core Warehouse build passed 75/75 selected nodes with zero warnings, errors, or skipped nodes |
+| P5H | Core Reconciliation | Intermediate-to-core aggregate and key-set reconciliation | Complete | Session and transaction row counts, distinct keys, purchasing-session counts, commercial measures, quantities, and key populations reconciled with zero differences and zero missing or unexpected keys |
+| P5I | Documentation & Phase 5 Closeout | Validation evidence, project tracking, checkpoint, final quality gate, review, and merge | In Progress | Phase 5 validation SQL and validation summary prepared; project-management closeout documentation and final repository review are in progress |
 
 ---
 
@@ -257,40 +260,58 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 4 — Intermediate Models — Complete
+### Phase 5 — Core Warehouse — Closeout
 
-Phase 4 implementation and validation are complete.
+Phase 5 technical implementation and validation are complete. Formal documentation and repository closeout are in progress.
 
-Completed intermediate models:
+Implemented Core Warehouse models:
 
-- `int_ga4__session_events`
-- `int_ga4__sessions`
-- `int_ga4__transactions`
+- `dim_date`
+- `dim_channel`
+- `fct_sessions`
+- `fct_transactions`
 
-Final validation confirms:
+Core Warehouse design decisions include:
 
-- 4,295,584 event rows
+- explicit and governed analytical grains
+- native BigQuery `DATE` values for calendar relationships
+- preservation of governed Phase 4 session and transaction keys
+- business-facing acquisition channel classification
+- retention of detailed `source`, `medium`, and `campaign` attributes for drill-down analysis
+- session-level channel ownership through `channel_key`
+- no reconstruction of sessionization or transaction-deduplication logic in the warehouse layer
+
+Final warehouse validation confirms:
+
+- 92 governed calendar dates
+- 8 governed channel groups
 - 360,129 unique sessions
-- 4,033 purchasing sessions
 - 4,451 unique valid transactions
-- 3,702 purchasing users
-- 307,640 total purchase revenue
-- 19,459 total item quantity
-- zero unmatched transactions
-- zero session transaction-count mismatches
-- zero per-session revenue mismatches
-- zero per-session item-quantity mismatches
-- matching purchasing-user counts between session and transaction models
-- all final grain and revenue reconciliation checks passed
-- final intermediate dbt test suite: 61/61 passed
-- final dependency-aware dbt build: 75/75 passed with zero warnings or errors
+- zero duplicate session keys
+- zero duplicate transaction IDs
+- zero invalid session-to-date relationships
+- zero invalid transaction-to-date relationships
+- zero invalid transaction-to-session relationships
+- zero invalid session-to-channel relationships
+- governed session channel mapping validated
+- session business-rule tests passed
+- transaction business-rule tests passed
+- final Core Warehouse dbt test suite: 71/71 passed
+- final dependency-aware Core Warehouse build: 75/75 passed
+- zero warnings, errors, and skipped nodes in the final Core Warehouse quality gate
+- session aggregate reconciliation differences: 0
+- transaction aggregate reconciliation differences: 0
+- sessions missing from Core Warehouse: 0
+- unexpected sessions in Core Warehouse: 0
+- transactions missing from Core Warehouse: 0
+- unexpected transactions in Core Warehouse: 0
 
-Phase 4 is ready for review and merge. Phase 5 must begin only after the Phase 4 branch is reviewed, merged, and the local `main` branch is synchronized.
+Phase 5 is technically accepted. Documentation closeout, final repository review, Pull Request review, merge, and synchronization with `main` remain before Phase 6 begins.
 
 ## Next Approved Work Package
 
-### P5A — Warehouse Model Design
+### P6A — Mart Requirements
 
-Define the governed dimensional architecture for the core warehouse layer, including fact and dimension boundaries, model grains, entity relationships, and the analytical role of each warehouse model.
+Define the consumers, business decisions, analytical questions, required grains, and downstream reporting requirements for the Business Marts layer.
 
-P5A will begin after Phase 4 review, merge, and synchronization with `main`.
+P6A will begin only after Phase 5 closeout is reviewed, merged, and the local `main` branch is synchronized with `origin/main`.
