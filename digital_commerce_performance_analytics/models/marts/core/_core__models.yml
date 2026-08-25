@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      Governed calendar dimension for the core warehouse. Contains one row
+      per calendar date across the date range represented by the validated
+      GA4 session and transaction intermediate models.
+
+    columns:
+      - name: date_day
+        description: Calendar date and primary analytical key.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: year
+        description: Calendar year.
+        data_tests:
+          - not_null
+
+      - name: quarter
+        description: Calendar quarter number from 1 to 4.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+                quote: false
+
+      - name: quarter_name
+        description: Calendar quarter label such as Q1 or Q4.
+        data_tests:
+          - not_null
+
+      - name: month_number
+        description: Calendar month number from 1 to 12.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                quote: false
+
+      - name: month_name
+        description: Full English calendar month name.
+        data_tests:
+          - not_null
+
+      - name: year_month
+        description: Calendar year-month label in YYYY-MM format.
+        data_tests:
+          - not_null
+
+      - name: week_of_year
+        description: BigQuery calendar week number.
+        data_tests:
+          - not_null
+
+      - name: day_of_month
+        description: Day number within the calendar month.
+        data_tests:
+          - not_null
+
+      - name: day_of_week
+        description: >
+          BigQuery day-of-week number where Sunday is 1 and Saturday is 7.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7]
+                quote: false
+
+      - name: day_name
+        description: Full English calendar day name.
+        data_tests:
+          - not_null
+
+      - name: is_weekend
+        description: True when the date is Saturday or Sunday.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
