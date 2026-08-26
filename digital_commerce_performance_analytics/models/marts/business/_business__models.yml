@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: mart_channel_daily
+    description: >
+      Governed daily acquisition-channel performance mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per session date and governed channel and aggregates session,
+      purchasing, transaction, revenue, and item measures from fct_sessions.
+
+    columns:
+      - name: session_date
+        description: Calendar date of the aggregated sessions.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: channel_key
+        description: >
+          Governed acquisition-channel key used to join the mart to
+          dim_channel.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channel')
+                field: channel_key
+
+      - name: channel_group
+        description: Business-facing governed acquisition-channel classification.
+        data_tests:
+          - not_null
+
+      - name: channel_description
+        description: Business description of the governed acquisition channel.
+        data_tests:
+          - not_null
+
+      - name: sort_order
+        description: Stable presentation order for acquisition channels.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: Number of sessions for the date and channel.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: Number of sessions containing at least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: Number of governed transactions attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: Total purchase revenue attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Total refund value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Total shipping value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Total tax value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: >
+          Sum of session-level unique-item measures for the date and channel.
+        data_tests:
+          - not_null
