@@ -1197,3 +1197,735 @@ After this design is approved, P6D proceeds with:
 11. commit the completed P6D implementation
 
 P6E begins only after P6D implementation and validation are complete.
+---
+
+# 28. Customer Behavior Mart
+
+## 28.1 Business Purpose
+
+The Customer Behavior Mart provides a governed pseudo-user-level view of observed session activity, purchasing behavior, repeat activity, and commercial contribution.
+
+It is designed to answer questions such as:
+
+- How many governed sessions does each pseudo-user generate?
+- On how many distinct dates is each pseudo-user observed?
+- Which pseudo-users demonstrate repeated session activity?
+- Which pseudo-users return on a later observed date?
+- Which pseudo-users generate purchasing sessions?
+- Which pseudo-users demonstrate repeat purchasing-session behavior?
+- Which pseudo-users demonstrate purchasing activity across multiple dates?
+- How many governed transactions are associated with each pseudo-user?
+- How much purchase revenue is associated with each pseudo-user?
+- How does purchasing behavior differ from non-purchasing behavior?
+
+The mart is intended for customer, growth, marketing, and commercial analysis.
+
+The mart represents observed GA4 pseudo-user behavior.
+
+It must not be interpreted as a production customer master or authenticated customer dataset.
+
+---
+
+# 29. Customer Behavior Mart Grain
+
+The approved grain is:
+
+> One row per `user_pseudo_id`.
+
+The planned model is:
+
+`mart_user_behavior`
+
+Each mart row represents the governed activity associated with one observed GA4 pseudo-user across the available analytical observation window.
+
+The mart does not introduce a daily grain.
+
+Time-based behavior is represented through user-level observed-date attributes and measures.
+
+---
+
+# 30. Customer Identity Semantics
+
+`user_pseudo_id` is the available governed analytical user identifier.
+
+It does not represent authenticated customer identity.
+
+Therefore:
+
+- pseudo-users must not automatically be described as customers
+- first observed activity must not be interpreted as true first-ever activity
+- last observed activity must not be interpreted as true last-ever activity
+- repeated observed activity must not automatically be described as customer retention
+- no production-grade `new_customer` or `returning_customer` classification is approved
+
+`ga_session_number` may provide supporting behavioral context but must not independently establish customer lifecycle status.
+
+Profiling identified that session-number values are not perfectly unique within every pseudo-user history.
+
+The Customer Behavior Mart therefore uses governed observed behavior rather than inferred customer identity.
+
+---
+
+# 31. Customer Behavior Profiling Results
+
+Profiling of the governed warehouse population identified:
+
+| Metric | Observed Value |
+|---|---:|
+| Governed sessions | 360,129 |
+| Observed pseudo-users | 270,154 |
+| Purchasing sessions | 4,033 |
+| Purchasing pseudo-users | 3,702 |
+| Multi-session pseudo-users | 47,364 |
+| Pseudo-users observed on multiple dates | 29,329 |
+| Repeat purchasing-session pseudo-users | 284 |
+| Repeat purchasing-date pseudo-users | 253 |
+| Governed transactions | 4,451 |
+| Governed purchase revenue | 307,640 |
+
+Additional profiling showed:
+
+- 222,790 pseudo-users generated exactly one observed session
+- 17.53% of observed pseudo-users generated more than one session
+- 10.86% of observed pseudo-users were observed on more than one calendar date
+- 439 purchasing pseudo-users generated more than one transaction
+- only 284 purchasing pseudo-users generated purchasing activity across multiple governed sessions
+- 253 purchasing pseudo-users generated purchasing activity across multiple governed dates
+- 31 pseudo-users generated multiple purchasing sessions on the same date
+
+These results demonstrate that:
+
+`transaction_count > 1`
+
+is not equivalent to repeat purchasing-session behavior.
+
+They also demonstrate that:
+
+`session_count > 1`
+
+is not equivalent to returning on a later date.
+
+Separate governed behavioral attributes are therefore required.
+
+---
+
+# 32. Customer Behavior Mart Inputs
+
+The governed warehouse inputs are:
+
+- `fct_sessions`
+- `fct_transactions`
+
+`fct_sessions` provides:
+
+- `user_pseudo_id`
+- governed session population
+- `session_date`
+- `has_purchase`
+- purchasing-session population
+- `ga_session_number`
+
+`fct_transactions` provides:
+
+- `user_pseudo_id`
+- governed transaction population
+- purchase revenue
+- refund value
+- purchased item quantity
+
+The business mart must not consume staging or intermediate models directly.
+
+---
+
+# 33. Customer Behavior Fact-Grain Strategy
+
+`fct_sessions` and `fct_transactions` have different grains.
+
+`fct_sessions` contains one row per governed session.
+
+`fct_transactions` contains one row per governed valid transaction.
+
+A pseudo-user may have:
+
+- multiple sessions
+- multiple transactions
+- multiple transactions within one session
+
+Therefore, the two fact tables must not be directly joined at raw fact grain and then aggregated.
+
+Doing so could multiply session rows and overstate session-based measures.
+
+P6E uses two controlled user-level aggregations:
+
+1. session and behavioral measures aggregated independently from `fct_sessions` by `user_pseudo_id`
+2. transaction and commercial measures aggregated independently from `fct_transactions` by `user_pseudo_id`
+
+Only these already-controlled user-level aggregates may be joined.
+
+Conceptually:
+
+```text
+fct_sessions
+    ↓
+aggregate by user_pseudo_id
+    ↓
+session_user
+
+fct_transactions
+    ↓
+aggregate by user_pseudo_id
+    ↓
+transaction_user
+
+session_user
+    ↓
+LEFT JOIN transaction_user
+    ↓
+mart_user_behavior
+```
+
+The session-derived user population is the authoritative mart population.
+
+A pseudo-user does not need transaction activity to appear in the mart.
+
+---
+
+# 34. Session-Derived User Measures
+
+The session-side aggregation is performed at:
+
+`user_pseudo_id`
+
+grain.
+
+Required measures include:
+
+| Measure | Definition |
+|---|---|
+| `session_count` | Number of governed sessions associated with the pseudo-user |
+| `active_date_count` | Number of distinct governed session dates on which the pseudo-user is observed |
+| `purchasing_session_count` | Number of governed purchasing sessions associated with the pseudo-user |
+| `purchasing_date_count` | Number of distinct governed session dates containing purchasing-session activity |
+| `first_observed_session_date` | Earliest governed session date visible for the pseudo-user |
+| `last_observed_session_date` | Latest governed session date visible for the pseudo-user |
+| `first_observed_purchase_date` | Earliest governed purchasing-session date visible for the pseudo-user |
+| `last_observed_purchase_date` | Latest governed purchasing-session date visible for the pseudo-user |
+| `observed_user_span_days` | Calendar-day difference between first and last observed session dates |
+
+Purchasing-date measures use governed purchasing-session dates rather than transaction activity dates.
+
+This keeps repeat purchasing behavior aligned with the purchasing-session population.
+
+---
+
+# 35. Transaction-Derived User Measures
+
+The transaction-side aggregation is performed independently at:
+
+`user_pseudo_id`
+
+grain.
+
+Required commercial measures include:
+
+| Measure | Definition |
+|---|---|
+| `transaction_count` | Number of governed valid transactions associated with the pseudo-user |
+| `purchase_revenue` | Total governed purchase revenue associated with the pseudo-user |
+| `refund_value` | Total governed refund value associated with the pseudo-user |
+| `total_item_quantity` | Total governed purchased-item quantity associated with the pseudo-user |
+
+These measures represent total governed transaction activity associated with the pseudo-user across the observation window.
+
+Because the final mart is user-grained rather than date-grained, transaction-date and session-date values are not combined into a daily cross-fact ratio.
+
+The transaction fact is aggregated independently before being joined to session-derived user behavior.
+
+---
+
+# 36. Customer Behavior Attributes
+
+The mart exposes the following governed behavioral attributes.
+
+## 36.1 Is Purchasing User
+
+```text
+purchasing_session_count > 0
+```
+
+Governed field:
+
+`is_purchasing_user`
+
+This identifies pseudo-users associated with at least one governed purchasing session.
+
+## 36.2 Is Multi-Session User
+
+```text
+session_count > 1
+```
+
+Governed field:
+
+`is_multi_session_user`
+
+This identifies pseudo-users with repeated governed session activity.
+
+It does not imply that the pseudo-user returned on a later calendar date.
+
+## 36.3 Returned on Later Date
+
+```text
+active_date_count > 1
+```
+
+Governed field:
+
+`returned_on_later_date`
+
+This identifies pseudo-users observed on more than one distinct governed session date.
+
+It is an observed behavioral measure rather than a returning-customer classification.
+
+## 36.4 Is Repeat Purchasing Session User
+
+```text
+purchasing_session_count > 1
+```
+
+Governed field:
+
+`is_repeat_purchasing_session_user`
+
+This is the approved definition of repeat purchasing-session behavior.
+
+It must not be inferred from:
+
+```text
+transaction_count > 1
+```
+
+because multiple governed transactions may occur within a single purchasing session.
+
+## 36.5 Is Repeat Purchasing Date User
+
+```text
+purchasing_date_count > 1
+```
+
+Governed field:
+
+`is_repeat_purchasing_date_user`
+
+This identifies pseudo-users with purchasing-session activity on more than one distinct governed session date.
+
+It is stricter than repeat purchasing-session behavior because multiple purchasing sessions may occur on the same date.
+
+---
+
+# 37. Observation-Window Semantics
+
+The Customer Behavior Mart describes observed behavior within the governed dataset.
+
+`first_observed_session_date` and `last_observed_session_date` represent the first and last visible governed session dates for the pseudo-user.
+
+They must not be interpreted as the pseudo-user's true first-ever or last-ever interaction.
+
+Similarly:
+
+- `first_observed_purchase_date`
+- `last_observed_purchase_date`
+
+represent the first and last visible purchasing-session dates within the governed observation window.
+
+`observed_user_span_days` is calculated as:
+
+```text
+DATE_DIFF(
+    last_observed_session_date,
+    first_observed_session_date,
+    DAY
+)
+```
+
+A pseudo-user observed on one date therefore has:
+
+```text
+observed_user_span_days = 0
+```
+
+This measure must not be interpreted as true customer tenure.
+
+---
+
+# 38. Null and Zero Handling
+
+Every mart row originates from the governed session population.
+
+Therefore:
+
+- `user_pseudo_id` must not be null
+- `session_count` must be greater than or equal to 1
+- `active_date_count` must be greater than or equal to 1
+
+For pseudo-users with no governed purchasing activity:
+
+- `purchasing_session_count = 0`
+- `purchasing_date_count = 0`
+- `transaction_count = 0`
+- `purchase_revenue = 0`
+- `refund_value = 0`
+- `total_item_quantity = 0`
+- `is_purchasing_user = FALSE`
+- `is_repeat_purchasing_session_user = FALSE`
+- `is_repeat_purchasing_date_user = FALSE`
+- `first_observed_purchase_date = NULL`
+- `last_observed_purchase_date = NULL`
+
+Zero replacement is appropriate for confirmed absence of transaction activity after the controlled left join.
+
+Missing purchase dates remain `NULL` because no purchasing-session date exists.
+
+---
+
+# 39. Customer Behavior Mart Assembly Strategy
+
+The model should be assembled conceptually in the following order:
+
+```text
+fct_sessions
+    ↓
+aggregate session behavior by user_pseudo_id
+    ↓
+session_user
+
+fct_transactions
+    ↓
+aggregate commercial measures by user_pseudo_id
+    ↓
+transaction_user
+
+session_user
+    ↓
+LEFT JOIN transaction_user on user_pseudo_id
+    ↓
+apply governed zero handling
+    ↓
+derive behavioral attributes
+    ↓
+mart_user_behavior
+```
+
+The two fact tables must be aggregated before the final join.
+
+No final assembly step may operate at raw session × transaction grain.
+
+---
+
+# 40. Customer Behavior Expected Data Volume
+
+The governed session population currently contains:
+
+```text
+270,154
+```
+
+distinct observed `user_pseudo_id` values.
+
+Therefore, the current static dataset is expected to produce:
+
+```text
+270,154
+```
+
+rows in `mart_user_behavior`.
+
+The mart must also contain:
+
+```text
+270,154
+```
+
+distinct non-null `user_pseudo_id` values.
+
+This expected population must be validated after implementation.
+
+---
+
+# 41. Customer Behavior Reconciliation Requirements
+
+The mart must reconcile with the governed session population for:
+
+- distinct pseudo-user count
+- session count
+- purchasing session count
+
+Expected current totals are:
+
+```text
+pseudo_users = 270,154
+sessions = 360,129
+purchasing_sessions = 4,033
+```
+
+The mart must reconcile with the governed transaction population for:
+
+- transaction count
+- purchase revenue
+- refund value
+- total item quantity
+
+Expected current transaction totals include:
+
+```text
+transactions = 4,451
+purchase_revenue = 307,640
+```
+
+Behavioral populations must reconcile with independently validated profiling results.
+
+Expected current values are:
+
+```text
+is_multi_session_user = 47,364
+returned_on_later_date = 29,329
+is_purchasing_user = 3,702
+is_repeat_purchasing_session_user = 284
+is_repeat_purchasing_date_user = 253
+```
+
+Any intentional difference from these values must be investigated and documented before implementation is accepted.
+
+---
+
+# 42. Customer Behavior Validation Requirements
+
+## 42.1 Structural Validation
+
+The mart must satisfy:
+
+- model builds successfully
+- `user_pseudo_id` is non-null
+- `user_pseudo_id` is unique
+- required measures and behavioral attributes exist
+- mart row count equals the governed pseudo-user population
+
+## 42.2 Measure Validity
+
+The following conditions must hold:
+
+- `session_count >= 1`
+- `active_date_count >= 1`
+- `active_date_count <= session_count`
+- `purchasing_session_count >= 0`
+- `purchasing_session_count <= session_count`
+- `purchasing_date_count >= 0`
+- `purchasing_date_count <= active_date_count`
+- `transaction_count >= 0`
+- `total_item_quantity >= 0`
+- `observed_user_span_days >= 0`
+
+Commercial value measures must follow their governed upstream contracts.
+
+## 42.3 Date Consistency
+
+For every pseudo-user:
+
+```text
+first_observed_session_date <= last_observed_session_date
+```
+
+For purchasing pseudo-users:
+
+```text
+first_observed_purchase_date <= last_observed_purchase_date
+```
+
+For non-purchasing pseudo-users:
+
+```text
+first_observed_purchase_date IS NULL
+last_observed_purchase_date IS NULL
+```
+
+## 42.4 Behavioral Attribute Consistency
+
+The following equivalences must hold:
+
+```text
+is_purchasing_user
+=
+(purchasing_session_count > 0)
+```
+
+```text
+is_multi_session_user
+=
+(session_count > 1)
+```
+
+```text
+returned_on_later_date
+=
+(active_date_count > 1)
+```
+
+```text
+is_repeat_purchasing_session_user
+=
+(purchasing_session_count > 1)
+```
+
+```text
+is_repeat_purchasing_date_user
+=
+(purchasing_date_count > 1)
+```
+
+---
+
+# 43. Customer Behavior Testing Strategy
+
+Generic dbt tests should cover:
+
+- `not_null` on `user_pseudo_id`
+- `unique` on `user_pseudo_id`
+- non-null required session-derived measures
+- non-null required behavioral flags
+- non-null transaction-derived additive measures after governed zero handling
+
+Singular SQL tests should cover:
+
+- session population reconciliation
+- transaction population reconciliation
+- behavioral population reconciliation
+- measure validity
+- date consistency
+- behavioral flag consistency
+- purchasing-date nullability rules
+- prevention of unsupported negative values
+
+The test suite must make fact-fanout errors detectable through reconciliation failures.
+
+---
+
+# 44. Customer Behavior Materialization Strategy
+
+`mart_user_behavior` should be materialized as a table.
+
+Rationale:
+
+- it is a stable user-level BI-serving dataset
+- it consolidates governed behavioral logic
+- it prevents downstream BI from repeatedly aggregating session and transaction facts
+- it contains substantially fewer rows than the session fact
+- the current dataset is static
+- incremental processing is not required
+
+---
+
+# 45. Customer Behavior Downstream Consumption
+
+`mart_user_behavior` is intended to support:
+
+- observed pseudo-user engagement analysis
+- purchasing versus non-purchasing user comparison
+- session-frequency analysis
+- repeat-session analysis
+- later-date return analysis
+- repeat purchasing-session analysis
+- repeat purchasing-date analysis
+- pseudo-user-level transaction analysis
+- pseudo-user-level commercial contribution analysis
+
+Downstream BI may:
+
+- aggregate governed user populations using compatible conditions
+- segment pseudo-users using the supplied governed behavioral attributes
+- aggregate user-level additive commercial measures
+- calculate presentation-specific percentages from governed population counts
+
+Downstream BI must not:
+
+- reinterpret pseudo-users as authenticated customers
+- create competing repeat-purchase definitions
+- treat `transaction_count > 1` as repeat purchasing-session behavior
+- infer customer retention directly from `returned_on_later_date`
+- infer true customer tenure from observed dates
+- reconstruct user-level session/transaction joins independently
+- create production-grade new/returning customer classifications from `ga_session_number`
+
+---
+
+# 46. Customer Behavior Known Limitations
+
+The P6E design has the following limitations:
+
+- the underlying GA4 dataset is a bounded static public sample
+- `user_pseudo_id` is not authenticated customer identity
+- pseudo-user identity may be affected by browser, device, cookie, and collection behavior
+- observed first and last dates do not represent complete lifetime history
+- session-number values are not perfectly unique within every pseudo-user history
+- cross-device identity resolution is unavailable
+- customer account, CRM, loyalty, and demographic identity are unavailable
+- repeat observed behavior is not equivalent to production customer retention
+- incremental processing is not required for the current static dataset
+
+These limitations must remain explicit in downstream interpretation.
+
+---
+
+# 47. P6E Implementation Contract
+
+P6E is approved to implement:
+
+`mart_user_behavior`
+
+with grain:
+
+> One row per `user_pseudo_id`.
+
+Primary warehouse inputs:
+
+- `fct_sessions`
+- `fct_transactions`
+
+The implementation must:
+
+1. preserve the approved pseudo-user grain
+2. use `fct_sessions` as the authoritative observed pseudo-user population
+3. aggregate session behavior independently by `user_pseudo_id`
+4. aggregate transaction activity independently by `user_pseudo_id`
+5. prevent raw session-to-transaction fact fanout
+6. preserve governed observation-window semantics
+7. use purchasing-session dates for repeat purchasing-date behavior
+8. expose the governed behavioral attributes defined in `kpi_contracts.md`
+9. preserve the distinction between multi-session activity and later-date return behavior
+10. preserve the distinction between multi-transaction activity and repeat purchasing-session behavior
+11. reconcile session-derived measures to `fct_sessions`
+12. reconcile transaction-derived measures to `fct_transactions`
+13. reconcile behavioral populations to independently validated profiling results
+14. preserve pseudo-user identity limitations
+15. prevent unsupported new-versus-returning customer classification
+16. minimize BI-side reconstruction of user-behavior logic
+
+---
+
+# 48. P6E Implementation Sequence
+
+After this design is approved, P6E proceeds with:
+
+1. implement `mart_user_behavior.sql`
+2. update `_business__models.yml`
+3. add structural and uniqueness tests
+4. add session-population reconciliation tests
+5. add transaction-population reconciliation tests
+6. add behavioral-population reconciliation tests
+7. add date-consistency tests
+8. add behavioral-flag consistency tests
+9. run `dbt parse`
+10. run targeted `dbt build`
+11. inspect reconciliation outputs
+12. commit the completed P6E implementation
+
+P6F begins only after P6E implementation and validation are complete.

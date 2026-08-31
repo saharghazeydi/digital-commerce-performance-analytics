@@ -185,7 +185,7 @@ One row per:
 
 ---
 
-# P6E — Customer Behavior Mart
+# P6E - Customer Behavior Mart
 
 ## Primary Consumers
 
@@ -198,56 +198,128 @@ One row per:
 
 The mart should support decisions about:
 
-- customer engagement
+- pseudo-user engagement
 - purchasing behavior
 - repeated session activity
+- repeated purchasing activity
 - differences between purchasing and non-purchasing users
-- customer-level commercial contribution
+- pseudo-user-level commercial contribution
 
 ## Primary Business Questions
 
 The mart should answer:
 
-- How many unique pseudo-users are active?
-- How many users generate purchasing sessions?
-- How many sessions does each user generate?
-- How many transactions does each user generate?
-- How much revenue does each user generate?
-- Which users demonstrate repeated session activity?
-- Which users demonstrate repeated purchasing activity?
+- How many unique pseudo-users are observed?
+- How many pseudo-users generate purchasing sessions?
+- How many sessions does each pseudo-user generate?
+- On how many distinct dates is each pseudo-user observed?
+- Which pseudo-users demonstrate repeated session activity?
+- Which pseudo-users return on a later observed date?
+- How many purchasing sessions does each pseudo-user generate?
+- How many transactions does each pseudo-user generate?
+- How much purchase revenue does each pseudo-user generate?
+- Which pseudo-users generate purchasing activity across multiple sessions?
+- Which pseudo-users generate purchasing activity across multiple dates?
 - How does purchasing behavior differ from non-purchasing behavior?
 
-## Candidate Grain
+## Approved Grain
 
 One row per:
 
 `user_pseudo_id`
 
-Optional downstream time-based variants may be introduced only if required.
+The mart represents behavior across the governed observation window.
+
+Optional downstream time-based variants may be introduced only when a separate business requirement justifies a different grain.
 
 ## Required Upstream Models
 
 - `fct_sessions`
 - `fct_transactions`
 
-## Candidate Measures
+## Required Measures
 
 - session_count
+- active_date_count
 - purchasing_session_count
 - transaction_count
 - purchase_revenue
 - refund_value
 - total_item_quantity
-- first_session_date
-- last_session_date
-- first_purchase_date
-- last_purchase_date
+- first_observed_session_date
+- last_observed_session_date
+- first_observed_purchase_date
+- last_observed_purchase_date
+- observed_user_span_days
+- purchasing_date_count
 
-## Candidate Behavioral Attributes
+## Required Behavioral Attributes
 
-- has_purchase
-- repeat_session_flag
-- repeat_purchase_flag
+- is_purchasing_user
+- is_multi_session_user
+- returned_on_later_date
+- is_repeat_purchasing_session_user
+- is_repeat_purchasing_date_user
+
+## Behavioral Definitions
+
+### Multi-Session User
+
+A pseudo-user is a multi-session user when:
+
+`session_count > 1`
+
+This identifies repeated governed session activity within the observation window.
+
+### Returned on a Later Date
+
+A pseudo-user is considered to have returned on a later observed date when:
+
+`active_date_count > 1`
+
+This is intentionally distinct from `is_multi_session_user`, because multiple sessions may occur on the same date.
+
+### Purchasing User
+
+A pseudo-user is a purchasing user when:
+
+`purchasing_session_count > 0`
+
+### Repeat Purchasing Session User
+
+A pseudo-user demonstrates repeat purchasing-session behavior when:
+
+`purchasing_session_count > 1`
+
+This definition identifies purchasing activity across multiple governed sessions.
+
+It must not be inferred from `transaction_count > 1`, because a single purchasing session may contain multiple transactions.
+
+### Repeat Purchasing Date User
+
+A pseudo-user demonstrates repeat purchasing-date behavior when purchasing activity occurs on more than one distinct governed session date:
+
+`purchasing_date_count > 1`
+
+This is a stricter temporal definition than repeat purchasing-session behavior because multiple purchasing sessions may occur on the same date.
+
+## Observation-Window Semantics
+
+`first_observed_session_date` and `last_observed_session_date` represent the first and last governed session dates visible for the pseudo-user within the available dataset.
+
+They must not be interpreted as the pseudo-user's true first-ever or last-ever interaction with the business.
+
+Similarly, `first_observed_purchase_date` and `last_observed_purchase_date` represent the first and last purchasing-session dates visible within the governed observation window.
+
+`observed_user_span_days` measures the number of calendar days between the first and last observed governed session dates.
+
+## GA4 Session Number
+
+`ga_session_number` may be used as a supporting behavioral or diagnostic attribute where required.
+
+It must not be treated as authoritative customer identity or used by itself to establish a production-grade new-versus-returning customer classification.
+
+Observed profiling shows that session-number values are not perfectly unique within every pseudo-user history.
 
 ## Important Limitation
 
@@ -255,7 +327,9 @@ Optional downstream time-based variants may be introduced only if required.
 
 Authenticated customer identity is not available in the source dataset.
 
-Therefore, this mart represents pseudo-user behavior rather than a production-grade customer master.
+Therefore, this mart represents observed GA4 pseudo-user behavior rather than a production-grade customer master.
+
+Terms such as `customer`, `new customer`, and `returning customer` must not be inferred directly from `user_pseudo_id`, first-observed dates, or `ga_session_number`.
 
 ---
 
