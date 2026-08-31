@@ -89,3 +89,174 @@ models:
           Sum of session-level unique-item measures for the date and channel.
         data_tests:
           - not_null
+
+  - name: mart_ecommerce_daily
+    description: >
+      Governed daily ecommerce performance mart for downstream business
+      intelligence and analytical reporting. The model contains one row per
+      calendar date and preserves distinct session-date, transaction-date,
+      and session-cohort metric semantics. Session metrics describe sessions
+      occurring on the date, transaction metrics describe commercial activity
+      occurring on the date, and session-attributed measures describe
+      commercial outcomes attributed to sessions originating on the date.
+
+    columns:
+      - name: date_day
+        description: Governed calendar date and unique grain of the mart.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: year
+        description: Calendar year from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: quarter
+        description: Calendar quarter number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: quarter_name
+        description: Calendar quarter label from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: month_number
+        description: Calendar month number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: month_name
+        description: Calendar month name from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: year_month
+        description: Calendar year-month label from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: week_of_year
+        description: Calendar week number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: day_of_month
+        description: Calendar day number within the month.
+        data_tests:
+          - not_null
+
+      - name: day_of_week
+        description: Governed numeric day-of-week value.
+        data_tests:
+          - not_null
+
+      - name: day_name
+        description: Calendar day name from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: is_weekend
+        description: Indicates whether the calendar date is classified as a weekend.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: >
+          Number of governed sessions occurring on date_day using session-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions occurring on date_day that contain at
+          least one valid purchase.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed session conversion rate calculated as purchasing sessions
+          divided by sessions using the same session-date population.
+
+      - name: transaction_count
+        description: >
+          Number of governed transactions occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed purchase revenue occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: >
+          Governed refund value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: >
+          Governed shipping value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: >
+          Governed tax value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: >
+          Purchased item quantity represented by transactions occurring on
+          date_day.
+        data_tests:
+          - not_null
+
+      - name: average_order_value
+        description: >
+          Governed transaction-date purchase revenue divided by transaction
+          count. Returns null when transaction count is zero.
+
+      - name: items_per_transaction
+        description: >
+          Governed transaction-date item quantity divided by transaction count.
+          Returns null when transaction count is zero.
+
+      - name: session_attributed_transaction_count
+        description: >
+          Number of governed transactions attributed to sessions originating
+          on date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions originating on
+          date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: revenue_per_session
+        description: >
+          Session-attributed purchase revenue divided by session count using
+          the same session-cohort attribution basis.
+
+      - name: transactions_per_purchasing_session
+        description: >
+          Session-attributed transaction count divided by purchasing session
+          count using the same session-cohort attribution basis.
