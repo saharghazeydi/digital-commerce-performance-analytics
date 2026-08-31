@@ -260,3 +260,190 @@ models:
         description: >
           Session-attributed transaction count divided by purchasing session
           count using the same session-cohort attribution basis.
+  - name: mart_user_behavior
+    description: >
+      Governed pseudo-user-level customer behavior mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per observed user_pseudo_id and consolidates governed session
+      behavior, purchasing behavior, transaction activity, commercial
+      contribution, and repeat-activity attributes across the available
+      observation window. user_pseudo_id represents an analytical GA4
+      pseudo-user and must not be interpreted as authenticated customer
+      identity.
+
+    columns:
+      - name: user_pseudo_id
+        description: >
+          Governed GA4 pseudo-user identifier and unique grain of the mart.
+          This field represents observed analytical identity rather than
+          authenticated customer identity.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: session_count
+        description: >
+          Number of governed sessions associated with the pseudo-user across
+          the observation window.
+        data_tests:
+          - not_null
+
+      - name: active_date_count
+        description: >
+          Number of distinct governed session dates on which the pseudo-user
+          is observed.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions associated with the pseudo-user that
+          contain at least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: purchasing_date_count
+        description: >
+          Number of distinct governed session dates on which the pseudo-user
+          generated at least one purchasing session.
+        data_tests:
+          - not_null
+
+      - name: first_observed_session_date
+        description: >
+          Earliest governed session date visible for the pseudo-user within
+          the available observation window. This does not necessarily
+          represent the pseudo-user's true first-ever session.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: last_observed_session_date
+        description: >
+          Latest governed session date visible for the pseudo-user within
+          the available observation window. This does not necessarily
+          represent the pseudo-user's true last-ever interaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: first_observed_purchase_date
+        description: >
+          Earliest governed purchasing-session date visible for the
+          pseudo-user. The value remains null for pseudo-users with no
+          governed purchasing session.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: last_observed_purchase_date
+        description: >
+          Latest governed purchasing-session date visible for the
+          pseudo-user. The value remains null for pseudo-users with no
+          governed purchasing session.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: observed_user_span_days
+        description: >
+          Calendar-day difference between the first and last observed
+          governed session dates. This is an observation-window measure and
+          must not be interpreted as true customer tenure.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: >
+          Number of governed valid transactions associated with the
+          pseudo-user across the observation window.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Total governed purchase revenue associated with the pseudo-user
+          across the observation window.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: >
+          Total governed refund value associated with the pseudo-user across
+          the observation window.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: >
+          Total governed purchased-item quantity associated with the
+          pseudo-user across the observation window.
+        data_tests:
+          - not_null
+
+      - name: is_purchasing_user
+        description: >
+          Indicates whether the pseudo-user generated at least one governed
+          purchasing session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_multi_session_user
+        description: >
+          Indicates whether the pseudo-user generated more than one governed
+          session within the observation window.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: returned_on_later_date
+        description: >
+          Indicates whether the pseudo-user was observed on more than one
+          distinct governed session date. This is not a production-grade
+          returning-customer classification.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_repeat_purchasing_session_user
+        description: >
+          Indicates whether the pseudo-user generated purchasing activity
+          across more than one governed session. This must not be inferred
+          from transaction_count greater than one.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_repeat_purchasing_date_user
+        description: >
+          Indicates whether the pseudo-user generated purchasing-session
+          activity on more than one distinct governed session date.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
