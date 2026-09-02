@@ -1929,3 +1929,670 @@ After this design is approved, P6E proceeds with:
 12. commit the completed P6E implementation
 
 P6F begins only after P6E implementation and validation are complete.
+---
+
+# 49. Device / Geography Performance Mart
+
+## 49.1 Business Purpose
+
+The Device / Geography Performance Mart provides a governed daily view of ecommerce performance segmented by session device category and country.
+
+It is designed to answer questions such as:
+
+- How does traffic differ across device categories?
+- Which device categories generate the strongest session conversion?
+- Which countries generate the largest session populations?
+- How does conversion performance vary by country?
+- Which device and country combinations generate the greatest commercial contribution?
+- How much session-attributed transaction activity and purchase revenue is associated with each segment?
+- How does segment performance change over time?
+
+The mart is intended for ecommerce, growth, commercial, and management analysis.
+
+It complements the Marketing / Channel Mart rather than duplicating acquisition analysis.
+
+---
+
+# 50. Device / Geography Mart Grain
+
+The approved grain is:
+
+> One row per `session_date + device_category + country`.
+
+The planned model is:
+
+`mart_segment_daily`
+
+Each row represents one observed governed session segment for a specific session date, device category, and governed country value.
+
+Profiling of the governed `fct_sessions` population identified:
+
+| Metric | Observed Value |
+|---|---:|
+| Governed sessions | 360,129 |
+| Distinct governed sessions | 360,129 |
+| Device categories | 3 |
+| Countries | 109 |
+| Observed session-date + device-category + country combinations | 17,052 |
+
+The current static dataset is therefore expected to produce:
+
+`17,052`
+
+mart rows after governed country normalization, subject to final implementation validation.
+
+---
+
+# 51. Segment Attribute Source
+
+P6F consumes:
+
+`fct_sessions`
+
+as its authoritative analytical input.
+
+The required segmentation attributes are:
+
+- `device_category`
+- `country`
+
+These attributes originate from GA4 event data but have been propagated through the governed analytical pipeline before mart consumption.
+
+The governed lineage is:
+
+```text
+GA4 source
+    →
+stg_ga4__events
+    →
+int_ga4__session_events
+    →
+int_ga4__sessions
+    →
+fct_sessions
+    →
+mart_segment_daily
+```
+
+The business mart must not reconstruct device or geography attributes directly from raw GA4 events.
+
+---
+
+# 52. Session-Level Segment Stability
+
+Profiling confirmed that `device_category` and `country` are stable at the governed session grain.
+
+Current validation results are:
+
+| Metric | Observed Value |
+|---|---:|
+| Governed sessions | 360,129 |
+| Sessions containing multiple device categories | 0 |
+| Sessions containing multiple countries | 0 |
+| Sessions with invalid device category | 0 |
+| Sessions with invalid country | 2,882 |
+
+This supports assigning one device category and one country value to each governed session.
+
+The stability result is a validated property of the current dataset and must not be assumed universally for future GA4 datasets without equivalent validation.
+
+---
+
+# 53. Governed Date Semantics
+
+P6F uses:
+
+`fct_sessions.session_date`
+
+as its analytical date.
+
+Raw GA4 `event_date` must not be used to independently construct the P6F mart grain.
+
+Profiling identified:
+
+- 360,129 governed sessions
+- 845 sessions spanning more than one raw event calendar date
+- a maximum of 2 raw event dates within a governed session
+
+Therefore, grouping raw events by:
+
+```text
+event_date + user_pseudo_id + ga_session_id
+```
+
+would incorrectly split some governed sessions.
+
+The mart must preserve the existing governed sessionization and session-date semantics.
+
+---
+
+# 54. Device Category Semantics
+
+`device_category` represents the device category associated with the governed session.
+
+Current profiling identified:
+
+- 3 distinct device categories
+- 0 sessions with an invalid device category
+
+The field is suitable for primary performance segmentation.
+
+For defensive downstream handling, a future null, blank, or `(not set)` value must be represented as:
+
+`Unknown`
+
+within the P6F mart rather than excluded from the analytical population.
+
+Operating system and browser are intentionally excluded from the current mart because they are not required by the approved P6F consumer question and would unnecessarily expand the serving grain.
+
+---
+
+# 55. Country Semantics
+
+`country` represents the country associated with the governed session.
+
+Current profiling identified:
+
+- 109 distinct observed countries
+- 2,882 sessions with null, blank, or `(not set)` country values
+
+P6F must preserve these sessions.
+
+For the business-facing mart, invalid country values are normalized to:
+
+`Unknown`
+
+The normalization applies to:
+
+- `NULL`
+- blank values
+- `(not set)`
+
+Unknown-country sessions must remain part of all relevant session and commercial reconciliations.
+
+Region and city are intentionally excluded from the primary mart.
+
+Profiling showed substantially higher missingness and cardinality at those levels, particularly for city, and no current business requirement requires that additional grain.
+
+---
+
+# 56. Segment Mart Measures
+
+P6F exposes the following governed additive measures.
+
+| Measure | Definition |
+|---|---|
+| `session_count` | Number of governed sessions in the segment |
+| `purchasing_session_count` | Number of governed purchasing sessions in the segment |
+| `transaction_count` | Governed transactions attributed to the originating session segment |
+| `purchase_revenue` | Governed purchase revenue attributed to the originating session segment |
+
+Because the segmentation dimensions belong to sessions, commercial measures in P6F use session attribution.
+
+They represent commercial outcomes generated by sessions belonging to the specified:
+
+```text
+session_date
++ device_category
++ country
+```
+
+population.
+
+They do not represent transaction-date activity.
+
+---
+
+# 57. Segment Mart Derived KPIs
+
+P6F exposes the following governed derived KPIs.
+
+## 57.1 Conversion Rate
+
+```text
+purchasing_session_count / session_count
+```
+
+Both numerator and denominator belong to the same governed session segment.
+
+## 57.2 Revenue per Session
+
+```text
+purchase_revenue / session_count
+```
+
+where `purchase_revenue` represents session-attributed purchase revenue.
+
+The numerator and denominator therefore share the same session-date and segment attribution.
+
+All ratios must use safe division.
+
+Zero denominators return `NULL`.
+
+Derived ratios must not be summed or averaged across mart rows.
+
+When the reporting grain changes, ratios must be recalculated from their aggregated governed numerator and denominator measures.
+
+---
+
+# 58. Average Order Value Decision
+
+`average_order_value` is intentionally excluded from the current P6F mart.
+
+The governed general AOV contract is transaction-based:
+
+```text
+purchase_revenue / transaction_count
+```
+
+using transaction-date semantics when reported over time.
+
+P6F is a session-segment mart whose dimensions belong to the originating session.
+
+Introducing AOV would therefore require an explicitly approved session-attributed AOV semantic.
+
+No such requirement currently exists.
+
+P6F must not implicitly create a new AOV definition.
+
+---
+
+# 59. Segment Mart Aggregation Strategy
+
+The mart is aggregated directly from the governed session fact.
+
+Conceptually:
+
+```text
+fct_sessions
+    ↓
+normalize business-facing segment values
+    ↓
+group by
+    session_date
+    + device_category
+    + country
+    ↓
+aggregate governed session and
+session-attributed commercial measures
+    ↓
+calculate governed ratios
+    ↓
+mart_segment_daily
+```
+
+No raw session-to-transaction join is required.
+
+This is possible because `fct_sessions` already contains governed session-level commercial measures including:
+
+- `transaction_count`
+- `purchase_revenue`
+
+Using the session fact preserves the originating session's segmentation attributes and prevents transaction fanout.
+
+---
+
+# 60. Segment Normalization Strategy
+
+Business-facing normalization is applied inside P6F without changing upstream raw semantics.
+
+Conceptually:
+
+```text
+device_category =
+    Unknown when null, blank, or (not set)
+    otherwise governed device_category
+
+country =
+    Unknown when null, blank, or (not set)
+    otherwise governed country
+```
+
+The staging layer remains source-aligned.
+
+The intermediate and core layers preserve governed session attributes.
+
+The business mart owns the presentation-oriented fallback required for stable downstream segmentation.
+
+Normalization must not remove sessions from the analytical population.
+
+---
+
+# 61. Relationship Strategy
+
+The primary dimensional relationship is:
+
+```text
+dim_date.date_day
+    →
+mart_segment_daily.session_date
+```
+
+The mart does not currently require separate device or geography dimension tables.
+
+`device_category` and `country` are exposed as business-facing mart dimensions.
+
+Expected relationship behavior:
+
+- every `session_date` resolves to `dim_date`
+- every `session_date + device_category + country` combination is unique
+- `session_date` is non-null
+- normalized `device_category` is non-null
+- normalized `country` is non-null
+
+Separate device or geography dimensions may be introduced in a future design if richer governed attributes or reusable hierarchies become necessary.
+
+---
+
+# 62. Expected Data Volume
+
+The governed session fact currently contains:
+
+```text
+360,129
+```
+
+sessions.
+
+Using the governed session date and the approved P6F dimensions produces:
+
+```text
+17,052
+```
+
+observed:
+
+```text
+session_date + device_category + country
+```
+
+combinations.
+
+Therefore, the current static P6F mart is expected to contain:
+
+```text
+17,052 rows
+```
+
+This value must be validated after normalization and implementation.
+
+The mart remains substantially smaller than `fct_sessions`, making it appropriate as a BI-serving aggregate.
+
+---
+
+# 63. Segment Reconciliation Requirements
+
+Across the complete P6F mart population:
+
+```text
+SUM(session_count)
+```
+
+must equal:
+
+```text
+360,129
+```
+
+governed sessions.
+
+```text
+SUM(purchasing_session_count)
+```
+
+must equal:
+
+```text
+4,033
+```
+
+governed purchasing sessions.
+
+```text
+SUM(transaction_count)
+```
+
+must equal:
+
+```text
+4,451
+```
+
+governed transactions.
+
+```text
+SUM(purchase_revenue)
+```
+
+must equal:
+
+```text
+307,640
+```
+
+governed purchase revenue.
+
+The current profiling baseline also includes:
+
+```text
+invalid_device_sessions = 0
+invalid_country_sessions = 2,882
+```
+
+Invalid-country sessions must remain represented under the governed `Unknown` segment.
+
+Any reconciliation difference must be investigated before P6F is accepted.
+
+---
+
+# 64. Segment Validation Requirements
+
+## 64.1 Structural Validation
+
+The mart must satisfy:
+
+- model builds successfully
+- `session_date` is non-null
+- `device_category` is non-null after normalization
+- `country` is non-null after normalization
+- the composite grain is unique
+- row count matches the validated observed segment grain
+
+## 64.2 Measure Validity
+
+The following conditions must hold:
+
+```text
+session_count >= 1
+purchasing_session_count >= 0
+purchasing_session_count <= session_count
+transaction_count >= 0
+```
+
+Commercial measures must follow their governed upstream contracts.
+
+## 64.3 KPI Consistency
+
+For every mart row:
+
+```text
+conversion_rate
+=
+purchasing_session_count / session_count
+```
+
+and:
+
+```text
+revenue_per_session
+=
+purchase_revenue / session_count
+```
+
+using safe division.
+
+## 64.4 Population Preservation
+
+Normalization must not alter the governed analytical population.
+
+Tests must detect:
+
+- lost sessions
+- duplicated sessions
+- lost purchasing sessions
+- duplicated transactions
+- lost or duplicated purchase revenue
+
+---
+
+# 65. Segment Testing Strategy
+
+Generic dbt tests should cover:
+
+- non-null `session_date`
+- non-null `device_category`
+- non-null `country`
+- relationship between `session_date` and `dim_date`
+
+Composite-grain uniqueness must be tested for:
+
+```text
+session_date + device_category + country
+```
+
+Singular SQL tests should cover:
+
+- session population reconciliation
+- purchasing-session reconciliation
+- transaction reconciliation
+- purchase-revenue reconciliation
+- metric validity
+- KPI formula consistency
+- normalization behavior
+- composite-grain uniqueness where appropriate
+
+The test suite must make population loss or duplication detectable.
+
+---
+
+# 66. Materialization Strategy
+
+`mart_segment_daily` should be materialized as a table.
+
+Rationale:
+
+- it is a stable BI-serving dataset
+- it reduces the session fact to a compact analytical grain
+- segmentation logic and normalization are governed once
+- downstream BI does not need to repeatedly aggregate `fct_sessions`
+- the current dataset is static
+- incremental processing is not required
+
+---
+
+# 67. Downstream Consumption
+
+`mart_segment_daily` is intended to support:
+
+- device performance analysis
+- country performance analysis
+- device-by-country performance comparison
+- daily segment traffic trends
+- segment conversion analysis
+- session-attributed transaction contribution
+- session-attributed purchase-revenue contribution
+- revenue-per-session comparison
+
+BI consumers may:
+
+- aggregate compatible additive measures
+- filter by device category and country
+- aggregate across dates
+- recalculate governed ratios from compatible numerator and denominator measures
+
+BI consumers must not:
+
+- reconstruct raw GA4 device or geography attribution
+- replace governed `session_date` with raw `event_date`
+- exclude `Unknown` geography populations from totals without an explicit analytical filter
+- mix transaction-date commercial activity with P6F session-segment denominators
+- average pre-calculated conversion rates or revenue-per-session values to create higher-level KPIs
+- introduce unsupported geography or device classifications
+
+---
+
+# 68. Known Limitations
+
+The P6F design has the following limitations:
+
+- the underlying GA4 dataset is a bounded static public sample
+- geography represents GA4-observed session geography rather than verified customer residence
+- country may be unavailable for some sessions
+- unknown-country sessions are retained under `Unknown`
+- device category represents observed session device context
+- authenticated cross-device customer identity is unavailable
+- operating system and browser are outside the current mart scope
+- region and city are outside the current mart scope
+- acquisition segmentation belongs to the separate governed channel mart
+- transaction-date commercial trend analysis belongs to the Ecommerce Performance Mart
+- incremental processing is not required for the current static dataset
+
+These limitations must remain explicit in downstream interpretation.
+
+---
+
+# 69. P6F Implementation Contract
+
+P6F is approved to implement:
+
+`mart_segment_daily`
+
+with grain:
+
+> One row per `session_date + device_category + country`.
+
+Primary warehouse inputs:
+
+- `fct_sessions`
+- `dim_date`
+
+The implementation must:
+
+1. preserve the governed session population
+2. use `fct_sessions.session_date`
+3. use session-level `device_category`
+4. use session-level `country`
+5. normalize invalid device and country values to `Unknown`
+6. preserve unknown-country sessions
+7. aggregate only at the approved segment grain
+8. use session-attributed commercial measures
+9. avoid raw session-to-transaction joins
+10. expose governed additive measures
+11. calculate governed conversion rate
+12. calculate governed revenue per session
+13. avoid introducing an unapproved AOV definition
+14. maintain referential integrity with `dim_date`
+15. reconcile sessions, purchasing sessions, transactions, and purchase revenue
+16. preserve documented segment and attribution semantics for BI consumers
+
+---
+
+# 70. P6F Implementation Sequence
+
+After this design is approved, P6F proceeds with:
+
+1. implement `mart_segment_daily.sql`
+2. update `_business__models.yml`
+3. add structural and relationship tests
+4. add composite-grain uniqueness validation
+5. add session-population reconciliation tests
+6. add purchasing-session reconciliation tests
+7. add transaction and purchase-revenue reconciliation tests
+8. add KPI formula tests
+9. add segment-normalization tests
+10. run `dbt parse`
+11. run targeted `dbt build`
+12. inspect reconciliation outputs
+13. commit the completed P6F implementation
+
+P6G begins only after P6F implementation and validation are complete.

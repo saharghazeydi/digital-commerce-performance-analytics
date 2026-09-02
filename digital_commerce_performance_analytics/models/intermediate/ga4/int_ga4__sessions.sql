@@ -101,6 +101,9 @@ session_enriched as (
         sessions.*,
 
         first_events.platform as platform,
+        first_events.device_category as device_category,
+        first_events.country as country,
+
         first_events.page_location as landing_page,
         first_events.page_title as landing_page_title,
 

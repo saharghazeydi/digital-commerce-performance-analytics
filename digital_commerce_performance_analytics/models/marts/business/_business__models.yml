@@ -260,6 +260,7 @@ models:
         description: >
           Session-attributed transaction count divided by purchasing session
           count using the same session-cohort attribution basis.
+
   - name: mart_user_behavior
     description: >
       Governed pseudo-user-level customer behavior mart for downstream
@@ -447,3 +448,79 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+
+  - name: mart_segment_daily
+    description: >
+      Governed daily device and geography performance mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per governed session date, device category, and country. Commercial
+      measures are attributed to the originating session and aggregated from
+      fct_sessions, preserving consistent session-date semantics.
+
+    columns:
+      - name: session_date
+        description: >
+          Governed session date used as the calendar grain of the mart.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: device_category
+        description: >
+          Governed session-level device category. Missing, blank, or '(not set)'
+          values are normalized to 'Unknown' within the business mart.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['desktop', 'mobile', 'tablet', 'Unknown']
+
+      - name: country
+        description: >
+          Governed session-level country. Missing, blank, or '(not set)'
+          values are normalized to 'Unknown' within the business mart.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: >
+          Number of governed sessions for the session date, device category,
+          and country.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions containing at least one valid purchase
+          for the session date, device category, and country.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed session conversion rate calculated as purchasing sessions
+          divided by sessions within the same segment grain.
+
+      - name: transaction_count
+        description: >
+          Number of governed transactions attributed to sessions in the
+          segment. This measure uses session attribution rather than
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions in the segment.
+          This measure uses session attribution rather than transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: revenue_per_session
+        description: >
+          Session-attributed purchase revenue divided by session count within
+          the same segment grain.
