@@ -29,6 +29,8 @@ final as (
 
         -- platform and navigation
         platform,
+        device_category,
+        country,
         landing_page,
         landing_page_title,
         exit_page,

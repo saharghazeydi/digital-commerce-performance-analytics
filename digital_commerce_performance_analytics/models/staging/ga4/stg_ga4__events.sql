@@ -16,6 +16,9 @@ events as (
         user_pseudo_id,
         platform,
 
+        device.category as device_category,
+        geo.country as country,
+
         (
             select value.int_value
             from unnest(event_params)

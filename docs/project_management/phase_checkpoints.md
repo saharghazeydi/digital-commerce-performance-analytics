@@ -897,3 +897,144 @@ Repository documentation, Pull Request review, merge, and synchronization with `
 ## Next Approved Work Package
 
 P6A — Mart Requirements, after Phase 5 closeout review and merge
+---
+
+# Checkpoint 6.1 — Business Marts Accepted
+
+## Objective
+
+Implement and formally validate the governed business-mart layer on top of the Core Warehouse, providing decision-oriented analytical datasets for acquisition performance, ecommerce performance, observed user behaviour, and device/geography segmentation while preserving governed KPI definitions and attribution semantics.
+
+## Work Completed
+
+- defined business-mart consumers, analytical questions, decision use cases, grains, and downstream BI requirements
+- documented governed KPI contracts before mart implementation
+- separated session-date, transaction-date, and session-cohort metric semantics
+- defined controls to prevent mixed-date ratios and fact-to-fact fanout
+- implemented `mart_channel_daily` at `session_date × channel` grain
+- implemented `mart_ecommerce_daily` at daily grain
+- implemented separate session-date, transaction-date, and session-cohort calculations within the ecommerce mart
+- implemented `mart_user_behavior` at one row per observed `user_pseudo_id`
+- implemented governed observed-user behaviour and repeat-behaviour flags
+- profiled device and geography attributes before segment-mart design
+- extended the governed session path with `device_category` and `country`
+- implemented `mart_segment_daily` at `session_date × device_category × country` grain
+- normalized unknown country and device values at the business-mart boundary
+- added model and column documentation for the business marts
+- added mart-specific grain, metric, reconciliation, and semantic tests
+- added cross-mart reconciliation regression tests
+- validated observed date coverage across daily marts
+- validated daily KPI consistency across comparable session-attributed marts
+- assessed BigQuery table sizes and upstream scan volumes
+- evaluated table materialization, partitioning, clustering, and incremental strategies
+- documented the evidence-based decision not to introduce premature physical optimization
+
+## Validation Performed
+
+- confirmed `mart_channel_daily` contains 668 rows
+- confirmed `mart_ecommerce_daily` contains 92 rows
+- confirmed `mart_segment_daily` contains 17,052 rows
+- confirmed `mart_user_behavior` contains 270,154 observed users
+- confirmed all four marts reconcile to 360,129 governed sessions
+- confirmed all four marts reconcile to 4,033 purchasing sessions
+- confirmed all four marts reconcile to 4,451 governed transactions
+- confirmed all four marts reconcile to 307,640 purchase revenue
+- confirmed the ecommerce cross-mart comparison uses session-attributed transaction and revenue measures rather than transaction-date activity measures
+- confirmed 92 observed session dates from 2020-11-01 through 2021-01-31
+- confirmed zero missing observed dates across the channel, ecommerce, and segment daily marts
+- confirmed zero date-level session-count mismatches
+- confirmed zero date-level purchasing-session-count mismatches
+- confirmed zero date-level transaction-count mismatches
+- confirmed zero date-level purchase-revenue mismatches
+- confirmed `mart_user_behavior` reconciles user, session, purchasing-session, transaction, and revenue populations to governed facts
+- confirmed segmentation introduces no row multiplication or aggregate KPI drift
+- executed `assert_business_marts_cross_mart_reconciliation`
+- confirmed the cross-mart reconciliation test passed
+- executed `assert_business_marts_consistent_date_coverage`
+- confirmed the date-coverage consistency test passed
+- executed `assert_business_marts_daily_reconciliation`
+- confirmed the daily cross-mart reconciliation test passed
+- executed the final dependency-aware business-mart build
+- confirmed 4 business-mart table models and 96 data tests were executed
+- confirmed all 100 selected dbt nodes completed successfully
+- confirmed zero warnings, errors, and skipped nodes in the final business-mart build
+- profiled `mart_user_behavior` at 29.34 MB
+- profiled `mart_segment_daily` at 1.21 MB
+- profiled `mart_channel_daily` at 0.11 MB
+- profiled `mart_ecommerce_daily` at 0.02 MB
+- profiled `fct_sessions` at 136.99 MB
+- profiled `fct_transactions` at 1.20 MB
+- confirmed `dim_channel` contains 8 rows and 8 distinct channel keys
+- confirmed current data scale does not justify additional partitioning, clustering, or incremental materialization
+
+## Evidence
+
+- `digital_commerce_performance_analytics/docs/business_requirements/business_marts_requirements.md`
+- `digital_commerce_performance_analytics/docs/business_requirements/kpi_contracts.md`
+- `digital_commerce_performance_analytics/docs/technical_design/business_marts_design.md`
+- `digital_commerce_performance_analytics/models/marts/business/mart_channel_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/business/mart_ecommerce_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/business/mart_user_behavior.sql`
+- `digital_commerce_performance_analytics/models/marts/business/mart_segment_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/business/_business__models.yml`
+- `digital_commerce_performance_analytics/tests/assert_business_marts_cross_mart_reconciliation.sql`
+- `digital_commerce_performance_analytics/tests/assert_business_marts_consistent_date_coverage.sql`
+- `digital_commerce_performance_analytics/tests/assert_business_marts_daily_reconciliation.sql`
+- `validation/reports/p6f_validation_summary.md`
+- `validation/reports/p6g_validation_summary.md`
+- `validation/reports/p6h_performance_optimization_summary.md`
+- `docs/project_management/project_tracker.md`
+
+## Decisions Made
+
+- business marts consume governed Core Warehouse entities rather than reconstructing source or intermediate logic
+- KPI definitions are governed centrally through documented KPI contracts
+- session-date, transaction-date, and session-cohort measures remain semantically distinct
+- cross-mart comparisons use measures with compatible attribution semantics
+- `mart_channel_daily` is the governed acquisition-performance mart
+- `mart_ecommerce_daily` is the governed daily ecommerce-performance mart
+- `mart_user_behavior` represents observed user behaviour rather than asserting unsupported customer lifecycle status
+- `mart_segment_daily` uses device category and country as the approved segmentation dimensions
+- platform is not used as a segmentation dimension because the profiled source contains only `WEB`
+- city, region, operating system, and browser are not introduced without a justified analytical consumer
+- governed session date remains the minimum event date of the session rather than raw event date
+- transaction-derived session-cohort measures remain attributed to the originating governed session
+- fact tables are aggregated independently before cross-domain combination where required, preventing fact-to-fact fanout
+- all four business marts remain materialized as tables
+- partitioning is not introduced at the current mart sizes
+- clustering is not introduced without a demonstrated selective query pattern and material performance benefit
+- incremental materialization is not introduced for the current bounded historical dataset
+- physical optimization will be reconsidered when measured data growth, query cost, refresh duration, or BI latency justifies additional complexity
+
+## Known Limitations
+
+- the analytical source remains a static, obfuscated public GA4 ecommerce sample
+- the available history covers approximately three months
+- authenticated `user_id` remains unavailable
+- user-level analysis therefore represents observed `user_pseudo_id` behaviour rather than authenticated customer identity
+- customer lifecycle labels such as true new customer and returning customer are not asserted
+- acquisition analysis is constrained by the source and medium values available in the sample
+- device/geography segmentation is limited to dimensions supported by a clear analytical use case
+- `mart_ecommerce_daily` contains both transaction-date activity measures and explicitly named session-attributed measures, which must not be mixed without respecting their KPI contracts
+- current performance decisions are scale-dependent and should be reassessed if the dataset or workload grows materially
+- automated CI validation has not yet been introduced
+
+## Phase Decision
+
+**Phase 6 — Business Marts is technically accepted.**
+
+The governed business-mart layer is complete at the implementation, semantic-governance, validation, and performance-assessment level.
+
+Four decision-oriented marts have been implemented across channel, ecommerce, observed-user, and device/geography analytical domains. Their shared governed metrics reconcile to 360,129 sessions, 4,033 purchasing sessions, 4,451 transactions, and 307,640 purchase revenue.
+
+Cross-mart validation confirmed consistent overall totals, complete observed-date coverage, and zero daily KPI mismatches across comparable session-attributed marts. The final dependency-aware business-mart build passed all 100 selected nodes with zero warnings, errors, or skipped nodes.
+
+Performance assessment confirmed that current mart and upstream table sizes do not justify additional partitioning, clustering, incremental materialization, or physical redesign. This is an explicit scale- and workload-based engineering decision.
+
+No identified grain, KPI-governance, attribution, reconciliation, data-quality, or performance issue blocks downstream analytical development.
+
+Repository documentation, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 7 begins.
+
+## Next Approved Work Package
+
+P7A — Executive KPI Scope, after Phase 6 closeout review and merge

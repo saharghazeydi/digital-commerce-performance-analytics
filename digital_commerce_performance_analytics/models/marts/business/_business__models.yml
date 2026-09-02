@@ -1,0 +1,526 @@
+version: 2
+
+models:
+  - name: mart_channel_daily
+    description: >
+      Governed daily acquisition-channel performance mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per session date and governed channel and aggregates session,
+      purchasing, transaction, revenue, and item measures from fct_sessions.
+
+    columns:
+      - name: session_date
+        description: Calendar date of the aggregated sessions.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: channel_key
+        description: >
+          Governed acquisition-channel key used to join the mart to
+          dim_channel.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channel')
+                field: channel_key
+
+      - name: channel_group
+        description: Business-facing governed acquisition-channel classification.
+        data_tests:
+          - not_null
+
+      - name: channel_description
+        description: Business description of the governed acquisition channel.
+        data_tests:
+          - not_null
+
+      - name: sort_order
+        description: Stable presentation order for acquisition channels.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: Number of sessions for the date and channel.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: Number of sessions containing at least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: Number of governed transactions attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: Total purchase revenue attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: Total refund value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: Total shipping value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: Total tax value attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: Total purchased item quantity attributed to the sessions.
+        data_tests:
+          - not_null
+
+      - name: unique_items
+        description: >
+          Sum of session-level unique-item measures for the date and channel.
+        data_tests:
+          - not_null
+
+  - name: mart_ecommerce_daily
+    description: >
+      Governed daily ecommerce performance mart for downstream business
+      intelligence and analytical reporting. The model contains one row per
+      calendar date and preserves distinct session-date, transaction-date,
+      and session-cohort metric semantics. Session metrics describe sessions
+      occurring on the date, transaction metrics describe commercial activity
+      occurring on the date, and session-attributed measures describe
+      commercial outcomes attributed to sessions originating on the date.
+
+    columns:
+      - name: date_day
+        description: Governed calendar date and unique grain of the mart.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: year
+        description: Calendar year from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: quarter
+        description: Calendar quarter number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: quarter_name
+        description: Calendar quarter label from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: month_number
+        description: Calendar month number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: month_name
+        description: Calendar month name from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: year_month
+        description: Calendar year-month label from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: week_of_year
+        description: Calendar week number from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: day_of_month
+        description: Calendar day number within the month.
+        data_tests:
+          - not_null
+
+      - name: day_of_week
+        description: Governed numeric day-of-week value.
+        data_tests:
+          - not_null
+
+      - name: day_name
+        description: Calendar day name from the governed date dimension.
+        data_tests:
+          - not_null
+
+      - name: is_weekend
+        description: Indicates whether the calendar date is classified as a weekend.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: >
+          Number of governed sessions occurring on date_day using session-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions occurring on date_day that contain at
+          least one valid purchase.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed session conversion rate calculated as purchasing sessions
+          divided by sessions using the same session-date population.
+
+      - name: transaction_count
+        description: >
+          Number of governed transactions occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed purchase revenue occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: >
+          Governed refund value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: shipping_value
+        description: >
+          Governed shipping value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: tax_value
+        description: >
+          Governed tax value occurring on date_day using transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: >
+          Purchased item quantity represented by transactions occurring on
+          date_day.
+        data_tests:
+          - not_null
+
+      - name: average_order_value
+        description: >
+          Governed transaction-date purchase revenue divided by transaction
+          count. Returns null when transaction count is zero.
+
+      - name: items_per_transaction
+        description: >
+          Governed transaction-date item quantity divided by transaction count.
+          Returns null when transaction count is zero.
+
+      - name: session_attributed_transaction_count
+        description: >
+          Number of governed transactions attributed to sessions originating
+          on date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions originating on
+          date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: revenue_per_session
+        description: >
+          Session-attributed purchase revenue divided by session count using
+          the same session-cohort attribution basis.
+
+      - name: transactions_per_purchasing_session
+        description: >
+          Session-attributed transaction count divided by purchasing session
+          count using the same session-cohort attribution basis.
+
+  - name: mart_user_behavior
+    description: >
+      Governed pseudo-user-level customer behavior mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per observed user_pseudo_id and consolidates governed session
+      behavior, purchasing behavior, transaction activity, commercial
+      contribution, and repeat-activity attributes across the available
+      observation window. user_pseudo_id represents an analytical GA4
+      pseudo-user and must not be interpreted as authenticated customer
+      identity.
+
+    columns:
+      - name: user_pseudo_id
+        description: >
+          Governed GA4 pseudo-user identifier and unique grain of the mart.
+          This field represents observed analytical identity rather than
+          authenticated customer identity.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: session_count
+        description: >
+          Number of governed sessions associated with the pseudo-user across
+          the observation window.
+        data_tests:
+          - not_null
+
+      - name: active_date_count
+        description: >
+          Number of distinct governed session dates on which the pseudo-user
+          is observed.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions associated with the pseudo-user that
+          contain at least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: purchasing_date_count
+        description: >
+          Number of distinct governed session dates on which the pseudo-user
+          generated at least one purchasing session.
+        data_tests:
+          - not_null
+
+      - name: first_observed_session_date
+        description: >
+          Earliest governed session date visible for the pseudo-user within
+          the available observation window. This does not necessarily
+          represent the pseudo-user's true first-ever session.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: last_observed_session_date
+        description: >
+          Latest governed session date visible for the pseudo-user within
+          the available observation window. This does not necessarily
+          represent the pseudo-user's true last-ever interaction.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: first_observed_purchase_date
+        description: >
+          Earliest governed purchasing-session date visible for the
+          pseudo-user. The value remains null for pseudo-users with no
+          governed purchasing session.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: last_observed_purchase_date
+        description: >
+          Latest governed purchasing-session date visible for the
+          pseudo-user. The value remains null for pseudo-users with no
+          governed purchasing session.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: observed_user_span_days
+        description: >
+          Calendar-day difference between the first and last observed
+          governed session dates. This is an observation-window measure and
+          must not be interpreted as true customer tenure.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: >
+          Number of governed valid transactions associated with the
+          pseudo-user across the observation window.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Total governed purchase revenue associated with the pseudo-user
+          across the observation window.
+        data_tests:
+          - not_null
+
+      - name: refund_value
+        description: >
+          Total governed refund value associated with the pseudo-user across
+          the observation window.
+        data_tests:
+          - not_null
+
+      - name: total_item_quantity
+        description: >
+          Total governed purchased-item quantity associated with the
+          pseudo-user across the observation window.
+        data_tests:
+          - not_null
+
+      - name: is_purchasing_user
+        description: >
+          Indicates whether the pseudo-user generated at least one governed
+          purchasing session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_multi_session_user
+        description: >
+          Indicates whether the pseudo-user generated more than one governed
+          session within the observation window.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: returned_on_later_date
+        description: >
+          Indicates whether the pseudo-user was observed on more than one
+          distinct governed session date. This is not a production-grade
+          returning-customer classification.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_repeat_purchasing_session_user
+        description: >
+          Indicates whether the pseudo-user generated purchasing activity
+          across more than one governed session. This must not be inferred
+          from transaction_count greater than one.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: is_repeat_purchasing_date_user
+        description: >
+          Indicates whether the pseudo-user generated purchasing-session
+          activity on more than one distinct governed session date.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+  - name: mart_segment_daily
+    description: >
+      Governed daily device and geography performance mart for downstream
+      business intelligence and analytical reporting. The model contains one
+      row per governed session date, device category, and country. Commercial
+      measures are attributed to the originating session and aggregated from
+      fct_sessions, preserving consistent session-date semantics.
+
+    columns:
+      - name: session_date
+        description: >
+          Governed session date used as the calendar grain of the mart.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: device_category
+        description: >
+          Governed session-level device category. Missing, blank, or '(not set)'
+          values are normalized to 'Unknown' within the business mart.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['desktop', 'mobile', 'tablet', 'Unknown']
+
+      - name: country
+        description: >
+          Governed session-level country. Missing, blank, or '(not set)'
+          values are normalized to 'Unknown' within the business mart.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: >
+          Number of governed sessions for the session date, device category,
+          and country.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions containing at least one valid purchase
+          for the session date, device category, and country.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed session conversion rate calculated as purchasing sessions
+          divided by sessions within the same segment grain.
+
+      - name: transaction_count
+        description: >
+          Number of governed transactions attributed to sessions in the
+          segment. This measure uses session attribution rather than
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions in the segment.
+          This measure uses session attribution rather than transaction-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: revenue_per_session
+        description: >
+          Session-attributed purchase revenue divided by session count within
+          the same segment grain.
