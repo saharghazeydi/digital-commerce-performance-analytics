@@ -6,12 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 6 — Business Marts |
-| Last Completed Phase | Phase 5 — Core Warehouse |
-| Current Work Package | Phase 6 closeout — documentation, repository review, and merge preparation |
-| Next Approved Work Package | P7A — Executive KPI Scope, after Phase 6 closeout review and merge |
-| Repository Baseline | `main` through Phase 5 closeout and PR #14; Phase 6 business-mart implementation, validation, and performance assessment are complete on `feat/business-marts`, with formal closeout in progress |
-| Overall Delivery Progress | Phases 0–5 are complete and merged. Phase 6 requirements, KPI contracts, four governed business marts, cross-mart reconciliation controls, validation evidence, and performance assessment are complete on the feature branch. Phase 6 repository closeout, review, merge, and synchronization remain before progression to Phase 7. |
+| Current Delivery Phase | Phase 7 — Executive KPI Layer |
+| Last Completed Phase | Phase 6 — Business Marts |
+| Current Work Package | P7A — Executive KPI Scope |
+| Next Approved Work Package | P7A — Executive KPI Scope |
+| Repository Baseline | `main` through Phase 6 closeout and PR #15; business marts, cross-mart validation controls, performance assessment, and Phase 6 documentation are merged and synchronized locally |
+| Overall Delivery Progress | Phases 0–6 are complete, validated, reviewed, and merged. Phase 7 is approved to begin with P7A — Executive KPI Scope. |
 | Last Updated | 2026-09-02 |
 
 ## Tracker Purpose
@@ -153,9 +153,9 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 6 — Business Marts
 
-**Phase status:** In Review
+**Phase status:** Complete
 
-**Delivery outcome:** Governed domain-oriented marts have been implemented for acquisition, ecommerce performance, observed user behaviour, and device/geography segmentation. KPI attribution rules, cross-mart reconciliation controls, validation evidence, and evidence-based BigQuery performance decisions have been completed. Formal repository closeout and merge remain.
+**Delivery outcome:** Governed domain-oriented marts for acquisition, ecommerce performance, observed user behaviour, and device/geography segmentation were implemented, validated, documented, reviewed, and merged. KPI attribution rules, cross-mart reconciliation controls, validation evidence, and evidence-based BigQuery performance decisions are complete. Phase 6 was merged through PR #15 and synchronized to local `main`.
 
 | ID | Work Package | Deliverable | Status | Validation Summary |
 |---|---|---|---|---|
@@ -172,13 +172,13 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 7 — Executive KPI Layer
 
-**Phase status:** Not Started
+**Phase status:** In Progress
 
 **Delivery outcome:** Establish a controlled and reconciled KPI layer for leadership-level monitoring and decision support.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P7A | Executive KPI Scope | Approved executive metric set and decision use cases | Not Started |
+| P7A | Executive KPI Scope | Approved executive metric set and decision use cases | In Progress |
 | P7B | KPI Calculation Layer | Governed executive KPI models | Not Started |
 | P7C | Trend Metrics | Rolling, period-over-period, and variance metrics | Not Started |
 | P7D | Driver Metrics | Channel, segment, and performance-contribution metrics | Not Started |
@@ -274,61 +274,32 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P12H | Portfolio Release | Final repository review and portfolio publication | Not Started |
 
 ---
-
 ## Current Focus
 
-### Phase 6 — Business Marts — Closeout
+### Phase 7 — Executive KPI Layer
 
-Phase 6 technical implementation, validation, KPI governance, and performance assessment are complete on `feat/business-marts`.
+Phase 6 — Business Marts is complete, validated, reviewed, merged through PR #15, and synchronized to local `main`.
 
-Implemented business marts:
+The project now enters Phase 7 to establish a controlled executive KPI layer on top of the governed business marts.
 
-- `mart_channel_daily`
-- `mart_ecommerce_daily`
-- `mart_user_behavior`
-- `mart_segment_daily`
+Current work package:
 
-Phase 6 design and governance include:
+**P7A — Executive KPI Scope**
 
-- business-mart consumer and decision requirements
-- governed KPI contracts
-- explicit separation of session-date, transaction-date, and session-cohort semantics
-- channel-performance aggregation
-- ecommerce daily performance
-- observed user behaviour
-- device-category and country segmentation
-- prevention of fact-to-fact fanout
-- cross-mart reconciliation controls
-- evidence-based BigQuery performance assessment
+P7A will define:
 
-Final Phase 6 validation confirms:
+- executive decision use cases
+- approved leadership-level KPI set
+- KPI business meaning and ownership
+- required reporting grains and time perspectives
+- dependencies on governed Phase 6 marts
+- metric responsibilities between dbt and the downstream BI semantic layer
+- exclusions and boundaries to prevent duplicate or conflicting KPI logic
 
-- 4 governed business marts
-- 360,129 governed sessions
-- 4,033 purchasing sessions
-- 4,451 valid transactions
-- 307,640 purchase revenue
-- 270,154 observed users in `mart_user_behavior`
-- 668 rows in `mart_channel_daily`
-- 92 rows in `mart_ecommerce_daily`
-- 17,052 rows in `mart_segment_daily`
-- 92 observed session dates from 2020-11-01 through 2021-01-31
-- zero missing observed dates across daily marts
-- zero daily session KPI mismatches
-- zero daily transaction KPI mismatches
-- zero daily revenue mismatches
-- full business-layer dbt build: 100/100 passed
-- zero warnings, errors, and skipped nodes
-- business marts reconcile to governed fact totals
-- current business-mart sizes do not justify partitioning, clustering, or incremental materialization
-- current upstream scan volumes do not require additional physical redesign
-
-Phase 6 is technically accepted. Project-management closeout, final repository review, Pull Request review, merge, and synchronization with `main` remain before Phase 7 begins.
+No executive KPI calculation models will be implemented until the P7A scope and metric responsibilities are reviewed and approved.
 
 ## Next Approved Work Package
 
 ### P7A — Executive KPI Scope
 
-Define the executive metric set, decision use cases, reporting expectations, and KPI responsibilities for the Executive KPI Layer.
-
-P7A will begin only after Phase 6 closeout is reviewed, merged, and the local `main` branch is synchronized with `origin/main`.
+Define and approve the executive metric set, decision use cases, reporting expectations, KPI ownership, semantic boundaries, and upstream mart dependencies for the Executive KPI Layer.
