@@ -6,13 +6,13 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 5 — Core Warehouse |
-| Last Completed Phase | Phase 4 — Intermediate Models |
-| Current Work Package | P5I — Documentation & Phase 5 Closeout |
-| Next Approved Work Package | P6A — Mart Requirements, after Phase 5 closeout review and merge |
-| Repository Baseline | `main` through Phase 4 closeout and PR #13; Phase 5 implementation and validation are complete on `feat/core-warehouse`, with formal closeout in progress |
-| Overall Delivery Progress | Phases 0–4 are complete and merged. Phase 5 core warehouse architecture, dimensions, facts, governed channel classification, automated tests, referential-integrity controls, and intermediate-to-core reconciliation are complete. Phase 5 documentation and repository closeout remain before progression to Phase 6. |
-| Last Updated | 2026-08-25 |
+| Current Delivery Phase | Phase 6 — Business Marts |
+| Last Completed Phase | Phase 5 — Core Warehouse |
+| Current Work Package | Phase 6 closeout — documentation, repository review, and merge preparation |
+| Next Approved Work Package | P7A — Executive KPI Scope, after Phase 6 closeout review and merge |
+| Repository Baseline | `main` through Phase 5 closeout and PR #14; Phase 6 business-mart implementation, validation, and performance assessment are complete on `feat/business-marts`, with formal closeout in progress |
+| Overall Delivery Progress | Phases 0–5 are complete and merged. Phase 6 requirements, KPI contracts, four governed business marts, cross-mart reconciliation controls, validation evidence, and performance assessment are complete on the feature branch. Phase 6 repository closeout, review, merge, and synchronization remain before progression to Phase 7. |
+| Last Updated | 2026-09-02 |
 
 ## Tracker Purpose
 
@@ -39,6 +39,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 0 — Project Foundation and Governance
 
 **Phase status:** Complete
+
 **Delivery outcome:** Repository governance, target architecture, documentation controls, and the GitHub delivery workflow were established and validated.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
@@ -54,6 +55,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 1 — dbt Development Environment
 
 **Phase status:** Complete
+
 **Delivery outcome:** A reproducible local dbt Core development environment was established and connected securely to BigQuery.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
@@ -75,6 +77,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 2 — Source Feasibility & Profiling
 
 **Phase status:** Complete
+
 **Delivery outcome:** The GA4 ecommerce source has been profiled and assessed as feasible for the planned analytics-engineering implementation, subject to documented transformation controls for session identity, transaction deduplication, invalid transaction identifiers, nested item handling, and bounded source scanning.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
@@ -89,9 +92,12 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P2H | Risks and Assumptions | Source limitations, assumptions, exclusions, and mitigation decisions documented | Complete | Source limitations documented in feasibility assessment; order identity and deduplication decision captured in ADR-002 | PR #6 |
 | P2I | Phase Validation | Source feasibility decision and Phase 3 entry recommendation documented | Complete | GA4 source accepted as feasible; no blocking source limitation identified; progression to Phase 3 approved | PR #6 |
 
+---
+
 ## Phase 3 — dbt Source and Staging Layer
 
 **Phase status:** Complete
+
 **Delivery outcome:** Governed GA4 dbt sources and standardized event- and item-grain staging models were implemented, tested, documented, reconciled, reviewed, and formally closed. The validated staging layer is approved as the source-aligned input to Phase 4 intermediate modeling.
 
 | ID | Work Package | Deliverable | Status | Validation Summary | Pull Request |
@@ -103,6 +109,8 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P3E | Staging Tests | Generic and targeted staging data-quality tests | Complete | 26 generic and singular tests implemented across both staging models; composite grain, date-window, parent-event, item-offset, and required-field controls passed | PR #11 |
 | P3F | Staging Documentation | Model grains, columns, assumptions, and lineage documented | Complete | Both staging models and all published columns documented in `_ga4__models.yml`; source-aligned transaction placeholder behaviour and model grains documented | PR #9 and PR #10 |
 | P3G | Staging Validation | Successful dbt parsing, build, documentation generation, and source-to-staging reconciliation | Complete | `dbt parse --no-partial-parse` passed; `dbt build` completed successfully for 2 models and 26 tests; 28/28 nodes succeeded; `dbt docs generate` produced the catalog successfully | Phase 3 closeout PR |
+
+---
 
 ## Phase 4 — Intermediate Models
 
@@ -125,9 +133,9 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 5 — Core Warehouse
 
-**Phase status:** In Progress
+**Phase status:** Complete
 
-**Delivery outcome:** A governed Core Warehouse has been implemented on top of the validated GA4 intermediate layer, providing reusable calendar and channel dimensions plus session- and transaction-grain facts with explicit grains, stable keys, tested relationships, documented business rules, and zero-difference reconciliation to the intermediate layer.
+**Delivery outcome:** A governed Core Warehouse was implemented, validated, documented, reviewed, and merged on top of the GA4 intermediate layer, providing reusable calendar and channel dimensions plus session- and transaction-grain facts with explicit grains, stable keys, tested relationships, documented business rules, and zero-difference reconciliation to the intermediate layer.
 
 | ID | Work Package | Deliverable | Status | Validation Summary |
 |---|---|---|---|---|
@@ -139,30 +147,33 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P5F | Transaction Fact | `fct_transactions` | Complete | 4,451 unique valid transaction rows preserved; transaction grain, transaction-to-session and transaction-to-date relationships, monetary rules, quantity rules, and session-window integrity validated |
 | P5G | Referential Integrity & Warehouse Tests | Core Warehouse generic and business-rule dbt quality gate | Complete | Final warehouse test execution passed 71/71 tests; dependency-aware Core Warehouse build passed 75/75 selected nodes with zero warnings, errors, or skipped nodes |
 | P5H | Core Reconciliation | Intermediate-to-core aggregate and key-set reconciliation | Complete | Session and transaction row counts, distinct keys, purchasing-session counts, commercial measures, quantities, and key populations reconciled with zero differences and zero missing or unexpected keys |
-| P5I | Documentation & Phase 5 Closeout | Validation evidence, project tracking, checkpoint, final quality gate, review, and merge | In Progress | Phase 5 validation SQL and validation summary prepared; project-management closeout documentation and final repository review are in progress |
+| P5I | Documentation & Phase 5 Closeout | Validation evidence, project tracking, checkpoint, final quality gate, review, and merge | Complete | Validation evidence and closeout documentation completed; PR #14 merged; local repository synchronized before Phase 6 development began |
 
 ---
 
 ## Phase 6 — Business Marts
 
-**Phase status:** Not Started
-**Delivery outcome:** Build domain-oriented marts that answer defined commercial, acquisition, customer, and ecommerce performance questions.
+**Phase status:** In Review
 
-| ID | Work Package | Deliverable | Status |
-|---|---|---|---|
-| P6A | Mart Requirements | Consumers, decisions, and business questions defined | Not Started |
-| P6B | KPI Contracts | KPI definitions, grains, filters, and ownership documented | Not Started |
-| P6C | Acquisition Mart | Channel and acquisition performance model | Not Started |
-| P6D | Commerce Mart | Revenue, transaction, and conversion performance model | Not Started |
-| P6E | Customer Behaviour Mart | Customer and engagement behaviour model | Not Started |
-| P6F | Segment Performance Mart | Device, geography, and other approved segment models | Not Started |
-| P6G | Mart Validation | Business-rule tests and core-to-mart reconciliation | Not Started |
+**Delivery outcome:** Governed domain-oriented marts have been implemented for acquisition, ecommerce performance, observed user behaviour, and device/geography segmentation. KPI attribution rules, cross-mart reconciliation controls, validation evidence, and evidence-based BigQuery performance decisions have been completed. Formal repository closeout and merge remain.
+
+| ID | Work Package | Deliverable | Status | Validation Summary |
+|---|---|---|---|---|
+| P6A | Mart Requirements | Consumers, business decisions, analytical questions, grains, and downstream requirements | Complete | Business-mart consumers, decisions, required analytical grains, dependencies, and BI use cases documented before implementation |
+| P6B | KPI Contracts | Governed KPI definitions, grains, attribution rules, filters, and semantic ownership | Complete | Session-date, transaction-date, and session-cohort metric semantics defined; mixed-date ratios and fact-to-fact fanout explicitly prevented |
+| P6C | Acquisition Mart | `mart_channel_daily` | Complete | Daily channel mart implemented at `session_date × channel` grain; 668 rows produced; session and commercial measures reconcile to governed session facts |
+| P6D | Commerce Mart | `mart_ecommerce_daily` | Complete | Daily ecommerce mart implemented with separate session-date, transaction-date, and session-cohort calculations; 92 dates produced; sessions, transactions, and revenue reconcile to governed facts |
+| P6E | Customer Behaviour Mart | `mart_user_behavior` | Complete | User-grain behaviour mart implemented for 270,154 observed users; session, purchase, transaction, repeat-behaviour, and user-population measures reconciled to governed facts |
+| P6F | Segment Performance Mart | `mart_segment_daily` using device category and country | Complete | Daily segment mart implemented at `session_date × device_category × country` grain; 17,052 rows produced; segment aggregation introduces no row multiplication or KPI drift |
+| P6G | Mart Validation | Cross-mart reconciliation, date-coverage, and daily KPI regression controls | Complete | Full business-layer build passed 100/100 nodes with zero warnings, errors, or skips; four marts reconcile to 360,129 sessions, 4,033 purchasing sessions, 4,451 transactions, and 307,640 purchase revenue; 92 observed dates reconcile with zero daily KPI mismatches |
+| P6H | Performance Optimization | BigQuery storage, materialization, partitioning, clustering, incremental, and upstream scan assessment | Complete | Mart and upstream table sizes measured; current table materializations retained; partitioning, clustering, and incremental logic intentionally not introduced because current scale and workload do not justify additional complexity |
 
 ---
 
 ## Phase 7 — Executive KPI Layer
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Establish a controlled and reconciled KPI layer for leadership-level monitoring and decision support.
 
 | ID | Work Package | Deliverable | Status |
@@ -179,6 +190,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 8 — BI Serving Layer
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Provide stable, performant, business-readable datasets optimized for Power BI consumption.
 
 | ID | Work Package | Deliverable | Status |
@@ -194,6 +206,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 9 — Power BI Semantic Model
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Build a governed Power BI semantic model with clear relationships, measures, formatting, and filter behaviour.
 
 | ID | Work Package | Deliverable | Status |
@@ -210,6 +223,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 10 — Power BI Report
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Deliver an executive-ready, decision-oriented Power BI report with consistent interaction and visual design.
 
 | ID | Work Package | Deliverable | Status |
@@ -227,6 +241,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 11 — Final Validation
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Validate the complete analytical chain from source data through dbt models, BigQuery outputs, semantic measures, and report visuals.
 
 | ID | Work Package | Deliverable | Status |
@@ -244,6 +259,7 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ## Phase 12 — Portfolio Packaging
 
 **Phase status:** Not Started
+
 **Delivery outcome:** Package the technical implementation and business analysis as a reproducible, interview-ready analytics engineering case study.
 
 | ID | Work Package | Deliverable | Status |
@@ -258,60 +274,61 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P12H | Portfolio Release | Final repository review and portfolio publication | Not Started |
 
 ---
+
 ## Current Focus
 
-### Phase 5 — Core Warehouse — Closeout
+### Phase 6 — Business Marts — Closeout
 
-Phase 5 technical implementation and validation are complete. Formal documentation and repository closeout are in progress.
+Phase 6 technical implementation, validation, KPI governance, and performance assessment are complete on `feat/business-marts`.
 
-Implemented Core Warehouse models:
+Implemented business marts:
 
-- `dim_date`
-- `dim_channel`
-- `fct_sessions`
-- `fct_transactions`
+- `mart_channel_daily`
+- `mart_ecommerce_daily`
+- `mart_user_behavior`
+- `mart_segment_daily`
 
-Core Warehouse design decisions include:
+Phase 6 design and governance include:
 
-- explicit and governed analytical grains
-- native BigQuery `DATE` values for calendar relationships
-- preservation of governed Phase 4 session and transaction keys
-- business-facing acquisition channel classification
-- retention of detailed `source`, `medium`, and `campaign` attributes for drill-down analysis
-- session-level channel ownership through `channel_key`
-- no reconstruction of sessionization or transaction-deduplication logic in the warehouse layer
+- business-mart consumer and decision requirements
+- governed KPI contracts
+- explicit separation of session-date, transaction-date, and session-cohort semantics
+- channel-performance aggregation
+- ecommerce daily performance
+- observed user behaviour
+- device-category and country segmentation
+- prevention of fact-to-fact fanout
+- cross-mart reconciliation controls
+- evidence-based BigQuery performance assessment
 
-Final warehouse validation confirms:
+Final Phase 6 validation confirms:
 
-- 92 governed calendar dates
-- 8 governed channel groups
-- 360,129 unique sessions
-- 4,451 unique valid transactions
-- zero duplicate session keys
-- zero duplicate transaction IDs
-- zero invalid session-to-date relationships
-- zero invalid transaction-to-date relationships
-- zero invalid transaction-to-session relationships
-- zero invalid session-to-channel relationships
-- governed session channel mapping validated
-- session business-rule tests passed
-- transaction business-rule tests passed
-- final Core Warehouse dbt test suite: 71/71 passed
-- final dependency-aware Core Warehouse build: 75/75 passed
-- zero warnings, errors, and skipped nodes in the final Core Warehouse quality gate
-- session aggregate reconciliation differences: 0
-- transaction aggregate reconciliation differences: 0
-- sessions missing from Core Warehouse: 0
-- unexpected sessions in Core Warehouse: 0
-- transactions missing from Core Warehouse: 0
-- unexpected transactions in Core Warehouse: 0
+- 4 governed business marts
+- 360,129 governed sessions
+- 4,033 purchasing sessions
+- 4,451 valid transactions
+- 307,640 purchase revenue
+- 270,154 observed users in `mart_user_behavior`
+- 668 rows in `mart_channel_daily`
+- 92 rows in `mart_ecommerce_daily`
+- 17,052 rows in `mart_segment_daily`
+- 92 observed session dates from 2020-11-01 through 2021-01-31
+- zero missing observed dates across daily marts
+- zero daily session KPI mismatches
+- zero daily transaction KPI mismatches
+- zero daily revenue mismatches
+- full business-layer dbt build: 100/100 passed
+- zero warnings, errors, and skipped nodes
+- business marts reconcile to governed fact totals
+- current business-mart sizes do not justify partitioning, clustering, or incremental materialization
+- current upstream scan volumes do not require additional physical redesign
 
-Phase 5 is technically accepted. Documentation closeout, final repository review, Pull Request review, merge, and synchronization with `main` remain before Phase 6 begins.
+Phase 6 is technically accepted. Project-management closeout, final repository review, Pull Request review, merge, and synchronization with `main` remain before Phase 7 begins.
 
 ## Next Approved Work Package
 
-### P6A — Mart Requirements
+### P7A — Executive KPI Scope
 
-Define the consumers, business decisions, analytical questions, required grains, and downstream reporting requirements for the Business Marts layer.
+Define the executive metric set, decision use cases, reporting expectations, and KPI responsibilities for the Executive KPI Layer.
 
-P6A will begin only after Phase 5 closeout is reviewed, merged, and the local `main` branch is synchronized with `origin/main`.
+P7A will begin only after Phase 6 closeout is reviewed, merged, and the local `main` branch is synchronized with `origin/main`.
