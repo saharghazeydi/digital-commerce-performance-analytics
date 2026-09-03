@@ -81,3 +81,138 @@ models:
           Governed revenue per session calculated as session-attributed
           purchase revenue divided by session_count using session-cohort
           semantics.
+
+  - name: executive_kpi_trends_daily
+    description: >
+      Governed daily executive KPI trend model for leadership-level digital
+      commerce performance monitoring. The model preserves the base executive
+      KPI values from executive_kpi_daily and adds rolling seven-day metrics
+      and Week-over-Week comparisons. Revenue trend measures retain
+      transaction-date semantics, while conversion trend measures retain
+      session-date semantics.
+
+    columns:
+      - name: date_day
+        description: >
+          Governed calendar date and unique grain of the executive trend model.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: session_count
+        description: >
+          Governed daily session count inherited from executive_kpi_daily.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Governed daily purchasing-session count inherited from
+          executive_kpi_daily.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: >
+          Governed daily transaction count using transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed daily purchase revenue using transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed daily session conversion rate inherited from the executive
+          KPI base layer.
+
+      - name: average_order_value
+        description: >
+          Governed daily average order value using transaction-date semantics.
+
+      - name: revenue_per_session
+        description: >
+          Governed daily revenue per session using session-cohort semantics.
+
+      - name: session_attributed_transaction_count
+        description: >
+          Governed transaction count attributed to sessions originating on
+          date_day.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions originating on
+          date_day.
+        data_tests:
+          - not_null
+
+      - name: revenue_7d
+        description: >
+          Rolling purchase revenue for the current date and previous six
+          calendar dates using transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: sessions_7d
+        description: >
+          Rolling session count for the current date and previous six calendar
+          dates.
+        data_tests:
+          - not_null
+
+      - name: purchasing_sessions_7d
+        description: >
+          Rolling purchasing-session count for the current date and previous
+          six calendar dates.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate_7d
+        description: >
+          Rolling seven-day conversion rate calculated from rolling purchasing
+          sessions divided by rolling sessions. This metric is not an average
+          of daily conversion rates.
+        data_tests:
+          - not_null
+
+      - name: revenue_previous_7d
+        description: >
+          Rolling seven-day revenue associated with the period ending seven
+          calendar days before date_day. Null when prior history is unavailable.
+
+      - name: conversion_rate_previous_7d
+        description: >
+          Rolling seven-day conversion rate associated with the period ending
+          seven calendar days before date_day. Null when prior history is
+          unavailable.
+
+      - name: revenue_wow_absolute_change
+        description: >
+          Absolute difference between current rolling seven-day revenue and
+          the equivalent rolling seven-day revenue ending seven days earlier.
+
+      - name: revenue_wow_pct_change
+        description: >
+          Relative change between current and prior rolling seven-day revenue.
+          Null when the prior-period revenue is zero or unavailable.
+
+      - name: conversion_wow_absolute_change
+        description: >
+          Absolute difference between current and prior rolling seven-day
+          conversion rates. Downstream BI may format this difference as
+          percentage points.
+
+      - name: conversion_wow_pct_change
+        description: >
+          Relative change between current and prior rolling seven-day
+          conversion rates. Null when the prior-period conversion rate is zero
+          or unavailable.
