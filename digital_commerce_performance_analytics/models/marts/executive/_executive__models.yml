@@ -216,3 +216,112 @@ models:
           Relative change between current and prior rolling seven-day
           conversion rates. Null when the prior-period conversion rate is zero
           or unavailable.
+
+  - name: executive_channel_drivers_daily
+    description: >
+      Governed daily executive channel-driver model for leadership-level
+      performance analysis. The model contains one row per session_date and
+      governed channel and consumes mart_channel_daily without reconstructing
+      upstream attribution logic. Session and conversion metrics use
+      session-date semantics, while transaction and revenue measures are
+      explicitly session-attributed. Contribution metrics compare each channel
+      with the corresponding daily total using the same semantic population.
+
+    columns:
+      - name: session_date
+        description: >
+          Governed session date used for daily channel performance and
+          contribution analysis.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: channel_key
+        description: >
+          Governed channel surrogate key inherited from mart_channel_daily.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channel')
+                field: channel_key
+
+      - name: channel_group
+        description: >
+          Governed business-facing channel grouping inherited from dim_channel.
+        data_tests:
+          - not_null
+
+      - name: channel_description
+        description: >
+          Business description of the governed channel grouping.
+
+      - name: sort_order
+        description: >
+          Governed display order for channel reporting.
+        data_tests:
+          - not_null
+
+      - name: session_count
+        description: >
+          Number of governed sessions originating on session_date for the
+          channel.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions originating on session_date for the
+          channel that contain at least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_transaction_count
+        description: >
+          Number of governed transactions attributed to sessions originating
+          on session_date for the channel. This is a session-attributed measure,
+          not a transaction-date measure.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions originating on
+          session_date for the channel. This is a session-attributed measure,
+          not a transaction-date measure.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Channel conversion rate calculated as purchasing_session_count
+          divided by session_count using the same session-date population.
+
+      - name: session_contribution
+        description: >
+          Share of all governed sessions on session_date attributable to the
+          channel, calculated as channel session_count divided by the daily
+          session total.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_contribution
+        description: >
+          Share of governed purchasing sessions on session_date attributable
+          to the channel. Null when the daily purchasing-session denominator
+          is zero.
+
+      - name: transaction_contribution
+        description: >
+          Share of session-attributed governed transactions on session_date
+          attributable to the channel. Null when the corresponding daily
+          transaction denominator is zero.
+
+      - name: revenue_contribution
+        description: >
+          Share of session-attributed governed purchase revenue on session_date
+          attributable to the channel. Null when the corresponding daily
+          revenue denominator is zero.
