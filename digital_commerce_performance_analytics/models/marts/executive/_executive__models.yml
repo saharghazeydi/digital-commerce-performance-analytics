@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: executive_kpi_daily
+    description: >
+      Governed daily executive KPI base model for leadership-level digital
+      commerce reporting. The model contains one row per governed calendar date
+      and consumes mart_ecommerce_daily without reconstructing upstream session,
+      transaction, or attribution logic. It preserves distinct session-date,
+      transaction-date, and session-cohort metric semantics while exposing the
+      additive components required for correct downstream reaggregation and
+      trend calculations.
+
+    columns:
+      - name: date_day
+        description: >
+          Governed calendar date and unique grain of the executive KPI model.
+          Metric interpretation depends on the documented semantic family.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+
+      - name: session_count
+        description: >
+          Number of governed sessions occurring on date_day using session-date
+          semantics.
+        data_tests:
+          - not_null
+
+      - name: purchasing_session_count
+        description: >
+          Number of governed sessions occurring on date_day that contain at
+          least one governed purchase.
+        data_tests:
+          - not_null
+
+      - name: transaction_count
+        description: >
+          Number of governed transactions occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: purchase_revenue
+        description: >
+          Governed purchase revenue occurring on date_day using
+          transaction-date semantics.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_transaction_count
+        description: >
+          Number of governed transactions attributed to sessions originating
+          on date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: session_attributed_purchase_revenue
+        description: >
+          Governed purchase revenue attributed to sessions originating on
+          date_day using session-cohort semantics.
+        data_tests:
+          - not_null
+
+      - name: conversion_rate
+        description: >
+          Governed session conversion rate calculated as purchasing_session_count
+          divided by session_count using the same session-date population.
+
+      - name: average_order_value
+        description: >
+          Governed average order value calculated as transaction-date
+          purchase_revenue divided by transaction_count.
+
+      - name: revenue_per_session
+        description: >
+          Governed revenue per session calculated as session-attributed
+          purchase revenue divided by session_count using session-cohort
+          semantics.
