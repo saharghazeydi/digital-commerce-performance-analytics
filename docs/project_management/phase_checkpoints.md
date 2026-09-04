@@ -1035,6 +1035,146 @@ No identified grain, KPI-governance, attribution, reconciliation, data-quality, 
 
 Repository documentation, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 7 begins.
 
+---
+
+# Checkpoint 7.1 — Executive KPI Layer Accepted
+
+## Objective
+
+Implement and formally validate a governed Executive KPI Layer on top of the approved business marts, providing leadership-level headline KPIs, short-term trend metrics, channel performance drivers, explicit semantic boundaries, and reconciliation controls suitable for downstream BI consumption.
+
+## Work Completed
+
+- defined the executive KPI scope, leadership decision use cases, approved metric set, ownership boundaries, and downstream responsibilities
+- established explicit separation between session-date, transaction-date, and session-cohort metric semantics
+- documented governed reaggregation rules for additive measures and ratios
+- implemented `executive_kpi_daily` at one row per governed calendar date
+- exposed governed session, purchasing-session, transaction, revenue, and session-attributed additive components
+- implemented governed daily conversion rate, average order value, and revenue per session
+- implemented `executive_kpi_trends_daily` at one row per governed calendar date
+- implemented rolling seven-day purchase revenue
+- implemented rolling seven-day conversion from compatible additive session components
+- implemented prior rolling-period values using the governed seven-calendar-day comparison
+- implemented absolute and percentage Week-over-Week changes for revenue and conversion
+- documented and validated early-history behavior for rolling and prior-period metrics
+- implemented `executive_channel_drivers_daily` at `session_date × channel_key` grain
+- implemented channel conversion rate
+- implemented session, purchasing-session, transaction, and revenue contribution metrics
+- preserved session-attributed commercial semantics within the channel-driver branch
+- prevented transaction-date headline commercial measures from being used as denominators for session-attributed channel contributions
+- added model and column documentation for the executive models
+- added model-specific reconciliation and semantic tests
+- added channel-driver grain and contribution controls
+- added an end-to-end executive reconciliation test across the base, trend, and driver branches
+- documented final KPI formulas, semantic families, aggregation rules, limitations, and downstream BI responsibilities
+- completed the final dependency-aware Executive KPI Layer dbt quality gate
+
+## Validation Performed
+
+- confirmed `executive_kpi_daily` contains 92 governed daily rows
+- confirmed the executive base contains 360,129 sessions
+- confirmed the executive base contains 4,033 purchasing sessions
+- confirmed the executive base contains 4,451 transaction-date transactions
+- confirmed the executive base contains 307,640 transaction-date purchase revenue
+- confirmed session-attributed transaction count reconciles to 4,451
+- confirmed session-attributed purchase revenue reconciles to 307,640
+- confirmed `executive_kpi_daily` reconciles day by day to `mart_ecommerce_daily`
+- confirmed conversion rate is recalculated as purchasing sessions divided by sessions
+- confirmed average order value is recalculated as purchase revenue divided by transaction count
+- confirmed revenue per session uses session-attributed purchase revenue divided by session count
+- confirmed `executive_kpi_trends_daily` contains 92 governed daily rows
+- confirmed rolling revenue uses the current date plus the previous six governed calendar dates
+- confirmed rolling conversion is calculated from rolling purchasing-session and session counts rather than averaging daily conversion rates
+- confirmed Week-over-Week revenue compares the current rolling seven-day revenue with the rolling seven-day revenue ending seven calendar dates earlier
+- confirmed Week-over-Week conversion uses the corresponding governed rolling-conversion comparison
+- confirmed early rolling windows use available governed history without fabricating pre-observation dates
+- confirmed prior-period and percentage-change metrics remain null when the required prior observation or denominator is unavailable
+- confirmed `executive_channel_drivers_daily` contains 668 rows
+- confirmed 668 distinct `session_date × channel_key` grain combinations
+- confirmed channel-driver totals reconcile to 360,129 sessions
+- confirmed channel-driver totals reconcile to 4,033 purchasing sessions
+- confirmed channel-driver session-attributed transactions reconcile to 4,451
+- confirmed channel-driver session-attributed purchase revenue reconciles to 307,640
+- confirmed daily contribution metrics reconcile to the compatible session-attributed channel population
+- confirmed contribution metrics sum to one on eligible dates with non-zero governed denominators
+- confirmed the channel-driver model reconciles to `mart_channel_daily`
+- confirmed the end-to-end executive reconciliation test passed
+- confirmed the end-to-end control compares only semantically compatible populations across executive branches
+- executed the final dependency-aware Executive KPI Layer build
+- confirmed 11 table models, 2 view models, and 242 data tests were executed
+- confirmed all 255 selected dbt nodes completed successfully
+- confirmed zero warnings, errors, and skipped nodes in the final Executive KPI Layer build
+
+## Evidence
+
+- `digital_commerce_performance_analytics/docs/business_requirements/executive_kpi_scope.md`
+- `digital_commerce_performance_analytics/docs/business_requirements/executive_kpi_reference.md`
+- `digital_commerce_performance_analytics/docs/business_requirements/kpi_contracts.md`
+- `digital_commerce_performance_analytics/docs/technical_design/executive_kpi_design.md`
+- `digital_commerce_performance_analytics/models/marts/executive/executive_kpi_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/executive/executive_kpi_trends_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/executive/executive_channel_drivers_daily.sql`
+- `digital_commerce_performance_analytics/models/marts/executive/_executive__models.yml`
+- `digital_commerce_performance_analytics/tests/assert_executive_kpi_daily_reconciles_ecommerce.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_kpi_trends_daily_reconciles.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_kpi_trends_daily_valid_history_semantics.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_channel_drivers_daily_contributions_sum_to_one.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_channel_drivers_daily_unique_grain.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_channel_drivers_daily_reconciles_channel_mart.sql`
+- `digital_commerce_performance_analytics/tests/assert_executive_layer_end_to_end_reconciles.sql`
+- `docs/project_management/project_tracker.md`
+
+## Decisions Made
+
+- the Executive KPI Layer is the governed analytical interface for leadership-level KPI reporting
+- `executive_kpi_daily` is the governed daily headline KPI base
+- headline transaction count, purchase revenue, and average order value retain transaction-date semantics
+- session count, purchasing-session count, and conversion rate retain session-date semantics
+- revenue per session retains session-cohort semantics and uses session-attributed purchase revenue
+- additive KPI components are retained so downstream periods can be reaggregated correctly
+- period-level ratios must be recalculated from compatible additive numerators and denominators rather than averaged from daily ratios
+- the governed short-term trend window is the current date plus the previous six calendar dates
+- rolling conversion must be calculated from rolling purchasing-session and session counts rather than from averaged daily conversion rates
+- Week-over-Week executive trend metrics compare rolling seven-day windows separated by seven calendar dates
+- early-history rolling calculations may use available governed dates, while unavailable prior-period observations remain null
+- `executive_channel_drivers_daily` is the governed channel-driver output
+- channel-driver commercial measures retain session-attributed semantics inherited from `mart_channel_daily`
+- channel transaction and revenue contribution denominators must use the same session-attributed population as their numerators
+- transaction-date executive commercial measures must not be used as denominators for session-attributed channel contributions
+- daily contribution percentages are non-additive across reporting periods and must be recalculated from additive components
+- BI may aggregate governed additive measures and recalculate documented ratios but must not redefine KPI, attribution, sessionization, or channel-classification logic
+- unsupported metrics require a new analytics-engineering design decision rather than ad hoc BI calculations
+
+## Known Limitations
+
+- the analytical source remains a static, obfuscated public GA4 ecommerce sample
+- the available history covers approximately three months
+- authenticated `user_id` remains unavailable
+- observed pseudo-user behavior must not be interpreted as authenticated customer identity
+- net revenue is not governed by the current Executive KPI Layer
+- ROAS, customer acquisition cost, profit, gross margin, customer lifetime value, and customer retention are outside the current governed scope
+- multi-touch and unsupported paid-media attribution are outside the current governed scope
+- acquisition and channel analysis remain constrained by source and medium values available in the sample
+- early rolling windows contain fewer than seven observed dates when complete prior history is unavailable
+- a shared calendar date across executive models does not imply that transaction-date and session-attributed commercial populations are interchangeable
+- automated CI validation has not yet been introduced
+
+## Phase Decision
+
+**Phase 7 — Executive KPI Layer is technically accepted.**
+
+The governed Executive KPI Layer is complete at the scope, implementation, semantic-governance, trend-analysis, driver-analysis, reconciliation, documentation, and final-validation levels.
+
+The executive base preserves the governed distinction between session-date, transaction-date, and session-cohort metrics. The trend layer provides controlled seven-day rolling and Week-over-Week calculations without averaging governed daily ratios. The channel-driver layer preserves session-attributed commercial semantics and uses compatible contribution populations.
+
+Model-specific and end-to-end reconciliation controls confirm that executive outputs remain aligned with the governed Phase 6 business marts without introducing grain drift, KPI redefinition, incompatible date semantics, or attribution mixing.
+
+The final dependency-aware Executive KPI Layer build completed successfully with all **255 of 255 selected dbt nodes passing**, with zero warnings, errors, or skipped nodes.
+
+No identified grain, KPI-governance, time-semantic, attribution, trend-calculation, reconciliation, documentation, or data-quality issue blocks progression to the BI Serving Layer.
+
+Repository closeout documentation, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 8 implementation begins.
+
 ## Next Approved Work Package
 
-P7A — Executive KPI Scope, after Phase 6 closeout review and merge
+P8A — Serving Requirements, after Phase 7 closeout review and merge

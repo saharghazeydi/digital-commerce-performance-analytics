@@ -6,13 +6,13 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 7 — Executive KPI Layer |
-| Last Completed Phase | Phase 6 — Business Marts |
-| Current Work Package | P7A — Executive KPI Scope |
-| Next Approved Work Package | P7A — Executive KPI Scope |
-| Repository Baseline | `main` through Phase 6 closeout and PR #15; business marts, cross-mart validation controls, performance assessment, and Phase 6 documentation are merged and synchronized locally |
-| Overall Delivery Progress | Phases 0–6 are complete, validated, reviewed, and merged. Phase 7 is approved to begin with P7A — Executive KPI Scope. |
-| Last Updated | 2026-09-02 |
+| Current Delivery Phase | Phase 8 — BI Serving Layer |
+| Last Completed Phase | Phase 7 — Executive KPI Layer |
+| Current Work Package | P8A — Serving Requirements |
+| Next Approved Work Package | P8A — Serving Requirements |
+| Repository Baseline | `feat/executive-kpi-layer` contains the completed Phase 7 implementation and validation; target post-merge baseline is `main` through Phase 7 closeout |
+| Overall Delivery Progress | Phases 0–7 are complete and validated. Phase 7 is ready for final review and merge, after which Phase 8 begins with P8A — Serving Requirements. |
+| Last Updated | 2026-09-04 |
 
 ## Tracker Purpose
 
@@ -172,20 +172,18 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 7 — Executive KPI Layer
 
-**Phase status:** In Progress
+**Phase status:** Complete
 
-**Delivery outcome:** Establish a controlled and reconciled KPI layer for leadership-level monitoring and decision support.
+**Delivery outcome:** A controlled executive KPI layer was implemented on top of the governed business marts, providing leadership-level daily KPIs, rolling and week-over-week trends, channel contribution drivers, explicit semantic boundaries, and independent reconciliation controls. The executive layer preserves session-date, transaction-date, and session-cohort semantics and is validated for downstream BI consumption.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P7A | Executive KPI Scope | Approved executive metric set and decision use cases | In Progress |
-| P7B | KPI Calculation Layer | Governed executive KPI models | Not Started |
-| P7C | Trend Metrics | Rolling, period-over-period, and variance metrics | Not Started |
-| P7D | Driver Metrics | Channel, segment, and performance-contribution metrics | Not Started |
-| P7E | KPI Reconciliation | Independent validation of all executive metrics | Not Started |
-| P7F | KPI Documentation | Definitions, formulas, filters, and known limitations | Not Started |
-
----
+| P7A | Executive KPI Scope | Approved executive metric set, decision use cases, ownership, semantic boundaries, and downstream responsibilities | Complete |
+| P7B | KPI Calculation Layer | `executive_kpi_daily` governed executive KPI base model | Complete |
+| P7C | Trend Metrics | `executive_kpi_trends_daily` with 7-day rolling revenue and conversion plus week-over-week change metrics | Complete |
+| P7D | Driver Metrics | `executive_channel_drivers_daily` with channel conversion and contribution metrics | Complete |
+| P7E | KPI Reconciliation | Independent base, trend, driver, and end-to-end executive-layer reconciliation controls | Complete |
+| P7F | KPI Documentation | Executive KPI scope, formulas, semantic rules, aggregation behaviour, driver definitions, limitations, and downstream BI contract | Complete |
 
 ## Phase 8 — BI Serving Layer
 
@@ -276,30 +274,27 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 7 — Executive KPI Layer
+### Phase 8 — BI Serving Layer
 
-Phase 6 — Business Marts is complete, validated, reviewed, merged through PR #15, and synchronized to local `main`.
+Phase 7 — Executive KPI Layer is complete and has passed its final dependency-aware dbt quality gate.
 
-The project now enters Phase 7 to establish a controlled executive KPI layer on top of the governed business marts.
+The executive layer now provides:
 
-Current work package:
+- governed daily executive KPIs
+- explicit session-date, transaction-date, and session-cohort metric semantics
+- 7-day rolling revenue and conversion metrics
+- week-over-week revenue and conversion changes
+- channel-level conversion and contribution drivers
+- independent reconciliation between business marts and executive outputs
+- end-to-end reconciliation across executive base, trend, and driver branches
+- documented aggregation and downstream BI consumption rules
 
-**P7A — Executive KPI Scope**
+The final Phase 7 dependency-aware build completed successfully with **255/255 selected nodes passing and zero warnings, errors, or skipped nodes**.
 
-P7A will define:
-
-- executive decision use cases
-- approved leadership-level KPI set
-- KPI business meaning and ownership
-- required reporting grains and time perspectives
-- dependencies on governed Phase 6 marts
-- metric responsibilities between dbt and the downstream BI semantic layer
-- exclusions and boundaries to prevent duplicate or conflicting KPI logic
-
-No executive KPI calculation models will be implemented until the P7A scope and metric responsibilities are reviewed and approved.
+Phase 8 will establish the BI Serving Layer between the governed analytical models and the Power BI semantic model.
 
 ## Next Approved Work Package
 
-### P7A — Executive KPI Scope
+### P8A — Serving Requirements
 
-Define and approve the executive metric set, decision use cases, reporting expectations, KPI ownership, semantic boundaries, and upstream mart dependencies for the Executive KPI Layer.
+Define and approve the Power BI serving requirements, including consumer needs, required grains, dataset boundaries, refresh expectations, field exposure, model responsibilities, and performance requirements before implementing serving models.
