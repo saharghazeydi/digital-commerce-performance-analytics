@@ -1178,3 +1178,248 @@ Repository closeout documentation, Pull Request review, merge, and synchronizati
 ## Next Approved Work Package
 
 P8A — Serving Requirements, after Phase 7 closeout review and merge
+---
+
+# Checkpoint 8.1 — BI Serving Layer Accepted
+
+## Objective
+
+Design, implement, and formally validate a governed BI Serving Layer that exposes stable, business-readable, semantically controlled, and performance-appropriate datasets for Power BI consumption without transferring upstream transformation or KPI-governance responsibilities into the BI layer.
+
+## Work Completed
+
+- defined Power BI consumption requirements, analytical subject areas, required grains, semantic families, refresh expectations, field exposure, and ownership boundaries
+
+- documented the BI serving architecture and model contracts before implementation
+
+- established five approved analytical serving datasets rather than a single wide BI table
+
+- retained `dim_date` and `dim_channel` as governed reusable dimensions without creating redundant BI wrapper dimensions
+
+- implemented `bi_executive_daily` for governed executive headline and trend consumption
+
+- implemented `bi_channel_daily` for session-date channel performance and session-attributed commercial drivers
+
+- implemented `bi_commerce_daily` for transaction-date commerce analysis
+
+- implemented `bi_user_behavior` for observed pseudo-user behaviour analysis
+
+- implemented `bi_segment_daily` for session-date device and geography segmentation with explicitly named session-attributed commercial measures
+
+- documented model grains, dependencies, column contracts, semantic populations, and downstream usage rules
+
+- established business-facing naming, visibility, aggregation, formatting, and field-usage conventions for Power BI
+
+- preserved the distinction between session-date, transaction-date, and session-attributed commercial populations at the BI interface
+
+- documented that observed `user_pseudo_id` behaviour must not be represented as authenticated customer identity
+
+- defined governed rules for downstream ratio calculation from compatible additive components
+
+- defined restrictions preventing Power BI from reconstructing sessionization, attribution, channel classification, transaction deduplication, or unsupported KPI logic
+
+- profiled serving-model row counts and BigQuery scan volumes
+
+- evaluated Import versus DirectQuery consumption
+
+- evaluated full versus incremental refresh requirements
+
+- evaluated serving-model materialization, partitioning, clustering, aggregate tables, and other physical optimization options
+
+- documented an evidence-based refresh and performance strategy
+
+- implemented serving-layer schema and relationship tests
+
+- executed a serving-only dbt build
+
+- executed the final dependency-aware BI Serving Layer dbt quality gate
+
+- completed explicit contract-aware reconciliation between all five serving models and their governed upstream sources
+
+- documented Phase 8 validation evidence
+
+- documented the formal handoff from the dbt serving layer into the Power BI semantic-model phase
+
+## Validation Performed
+
+- confirmed `bi_executive_daily` contains 92 rows
+
+- confirmed `bi_channel_daily` contains 668 rows
+
+- confirmed `bi_commerce_daily` contains 92 rows
+
+- confirmed `bi_user_behavior` contains 270,154 rows
+
+- confirmed `bi_segment_daily` contains 17,052 rows
+
+- confirmed `bi_executive_daily` reconciles to its governed executive upstream contract with 92 upstream rows, 92 serving rows, zero missing rows, and zero unexpected rows
+
+- confirmed `bi_channel_daily` reconciles to its governed executive channel-driver contract with 668 upstream rows, 668 serving rows, zero missing rows, and zero unexpected rows
+
+- confirmed `bi_commerce_daily` reconciles to its governed ecommerce contract with 92 upstream rows, 92 serving rows, zero missing rows, and zero unexpected rows
+
+- confirmed `bi_user_behavior` preserves the governed 270,154-row observed pseudo-user population as a direct serving projection with zero missing rows
+
+- confirmed `bi_segment_daily` reconciles to its governed segment contract with 17,052 upstream rows, 17,052 serving rows, zero missing rows, and zero unexpected rows
+
+- confirmed the executive serving dataset preserves governed headline and trend semantics rather than reconstructing executive KPI logic
+
+- confirmed channel commercial measures remain explicitly session-attributed
+
+- confirmed commerce serving measures retain transaction-date semantics
+
+- confirmed segment commercial measures remain explicitly session-attributed
+
+- confirmed observed pseudo-user behaviour is not relabeled as authenticated customer behaviour
+
+- confirmed serving datasets do not introduce fact-to-fact relationships or combine incompatible analytical populations into a single wide table
+
+- confirmed the serving-only dbt build completed successfully with 5 serving views and 60 data tests
+
+- confirmed all 65 selected serving-only dbt nodes passed with zero warnings, errors, or skipped nodes
+
+- executed `dbt build --select +path:models/marts/serving`
+
+- confirmed 13 table models, 7 view models, and 338 data tests were executed in the dependency-aware build
+
+- confirmed all 358 selected dbt nodes completed successfully
+
+- confirmed zero warnings, errors, and skipped nodes in the final dependency-aware BI Serving Layer build
+
+- confirmed current serving-model scale supports Power BI Import mode
+
+- confirmed current data volume and bounded historical scope do not justify incremental refresh
+
+- confirmed current workload does not justify DirectQuery
+
+- confirmed current serving scale does not justify additional dbt incremental models, serving-layer physical tables, materialized views, aggregate tables, partitioning, or clustering
+
+- confirmed Power Query is expected to remain lightweight, with governed transformation logic retained upstream in dbt
+
+- confirmed repository whitespace validation passed through `git diff --check`
+
+## Evidence
+
+- `digital_commerce_performance_analytics/docs/business_requirements/bi_serving_requirements.md`
+
+- `digital_commerce_performance_analytics/docs/technical_design/bi_serving_design.md`
+
+- `digital_commerce_performance_analytics/docs/business_requirements/bi_interface_contract.md`
+
+- `digital_commerce_performance_analytics/docs/technical_design/bi_refresh_performance_strategy.md`
+
+- `digital_commerce_performance_analytics/models/marts/serving/bi_executive_daily.sql`
+
+- `digital_commerce_performance_analytics/models/marts/serving/bi_channel_daily.sql`
+
+- `digital_commerce_performance_analytics/models/marts/serving/bi_commerce_daily.sql`
+
+- `digital_commerce_performance_analytics/models/marts/serving/bi_user_behavior.sql`
+
+- `digital_commerce_performance_analytics/models/marts/serving/bi_segment_daily.sql`
+
+- `digital_commerce_performance_analytics/models/marts/serving/_serving__models.yml`
+
+- `validation/reports/phase8_validation_summary.md`
+
+- `power_bi/documentation/bi_serving_handoff.md`
+
+- `docs/project_management/project_tracker.md`
+
+## Decisions Made
+
+- the BI Serving Layer is the governed warehouse-to-Power-BI data-product boundary
+
+- Power BI consumes approved serving datasets and governed dimensions rather than reconstructing analytical logic from lower-level facts or marts
+
+- five subject-oriented analytical serving datasets are retained rather than combining incompatible grains and semantic populations into a single wide BI table
+
+- `dim_date` and `dim_channel` remain the governed reusable dimensions and do not require redundant BI-specific wrapper dimensions
+
+- `bi_executive_daily` is the approved executive headline and trend serving dataset
+
+- `bi_channel_daily` is the approved channel-performance serving dataset and retains session-attributed commercial semantics
+
+- `bi_commerce_daily` is the approved transaction-date commerce serving dataset
+
+- `bi_user_behavior` represents observed pseudo-user behaviour rather than authenticated customer identity
+
+- `bi_segment_daily` is the approved device/geography segment serving dataset and retains session-attributed commercial semantics
+
+- session-date, transaction-date, and session-attributed populations remain explicitly distinct across the BI serving interface
+
+- dbt remains responsible for governed transformation logic, sessionization, transaction deduplication, attribution, channel classification, KPI definitions, and analytical model contracts
+
+- Power BI may aggregate governed additive measures and recalculate documented ratios from compatible additive components under filter context
+
+- Power BI must not average governed daily ratios to construct period-level ratios
+
+- Power BI must not redefine governed KPIs or combine semantically incompatible populations
+
+- unsupported metrics require an upstream analytics-engineering design decision rather than ad hoc DAX implementation
+
+- Power BI will initially consume the serving layer using Import mode
+
+- standard full refresh is appropriate for the current bounded dataset and serving-model scale
+
+- incremental refresh is intentionally not introduced at the current scale
+
+- DirectQuery is intentionally not introduced because current requirements do not justify its additional complexity and performance trade-offs
+
+- serving models remain BigQuery views because current scale and workload do not justify additional physical materialization
+
+- additional partitioning, clustering, aggregate tables, and serving-layer incremental models are deferred until measured growth or performance evidence justifies them
+
+- Power Query should remain lightweight and must not become a second transformation layer
+
+- Phase 9 owns Power BI connection, semantic relationships, date-model configuration, DAX measures, model usability, and semantic validation
+
+- Phase 10 owns report-page design, visuals, interactions, and dashboard presentation
+
+## Known Limitations
+
+- the analytical source remains a static, obfuscated public GA4 ecommerce sample
+
+- the available history covers approximately three months
+
+- authenticated `user_id` remains unavailable
+
+- observed pseudo-user behaviour must not be interpreted as authenticated customer identity
+
+- net revenue is not governed by the current analytical contracts
+
+- ROAS, customer acquisition cost, CPA, profit, gross margin, customer lifetime value, churn, and customer retention remain outside the current governed scope
+
+- unsupported multi-touch and paid-media attribution remain outside the current governed scope
+
+- transaction-date and session-attributed commercial measures remain different analytical populations even when exposed through a shared reporting date
+
+- daily ratio, trend, and contribution fields are not universally additive across reporting periods
+
+- current refresh and performance decisions are scale- and workload-dependent and must be reassessed if data volume, refresh duration, query cost, concurrency, or BI latency changes materially
+
+- automated CI validation has not yet been introduced
+
+- Power BI semantic-model relationships, DAX measures, formatting, filter behaviour, and report interactions have not yet been implemented and remain Phase 9 and Phase 10 responsibilities
+
+## Phase Decision
+
+**Phase 8 — BI Serving Layer is technically accepted.**
+
+The governed BI Serving Layer is complete at the requirements, architecture, implementation, interface-governance, performance-strategy, reconciliation, documentation, and BI-handoff levels.
+
+Five subject-oriented serving datasets have been implemented and validated for executive, channel, transaction-date commerce, observed pseudo-user behaviour, and device/geography segment analysis while preserving their governed analytical grains and semantic populations.
+
+The serving-only quality gate passed all 65 selected dbt nodes. The final dependency-aware BI Serving Layer build passed all **358 of 358 selected dbt nodes**, with zero warnings, errors, or skipped nodes.
+
+Explicit contract-aware reconciliation confirmed that all five serving datasets preserve their governed upstream populations with zero missing rows and zero unexpected rows where key-set comparison applies. No serving-layer grain drift, KPI redefinition, semantic mixing, or unsupported transformation logic was identified.
+
+The documented BI handoff establishes a controlled boundary between dbt-owned analytical logic and Power BI-owned semantic-model responsibilities. Current scale and workload evidence supports Import mode, standard full refresh, BigQuery view materialization, and the decision not to introduce premature incremental or physical optimization.
+
+No identified serving-layer grain, semantic-governance, reconciliation, data-quality, refresh, performance, documentation, or handoff issue blocks progression to the Power BI Semantic Model.
+
+Repository closeout documentation, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 9 implementation begins.
+
+## Next Approved Work Package
+
+P9A — BigQuery Connection, after Phase 8 closeout review and merge
