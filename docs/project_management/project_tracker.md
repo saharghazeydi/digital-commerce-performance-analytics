@@ -6,12 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 8 — BI Serving Layer |
-| Last Completed Phase | Phase 7 — Executive KPI Layer |
-| Current Work Package | P8A — Serving Requirements |
-| Next Approved Work Package | P8A — Serving Requirements |
-| Repository Baseline | `feat/executive-kpi-layer` contains the completed Phase 7 implementation and validation; target post-merge baseline is `main` through Phase 7 closeout |
-| Overall Delivery Progress | Phases 0–7 are complete and validated. Phase 7 is ready for final review and merge, after which Phase 8 begins with P8A — Serving Requirements. |
+| Current Delivery Phase | Phase 9 — Power BI Semantic Model |
+| Last Completed Phase | Phase 8 — BI Serving Layer |
+| Current Work Package | P9A — BigQuery Connection |
+| Next Approved Work Package | P9A — BigQuery Connection |
+| Repository Baseline | `feat/bi-serving-layer` contains the completed Phase 8 implementation, validation, and BI handoff; target post-merge baseline is `main` through Phase 8 closeout |
+| Overall Delivery Progress | Phases 0–8 are complete and validated. Phase 8 is ready for final review and merge, after which Phase 9 begins with P9A — BigQuery Connection. |
 | Last Updated | 2026-09-04 |
 
 ## Tracker Purpose
@@ -187,29 +187,31 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 8 — BI Serving Layer
 
-**Phase status:** Not Started
+**Phase status:** Complete
 
-**Delivery outcome:** Provide stable, performant, business-readable datasets optimized for Power BI consumption.
+**Delivery outcome:** A validated Power BI-facing serving layer was designed and implemented on top of the governed business and executive models, with explicit model contracts, business-readable BI interfaces, evidence-based refresh and performance decisions, full serving-to-upstream reconciliation, and a documented handoff into the Power BI semantic-model phase.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P8A | Serving Requirements | BI grains, refresh requirements, and consumer needs | Not Started |
-| P8B | Serving Models | Power BI-ready fact, summary, and filter models | Not Started |
-| P8C | Business Naming | Business-readable fields and consistent naming | Not Started |
-| P8D | Performance Optimization | Partitioning, clustering, size, and query-performance review | Not Started |
-| P8E | Serving Validation | Mart-to-serving reconciliation and schema review | Not Started |
+| P8A | BI Consumption & Serving Requirements | Power BI consumer needs, subject areas, analytical grains, semantic families, refresh expectations, field exposure, ownership boundaries, and serving requirements documented | Complete |
+| P8B | Serving Architecture & Model Contracts | Approved BI serving architecture, source dependencies, grains, relationships, field contracts, and dbt-versus-Power-BI responsibilities | Complete |
+| P8C | BI Serving Model Implementation | `bi_executive_daily`, `bi_channel_daily`, `bi_commerce_daily`, `bi_user_behavior`, `bi_segment_daily`, and serving schema tests implemented | Complete |
+| P8D | Business Naming & BI Interface | Business-facing naming, visibility, aggregation, formatting, semantic terminology, and downstream BI interface rules documented | Complete |
+| P8E | Refresh & Performance Strategy | Import-mode, refresh, materialization, BigQuery scan, and optimization decisions validated against measured serving-layer scale | Complete |
+| P8F | Serving Validation & Reconciliation | Dependency-aware dbt quality gate and explicit contract-aware reconciliation between all five serving models and governed upstream models and governed upstream models | Complete |
+| P8G | BI Handoff & Phase Closeout | Power BI handoff contract, final validation evidence, project tracking, checkpoint closeout, and Phase 9 entry readiness | Complete |
 
 ---
 
 ## Phase 9 — Power BI Semantic Model
 
-**Phase status:** Not Started
+**Phase status:** Planned
 
 **Delivery outcome:** Build a governed Power BI semantic model with clear relationships, measures, formatting, and filter behaviour.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P9A | BigQuery Connection | Controlled Power BI connection to serving datasets | Not Started |
+| P9A | BigQuery Connection | Controlled Power BI connection to serving datasets | Planned |
 | P9B | Semantic Architecture | Star-schema relationships and filter direction | Not Started |
 | P9C | Date Model | Dedicated and validated date dimension | Not Started |
 | P9D | DAX Measures | Business measures and calculation groups where appropriate | Not Started |
@@ -274,27 +276,36 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 8 — BI Serving Layer
+### Phase 9 — Power BI Semantic Model
 
-Phase 7 — Executive KPI Layer is complete and has passed its final dependency-aware dbt quality gate.
+Phase 8 — BI Serving Layer is complete and has passed its dependency-aware dbt quality gate and serving-to-upstream reconciliation.
 
-The executive layer now provides:
+The validated BI serving layer now provides:
 
-- governed daily executive KPIs
-- explicit session-date, transaction-date, and session-cohort metric semantics
-- 7-day rolling revenue and conversion metrics
-- week-over-week revenue and conversion changes
-- channel-level conversion and contribution drivers
-- independent reconciliation between business marts and executive outputs
-- end-to-end reconciliation across executive base, trend, and driver branches
-- documented aggregation and downstream BI consumption rules
+- five approved Power BI-facing analytical datasets: `bi_executive_daily`, `bi_channel_daily`, `bi_commerce_daily`, `bi_user_behavior`, and `bi_segment_daily`
 
-The final Phase 7 dependency-aware build completed successfully with **255/255 selected nodes passing and zero warnings, errors, or skipped nodes**.
+- governed date and channel dimensions for downstream semantic modeling
 
-Phase 8 will establish the BI Serving Layer between the governed analytical models and the Power BI semantic model.
+- explicit session-date, transaction-date, and session-attributed semantic boundaries
+
+- business-readable BI interface and field-usage rules
+
+- evidence-based Import-mode and refresh strategy
+
+- documented restrictions preventing downstream KPI redefinition or semantic mixing
+
+- complete contract-aware reconciliation between all five serving models and their governed upstream sources
+
+- a formal BI handoff defining the boundary between dbt serving logic and Power BI semantic-model responsibilities
+
+The final Phase 8 dependency-aware build completed successfully with **358/358 selected nodes passing and zero warnings, errors, or skipped nodes**.
+
+All five serving datasets reconciled to their governed upstream contracts with zero missing and zero unexpected rows.
+
+Phase 9 will build the governed Power BI semantic model on top of the approved Phase 8 serving interfaces.
 
 ## Next Approved Work Package
 
-### P8A — Serving Requirements
+### P9A — BigQuery Connection
 
-Define and approve the Power BI serving requirements, including consumer needs, required grains, dataset boundaries, refresh expectations, field exposure, model responsibilities, and performance requirements before implementing serving models.
+Connect Power BI to the approved BigQuery serving datasets using the documented Import-mode strategy, validate source visibility and data types, and establish the controlled semantic-model input boundary before configuring relationships or DAX measures.
