@@ -6,13 +6,13 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 9 — Power BI Semantic Model |
-| Last Completed Phase | Phase 8 — BI Serving Layer |
-| Current Work Package | P9A — BigQuery Connection |
-| Next Approved Work Package | P9A — BigQuery Connection |
-| Repository Baseline | `feat/bi-serving-layer` contains the completed Phase 8 implementation, validation, and BI handoff; target post-merge baseline is `main` through Phase 8 closeout |
-| Overall Delivery Progress | Phases 0–8 are complete and validated. Phase 8 is ready for final review and merge, after which Phase 9 begins with P9A — BigQuery Connection. |
-| Last Updated | 2026-09-04 |
+| Current Delivery Phase | Phase 10 — Power BI Report |
+| Last Completed Phase | Phase 9 — Power BI Semantic Model |
+| Current Work Package | P10A — Report Requirements |
+| Next Approved Work Package | P10A — Report Requirements |
+| Repository Baseline | Phase 9 semantic-model implementation, validation, Power BI artifact, and semantic-model handoff are complete and ready for closeout; target post-merge baseline is `main` through Phase 9 |
+| Overall Delivery Progress | Phases 0–9 are complete and validated. Phase 9 established the governed Power BI semantic model, including relationships, date model, explicit DAX measures, model usability controls, filter-propagation validation, total and subtotal validation, and semantic-model handoff. Phase 10 begins with report requirements and page design. |
+| Last Updated | 2026-09-07 |
 
 ## Tracker Purpose
 
@@ -198,25 +198,27 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P8C | BI Serving Model Implementation | `bi_executive_daily`, `bi_channel_daily`, `bi_commerce_daily`, `bi_user_behavior`, `bi_segment_daily`, and serving schema tests implemented | Complete |
 | P8D | Business Naming & BI Interface | Business-facing naming, visibility, aggregation, formatting, semantic terminology, and downstream BI interface rules documented | Complete |
 | P8E | Refresh & Performance Strategy | Import-mode, refresh, materialization, BigQuery scan, and optimization decisions validated against measured serving-layer scale | Complete |
-| P8F | Serving Validation & Reconciliation | Dependency-aware dbt quality gate and explicit contract-aware reconciliation between all five serving models and governed upstream models and governed upstream models | Complete |
+| P8F | Serving Validation & Reconciliation | Dependency-aware dbt quality gate and explicit contract-aware reconciliation between all five serving models and governed upstream models | Complete |
 | P8G | BI Handoff & Phase Closeout | Power BI handoff contract, final validation evidence, project tracking, checkpoint closeout, and Phase 9 entry readiness | Complete |
 
 ---
 
 ## Phase 9 — Power BI Semantic Model
 
-**Phase status:** Planned
+**Phase status:** Complete
 
-**Delivery outcome:** Build a governed Power BI semantic model with clear relationships, measures, formatting, and filter behaviour.
+**Delivery outcome:** A governed Power BI semantic model was implemented and validated on top of the approved BI-serving layer, with controlled BigQuery Import-mode loading, star-schema-oriented relationships, a governed date dimension, explicit DAX measures, business-facing model organization, validated filter propagation, correct total and subtotal behavior, and documented semantic boundaries for downstream report development.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P9A | BigQuery Connection | Controlled Power BI connection to serving datasets | Planned |
-| P9B | Semantic Architecture | Star-schema relationships and filter direction | Not Started |
-| P9C | Date Model | Dedicated and validated date dimension | Not Started |
-| P9D | DAX Measures | Business measures and calculation groups where appropriate | Not Started |
-| P9E | Model Usability | Technical fields hidden and business folders organized | Not Started |
-| P9F | Semantic Validation | Relationship, total, filter, and KPI reconciliation tests | Not Started |
+| P9A | Connect & Load from BigQuery | Approved BI-serving datasets and dimensions loaded into Power BI using Import mode | Complete |
+| P9B | Build Semantic Relationships | Dimension-to-fact relationship architecture with governed cardinality and filter direction | Complete |
+| P9C | Configure Governed Date Dimension | `dim_date` configured as the reporting calendar with governed sorting and date behavior | Complete |
+| P9D | Create DAX Measure Layer | Explicit business-facing DAX measures implemented in a dedicated Measures table and organized by analytical domain | Complete |
+| P9E | Model Usability & Organization | Technical fields hidden where appropriate, reporting fields exposed, and display folders organized for report-author usability | Complete |
+| P9F | Validate Filter Propagation | Date and channel filtering behavior validated across the intended semantic branches | Complete |
+| P9G | Validate Measures, Totals & Subtotals | Executive, monthly, channel, user-behavior, ratio, contribution, and aggregation behavior validated against governed totals | Complete |
+| P9H | Semantic Model Handoff & Closeout | Final semantic-model inspection completed, test visuals removed, Power BI artifact retained, handoff documentation created, and Phase 10 entry readiness established | Complete |
 
 ---
 
@@ -276,36 +278,39 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 ---
 ## Current Focus
 
-### Phase 9 — Power BI Semantic Model
+### Phase 10 — Power BI Report
 
-Phase 8 — BI Serving Layer is complete and has passed its dependency-aware dbt quality gate and serving-to-upstream reconciliation.
+Phase 9 — Power BI Semantic Model is complete.
 
-The validated BI serving layer now provides:
+The validated semantic model now provides:
 
-- five approved Power BI-facing analytical datasets: `bi_executive_daily`, `bi_channel_daily`, `bi_commerce_daily`, `bi_user_behavior`, and `bi_segment_daily`
+- approved Import-mode access to the governed BigQuery BI-serving datasets
+- star-schema-oriented dimension-to-fact relationships with single-direction filtering
+- a governed `dim_date` reporting calendar
+- a governed `dim_channel` acquisition dimension
+- explicit DAX measures organized in a dedicated Measures table
+- separate executive, commerce, channel, user-behavior, segment, and trend measure domains
+- validated date and channel filter propagation
+- validated KPI totals, ratios, and channel contribution behavior
+- preserved session-date, transaction-date, and session-attributed semantic boundaries
+- intentional isolation of user-level behavior data from the standard daily date relationship
+- documented restrictions preventing fact-to-fact relationships, KPI redefinition, ratio averaging, and inappropriate aggregation of contribution or trend metrics
+- a formal semantic-model handoff for downstream report development
 
-- governed date and channel dimensions for downstream semantic modeling
+Validated baseline values include:
 
-- explicit session-date, transaction-date, and session-attributed semantic boundaries
+- 360,129 sessions
+- 4,033 purchasing sessions
+- 4,451 transactions
+- 307,640 purchase revenue
+- approximately 1.12% overall conversion rate
+- 3,702 purchasing users
+- 284 repeat purchasing session users
 
-- business-readable BI interface and field-usage rules
-
-- evidence-based Import-mode and refresh strategy
-
-- documented restrictions preventing downstream KPI redefinition or semantic mixing
-
-- complete contract-aware reconciliation between all five serving models and their governed upstream sources
-
-- a formal BI handoff defining the boundary between dbt serving logic and Power BI semantic-model responsibilities
-
-The final Phase 8 dependency-aware build completed successfully with **358/358 selected nodes passing and zero warnings, errors, or skipped nodes**.
-
-All five serving datasets reconciled to their governed upstream contracts with zero missing and zero unexpected rows.
-
-Phase 9 will build the governed Power BI semantic model on top of the approved Phase 8 serving interfaces.
+The semantic model is now ready to support Phase 10 report development.
 
 ## Next Approved Work Package
 
-### P9A — BigQuery Connection
+### P10A — Report Requirements
 
-Connect Power BI to the approved BigQuery serving datasets using the documented Import-mode strategy, validate source visibility and data types, and establish the controlled semantic-model input boundary before configuring relationships or DAX measures.
+Define the report audiences, business decisions, analytical questions, page structure, KPI priorities, interaction requirements, and success criteria before building production visuals.

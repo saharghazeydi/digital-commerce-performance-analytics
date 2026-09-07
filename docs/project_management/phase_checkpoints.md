@@ -1423,3 +1423,153 @@ Repository closeout documentation, Pull Request review, merge, and synchronizati
 ## Next Approved Work Package
 
 P9A — BigQuery Connection, after Phase 8 closeout review and merge
+---
+
+# Checkpoint 9.1 — Power BI Semantic Model Accepted
+
+## Objective
+
+Implement and formally validate a governed Power BI semantic model on top of the approved BI Serving Layer, providing controlled source loading, dimension-to-fact relationships, a governed reporting calendar, explicit business measures, report-author usability controls, correct filter propagation, and validated aggregation behaviour for downstream report development.
+
+## Work Completed
+
+- connected Power BI to the approved BigQuery BI-serving datasets
+- loaded the approved serving datasets using Import mode
+- loaded `dim_date` and `dim_channel` as governed reusable dimensions
+- established a star-schema-oriented semantic-model structure
+- created active one-to-many relationships from `dim_date` to the date-grain serving tables
+- created the governed one-to-many channel relationship from `dim_channel` to `bi_channel_daily`
+- retained single-direction filtering from dimensions to serving tables
+- intentionally kept `bi_user_behavior` disconnected from the standard reporting-date relationship because it is user-grain rather than daily fact grain
+- intentionally retained the `Measures` table as a disconnected DAX measure container
+- confirmed no fact-to-fact relationships were introduced
+- configured `dim_date` as the governed Power BI reporting calendar
+- configured chronological sorting for month and weekday labels
+- implemented an explicit DAX measure layer in a dedicated `Measures` table
+- organized measures into Executive, Commerce, Channel, User Behavior, Segment, and Trends analytical folders
+- preserved upstream KPI contracts in the DAX layer
+- implemented ratio measures from compatible additive numerators and denominators rather than averaging pre-calculated ratios
+- preserved session-date, transaction-date, and session-attributed metric semantics
+- implemented point-in-time handling for rolling and Week-over-Week trend metrics
+- hid technical model fields where appropriate
+- retained business-facing dimensions and measures for report-author consumption
+- validated date filter propagation
+- validated channel filter propagation
+- validated semantic isolation between the Executive and Channel analytical branches
+- validated executive KPI totals
+- validated monthly aggregation and total-context ratio recalculation
+- validated channel totals and conversion behaviour
+- validated channel contribution behaviour
+- validated user-behavior measures
+- validated trend response to date context
+- completed final relationship and semantic-model inspection
+- removed temporary validation visuals
+- retained a clean `Report Development` page for downstream report construction
+- created the formal Power BI semantic-model handoff documentation
+- retained the Power BI `.pbix` artifact as the Phase 9 semantic-model deliverable
+
+## Validation Performed
+
+- confirmed the semantic model consumes the approved Phase 8 BI-serving interfaces
+- confirmed the model uses Import mode
+- confirmed `dim_date` filters the approved date-grain serving tables through active one-to-many relationships
+- confirmed `dim_channel` filters `bi_channel_daily` through an active one-to-many relationship
+- confirmed all governed model relationships use single-direction filtering
+- confirmed no fact-to-fact relationships are present
+- confirmed `bi_user_behavior` remains intentionally disconnected from the standard `dim_date` relationship
+- confirmed the `Measures` table remains intentionally disconnected
+- confirmed `dim_date[date_day]` is the governed reporting-date key
+- confirmed `month_name` is sorted by `month_number`
+- confirmed `day_name` is sorted by `day_of_week`
+- confirmed Executive measures reconcile to 360,129 sessions
+- confirmed Executive measures reconcile to 4,033 purchasing sessions
+- confirmed Executive measures reconcile to 4,451 governed transactions
+- confirmed Purchase Revenue reconciles to 307,640
+- confirmed overall Conversion Rate evaluates to approximately 1.12%
+- confirmed Purchasing Users evaluates to 3,702
+- confirmed Repeat Purchasing Session Users evaluates to 284
+- confirmed monthly session totals of 108,401 for 2020-11, 133,351 for 2020-12, and 118,377 for 2021-01
+- confirmed the monthly session values reconcile to the 360,129 grand total
+- confirmed grand-total Conversion Rate is recalculated from Purchasing Sessions divided by Sessions rather than averaged from monthly conversion percentages
+- confirmed Channel Sessions reconcile to 360,129
+- confirmed Channel Purchasing Sessions reconcile to 4,033
+- confirmed Channel Conversion Rate evaluates to approximately 1.12% at grand-total context
+- confirmed Channel Session Contribution evaluates to 100% at total context
+- confirmed the channel dimension contains the expected governed channel categories
+- confirmed channel slicer changes propagate to channel measures
+- confirmed executive headline metrics remain unaffected by channel filtering where semantic isolation is intentional
+- confirmed date filtering propagates correctly to connected serving tables
+- confirmed 2020-12 validation results include approximately 133K sessions, 2,030 purchasing sessions, 2,304 transactions, 158.17K purchase revenue, approximately 1.52% conversion rate, approximately 68.65 average order value, and approximately 4.35 items per transaction
+- confirmed trend measures respond to date filter context
+- confirmed trend metrics are not treated as additive measures across dates
+- confirmed final semantic-model inspection identified no unintended relationship or filter-direction issue
+- confirmed temporary validation visuals were removed before handoff
+- confirmed repository whitespace validation passed through `git diff --check`
+
+## Evidence
+
+- `power_bi/digital_commerce_performance_analytics.pbix`
+- `power_bi/documentation/bi_serving_handoff.md`
+- `power_bi/documentation/semantic_model_handoff.md`
+- `docs/project_management/project_tracker.md`
+- Power BI semantic-model relationship inspection
+- Power BI filter-propagation validation
+- Power BI KPI total and subtotal validation
+
+## Decisions Made
+
+- Power BI consumes only the approved Phase 8 BI-serving datasets and governed dimensions
+- Import mode remains the approved consumption strategy for the current dataset scale and workload
+- `dim_date` is the governed Power BI reporting calendar
+- `dim_channel` is the governed Power BI acquisition dimension
+- semantic relationships follow a dimension-to-fact design
+- single-direction filtering is the default and approved relationship behaviour
+- fact-to-fact relationships are prohibited
+- `bi_user_behavior` remains disconnected from the standard reporting-date dimension because its grain is observed pseudo-user rather than daily fact
+- user-behavior date fields represent user attributes and must not be treated as interchangeable daily reporting dates
+- the `Measures` table is a disconnected semantic organization container
+- business-facing DAX calculations are implemented as explicit measures
+- Power BI may recalculate governed ratios from compatible additive components
+- Power BI must not average governed daily ratios to construct period-level results
+- transaction-date, session-date, and session-attributed commercial populations remain semantically distinct
+- channel filters must not be forced into executive headline metrics through fact-to-fact relationships or bidirectional filtering
+- contribution metrics are non-additive across dates
+- rolling and Week-over-Week trend metrics are point-in-time analytical measures and must not be summed across dates
+- core KPI definitions remain governed upstream and must not be redefined locally in report visuals
+- Power Query remains a lightweight consumption layer rather than a second transformation layer
+- technical relationship keys and implementation fields may remain hidden from report authors
+- report development will consume the validated semantic model rather than adding ad hoc semantic logic
+- Phase 10 owns report requirements, page design, visuals, interactions, navigation, and presentation
+
+## Known Limitations
+
+- the analytical source remains a static, obfuscated public GA4 ecommerce sample
+- the available history covers approximately three months
+- authenticated `user_id` is unavailable
+- user-level metrics therefore represent observed `user_pseudo_id` behaviour rather than authenticated customer identity
+- `bi_user_behavior` does not participate in the standard reporting-date filter path
+- net revenue is not governed by the current analytical model
+- ROAS, CAC, CPA, profit, gross margin, customer lifetime value, churn, and formal retention remain outside the governed scope
+- multi-touch and unsupported paid-media attribution remain outside the governed scope
+- transaction-date and session-attributed commercial measures must not be treated as interchangeable populations
+- contribution, rolling, and Week-over-Week metrics are not additive across reporting periods
+- semantic-model validation was performed manually in Power BI Desktop rather than through automated BI regression testing
+- automated CI validation of the Power BI semantic model has not been introduced
+
+## Phase Decision
+
+**Phase 9 — Power BI Semantic Model is technically accepted.**
+
+The governed Power BI semantic model is complete at the connection, relationship-design, date-model, DAX-measure, usability, filter-validation, aggregation-validation, semantic-governance, and handoff levels.
+
+The model preserves the analytical contracts established upstream while providing a controlled report-author interface through governed dimensions and explicit measures. Date, channel, transaction, session, user-behavior, and trend semantics remain intentionally separated where required.
+
+Validation confirmed correct dimension-to-fact filtering, correct total-context ratio recalculation, reconciliation of headline and channel populations to governed upstream values, correct channel contribution behaviour, intentional semantic isolation between analytical branches, and appropriate handling of non-additive trend metrics.
+
+No identified relationship, filter-propagation, KPI-reconciliation, aggregation, semantic-boundary, usability, or handoff issue blocks downstream Power BI report development.
+
+Repository closeout, Pull Request review, merge, and synchronization with `main` remain as administrative closeout activities before Phase 10 implementation begins.
+
+## Next Approved Work Package
+
+P10A — Report Requirements, after Phase 9 closeout review and merge
