@@ -1916,3 +1916,219 @@ LOG ENTRY 001 regarding the interpretation of sessions without acquisition.
 
 ...
 ```
+---
+
+## GA4 Channel Attribution Semantic Fix — Completed
+
+### Status
+
+Completed and validated.
+
+Git commit:
+
+`fde130e` — `fix: refine GA4 session channel attribution`
+
+### Problem Identified
+
+The original channel-classification logic in `fct_sessions` classified sessions primarily from `medium`.
+
+This caused sessions with no selected acquisition event to be classified as `Unknown`, resulting in approximately 101K Unknown sessions (~28% of all sessions).
+
+Investigation showed that this was not a staging or session-grain failure. The upstream GA4 session logic intentionally allows sessions with no usable acquisition event.
+
+### Diagnostic Findings
+
+Total sessions:
+
+`360,129`
+
+Sessions with a selected acquisition event:
+
+`265,576`
+
+Sessions without a selected acquisition event:
+
+`94,553`
+
+For the 94,553 sessions without selected acquisition:
+
+- `94,321` had no first-event referrer.
+- `217` had an internal referrer from `shop.googlemerchandisestore.com`.
+- `15` had an external referrer.
+
+Therefore, 94,538 sessions had strong Direct-like evidence and were reclassified as Direct.
+
+### Governed Channel Rule
+
+The current business rule is:
+
+- Selected acquisition containing `(data deleted)` → `Unknown`
+- Explicit `(direct)` / `(none)` → `Direct`
+- `organic` → `Organic Search`
+- `cpc` → `Paid Search`
+- `referral` → `Referral`
+- `email` → `Email`
+- `affiliate` → `Affiliate`
+- Other populated acquisition medium → `Other`
+- Selected acquisition with no usable medium → `Unknown`
+- No selected acquisition + no landing-page referrer → `Direct`
+- No selected acquisition + internal `shop.googlemerchandisestore.com` referrer → `Direct`
+- No selected acquisition + external referrer → `Unknown`
+
+Power BI must not reconstruct or override this classification.
+
+### Implementation Changes
+
+`int_ga4__sessions.sql`
+
+Added:
+
+- `landing_page_referrer`
+- `has_selected_acquisition`
+
+`fct_sessions.sql`
+
+Updated the governed `channel_key` classification to distinguish selected acquisition from sessions without usable acquisition and to use landing-page referrer evidence for the latter.
+
+`assert_fct_sessions_channel_mapping_consistent.sql`
+
+Updated to validate the new channel-classification contract.
+
+### Validation
+
+Targeted downstream build:
+
+`dbt build --select int_ga4__sessions+`
+
+Result:
+
+`PASS=316 WARN=0 ERROR=0 SKIP=0`
+
+Final validated channel distribution:
+
+| Channel | Sessions | Share |
+|---|---:|---:|
+| Direct | 132,377 | 36.76% |
+| Organic Search | 101,750 | 28.25% |
+| Referral | 84,919 | 23.58% |
+| Other | 25,364 | 7.04% |
+| Paid Search | 7,683 | 2.13% |
+| Unknown | 6,510 | 1.81% |
+| Affiliate | 1,329 | 0.37% |
+| Email | 197 | 0.05% |
+
+Total remains exactly:
+
+`360,129 sessions`
+
+The one-session difference from the initial expected distribution was investigated and explained by:
+
+- `source = (data deleted)`
+- `medium = referral`
+- `campaign = (referral)`
+
+The governed rule intentionally gives `(data deleted)` precedence, so this session correctly remains `Unknown`.
+
+### Power BI Validation
+
+The refreshed `Acquisition & Channel Performance` page reflects the corrected warehouse classification.
+
+`Sessions by Channel` now ranks:
+
+1. Direct
+2. Organic Search
+3. Referral
+
+The large previous Unknown population is no longer present.
+
+### Important Continuity Decision
+
+Do not reopen or redesign the channel-attribution logic unless new evidence shows a real semantic problem.
+
+`Unknown = 6,510 (1.81%)` is the current validated and accepted result.
+
+The remaining Power BI work should continue from this validated semantic baseline.
+
+---
+
+# LOG ENTRY 002
+
+## Date
+
+2026-09-10
+
+## Session Area
+
+Phase 10 — Power BI Report Completion and Closeout
+
+## Starting Point
+
+Channel attribution had been corrected and validated through commit `fde130e`.
+The Power BI report had been refreshed against the corrected serving layer and final report-level QA was still in progress.
+
+## Work Completed
+
+- completed semantic and data validation for Executive Overview
+- completed semantic and data validation for Acquisition & Channel Performance
+- completed semantic and data validation for Commerce Performance
+- completed semantic and data validation for Customer Behaviour & Segmentation
+- validated Reporting Period slicer behavior across Pages 1–3
+- confirmed Page 4 should remain full-observation-period because `bi_user_behavior` is user-grain and is not governed by the standard daily date relationship
+- updated the Page 4 subtitle to communicate the full observation period explicitly
+- completed report-level usability QA
+- completed rendering and responsiveness review
+- confirmed no report-level rendering or interaction errors
+- saved and committed the final Power BI report artifact
+
+## Files Changed
+
+- `power_bi/digital_commerce_performance_analytics.pbix`
+- `docs/project_management/project_tracker.md`
+- `docs/project_management/AI_PROJECT_CONTINUITY.md`
+
+## Validation Performed
+
+- Pages 1–3 Reporting Period slicer QA passed
+- Page 4 user KPI values reconciled to `bi_user_behavior`
+- Page 4 device metrics reconciled to `bi_segment_daily`
+- all four report pages rendered successfully
+- no unexpected blank visuals or report-level errors observed
+
+## Important Results
+
+```text
+Observed Users                         270,154
+Purchasing Users                        3,702
+Multi-Session Users                    47,364
+Repeat Purchasing Session Users           284
+
+Desktop Sessions                      208,942
+Mobile Sessions                       143,185
+Tablet Sessions                         8,002
+
+Decisions Made
+Page 4 will not use the standard Reporting Period slicer.
+Page 4 represents full-observation-period user behaviour and segmentation.
+No additional Power BI features will be added during Phase 10 closeout.
+Report development is complete through P10K.
+P10L is the current active work package.
+Git Checkpoints
+fde130e — fix: refine GA4 session channel attribution
+52d7238 — feat: finalize Power BI performance report
+Supersedes
+
+This entry supersedes the prior continuity state that described Power BI report work as still active after the channel-attribution fix.
+
+Current Status
+
+Phase 10 report implementation is complete through P10K.
+
+P10L — Report Handoff & Phase Closeout is in progress.
+
+Next Approved Action
+
+Complete Phase 10 handoff documentation, repository closeout, and readiness checks before formally closing Phase 10 and beginning Phase 11.
+
+Handoff Note
+
+A new ChatGPT conversation should continue from P10L and must treat the Power BI report and corrected channel-attribution semantics as the validated baseline.

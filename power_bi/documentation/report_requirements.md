@@ -61,7 +61,8 @@ Users must be able to determine:
 - which channels generate the largest share of sessions
 - which channels generate purchasing sessions
 - how conversion rates differ by channel
-- which channels contribute most to session-attributed purchase revenue and transactions
+- which channels contribute most to session-attributed purchase revenue
+- which channels generate stronger or weaker revenue per session
 - whether high-traffic channels also generate proportionate commercial outcomes
 - which channels appear comparatively strong or weak and require further investigation
 
@@ -101,11 +102,9 @@ Users must be able to investigate performance across governed segmentation dimen
 
 Segment analysis should support comparison of:
 
-- sessions
-- purchasing sessions
+-- sessions
 - conversion rate
 - session-attributed purchase revenue
-- session-attributed transactions
 - revenue per session
 
 The report should help identify segments with materially different traffic, conversion, or commercial performance.
@@ -131,9 +130,9 @@ The report should answer the following questions without requiring users to insp
 - Which channels drive the most traffic?
 - Which channels drive the most purchasing sessions?
 - Which channels have the strongest and weakest conversion rates?
-- What proportion of sessions comes from each channel?
-- Which channels contribute most to session-attributed transactions and purchase revenue?
-- Are high-volume channels producing proportionate commercial outcomes?
+- How is traffic volume distributed across channels?
+- Which channels contribute most to session-attributed purchase revenue?- Are high-volume channels
+- Which channels generate the strongest revenue per session? producing proportionate commercial outcomes?
 
 ### Commerce
 
@@ -150,7 +149,6 @@ The report should answer the following questions without requiring users to insp
 - How many observed users purchased?
 - How many users had multiple sessions?
 - How many users purchased across multiple sessions?
-- How many users purchased across multiple observed dates?
 
 ### Segmentation
 
@@ -196,7 +194,7 @@ These support detailed analysis.
 - Channel Sessions
 - Channel Purchasing Sessions
 - Channel Conversion Rate
-- Channel Session Contribution
+- Revenue per Session
 - governed session-attributed channel commercial metrics and contribution metrics available in the semantic model
 
 #### Commerce
@@ -210,7 +208,6 @@ These support detailed analysis.
 - Observed Users
 - Purchasing Users
 - Multi-Session Users
-- Repeat Purchasing Date Users
 - Repeat Purchasing Session Users
 
 #### Segment
@@ -237,7 +234,7 @@ The page should prioritize:
 - executive KPI cards
 - revenue trend
 - conversion trend
-- rolling and week-over-week context
+- governed rolling context where directly comparable, together with recent seven-day versus previous seven-day performance comparisons
 - limited high-value performance-driver context
 - clear paths into deeper analytical pages
 
@@ -252,12 +249,12 @@ Explain how acquisition channels contribute to traffic, purchasing activity, and
 The page should support:
 
 - channel comparison
-- traffic contribution
-- purchasing-session contribution
+- traffic volume by channel
+- purchasing-session performance by channel
 - channel conversion comparison
-- session-attributed commercial contribution
+- session-attributed revenue share
+- revenue per session by channel
 - identification of high-volume/low-efficiency and lower-volume/high-efficiency channels
-- channel-level investigation over time where analytically appropriate
 
 ### Page 3 — Commerce Performance
 
@@ -271,7 +268,7 @@ The page should support:
 - transaction count
 - Average Order Value
 - item metrics
-- refund context
+- refund context where material and decision-useful
 - revenue trends
 - transaction trends
 - AOV trends
@@ -289,7 +286,7 @@ The page should contain clearly separated analytical sections for:
 2. device and geography segmentation
 
 User-grain measures must not be presented as if they respond to the standard reporting-date relationship.
-
+The user-behaviour section is interpreted across the full observation period. A standard Reporting Period slicer must not be applied to user-grain KPIs because `bi_user_behavior` is intentionally disconnected from the governed reporting-date relationship.
 ---
 
 ## 7. Information Hierarchy
@@ -492,6 +489,7 @@ Each page must communicate a coherent analytical story.
 The intended narrative pattern is:
 
 **What happened → How is it changing → What is driving it → Where should the user investigate next**
+Not every page must implement every narrative step when the underlying analytical grain does not support it. Full-observation-period user-behaviour analysis, for example, must not imply a time trend that the governed user-grain model does not provide.
 
 Titles, subtitles, tooltips, KPI context, and supporting visuals should reinforce this sequence.
 
@@ -548,8 +546,7 @@ Phase 10 report development will be considered successful when:
 9. The report remains readable without excessive visual density.
 10. Unsupported metrics or business claims are not introduced.
 11. Business users can navigate the report without understanding the underlying data architecture.
-12. Final report behaviour passes the Phase 10 report-level QA and subsequent Phase 11 end-to-end validation.
-
+12. Final report behaviour passes Phase 10 report-level QA and is ready for subsequent Phase 11 end-to-end validation.
 ---
 
 ## 17. Phase 10 Build Boundary

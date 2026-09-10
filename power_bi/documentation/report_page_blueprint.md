@@ -2,11 +2,11 @@
 
 ## 1. Purpose
 
-This document defines the information architecture and production-page blueprint for Phase 10 — Power BI Report.
+This document defines the final information architecture and production-page blueprint for Phase 10 — Power BI Report.
 
-It translates the approved report requirements into a controlled visual and analytical structure before production report development begins.
+It translates the approved reporting requirements and governed Phase 9 semantic model into the analytical structure implemented in the production Power BI report.
 
-The blueprint determines:
+The blueprint defines:
 
 - page purpose
 - analytical sequence
@@ -17,56 +17,65 @@ The blueprint determines:
 - interaction intent
 - semantic constraints
 - navigation structure
+- final implementation decisions
 
-The blueprint does not redefine governed KPIs or semantic-model relationships.
+The blueprint does not redefine governed KPIs, analytical grains, attribution logic, or semantic-model relationships.
 
 ---
 
 # 2. Report Information Architecture
 
-The production report will contain four primary analytical pages:
+The production report contains four primary analytical pages:
 
 1. Executive Overview
 2. Acquisition & Channel Performance
 3. Commerce Performance
 4. Customer Behaviour & Segmentation
 
-Supporting tooltip or drill-through pages may be introduced later only when they provide clear analytical value.
-
-The report should follow a progressive analytical path:
+The report follows the analytical path:
 
 **Overall Performance → Acquisition Drivers → Commerce Drivers → User & Segment Investigation**
 
-Each page must answer a distinct set of business questions rather than repeating the same visuals with different dimensions.
+Each page answers a distinct business question and avoids unnecessary duplication of metrics or visuals.
+
+Supporting tooltip or drill-through pages are not required unless they provide clear analytical value.
 
 ---
 
 # 3. Global Page Structure
 
-Production pages should follow a consistent visual hierarchy.
+Production pages use a consistent visual hierarchy.
 
 ## Header
 
-The header should contain:
+The header contains:
 
 - page title
-- concise analytical subtitle where useful
-- report navigation
-- relevant filter context
+- concise analytical subtitle
+- consistent report navigation
+- relevant filter context where semantically valid
 
 ## KPI Layer
 
-A compact KPI strip should communicate the most important metrics for the page.
+A compact KPI strip communicates the most important metrics for each page.
 
-KPI cards should not be added simply because a measure exists.
+KPI cards are included only when they provide direct business value.
 
 ## Analytical Layer
 
-The central page area should contain the visuals required to explain performance, trends, comparisons, or drivers.
+The primary visual area explains:
+
+- trends
+- comparisons
+- performance drivers
+- commercial efficiency
+- segment differences
 
 ## Investigation Layer
 
-Detailed comparison visuals, matrices, tooltips, or drill-through functionality should appear only where they support deeper investigation.
+Additional detail is included only when it supports a meaningful investigation question.
+
+The report does not add visual complexity only to demonstrate Power BI features.
 
 ---
 
@@ -74,18 +83,21 @@ Detailed comparison visuals, matrices, tooltips, or drill-through functionality 
 
 ## Purpose
 
-Provide leadership with a concise view of overall digital-commerce performance, recent movement, and the most important signals requiring further investigation.
+Provide leadership with a concise overview of overall digital-commerce performance, recent trends, and signals that may require further investigation.
+
+## Subtitle
+
+**Digital commerce performance, trends and key business signals**
 
 ## Primary Business Questions
 
-The page must answer:
+The page answers:
 
 - What is the overall level of commercial and traffic performance?
-- Is revenue improving or deteriorating?
-- Is conversion improving or deteriorating?
-- How does recent performance compare with the preceding period?
-- Are changes associated with traffic, purchasing activity, transaction volume, or order value?
-- Which analytical area should be investigated next?
+- How is purchase revenue changing?
+- How is conversion changing?
+- How does recent seven-day performance compare with the previous seven-day period?
+- What should be investigated further?
 
 ## KPI Strip
 
@@ -98,108 +110,88 @@ Primary KPI cards:
 5. Total Transactions
 6. Average Order Value
 
-`Revenue per Session` should be used as a supporting efficiency metric rather than automatically expanding the primary KPI strip.
-
 ### KPI Semantic Requirements
 
-- Purchase Revenue uses governed executive transaction-date semantics.
+- Purchase Revenue uses governed transaction-date semantics.
 - Total Transactions uses governed transaction-date semantics.
-- Total Sessions and Purchasing Sessions use governed session-date semantics.
-- Conversion Rate uses compatible session-date numerator and denominator.
+- Total Sessions uses session-date semantics.
+- Purchasing Sessions uses session-date semantics.
+- Conversion Rate uses compatible session-date components.
 - Average Order Value uses compatible transaction-date revenue and transaction count.
 
-The page must not imply that all headline metrics represent the same underlying date population.
+The page must not imply that all executive KPIs represent the same underlying analytical population.
 
-## Trend Area
+---
 
-### Visual E1 — Purchase Revenue Trend
+## Visual E1 — Revenue Trend
 
 **Business question:** How is purchase revenue changing over time?
 
-**Recommended visual:** Line chart
+**Visual:** Line chart
 
 **X-axis:** `dim_date[date_day]`
 
-**Measure:** Purchase Revenue
-
-**Supporting context:** Revenue 7D where the visual remains readable and analytically useful.
+**Measure:** Daily Revenue
 
 **Semantic constraint:** Transaction-date revenue.
 
+The stored warehouse `revenue_7d` metric is a rolling seven-day sum. It is not plotted beside Daily Revenue because the two series represent different aggregation scales and would create a misleading visual comparison.
+
 ---
 
-### Visual E2 — Conversion Trend
+## Visual E2 — Conversion Trend
 
 **Business question:** How is conversion performance changing?
 
-**Recommended visual:** Line chart
+**Visual:** Line chart
 
 **X-axis:** `dim_date[date_day]`
 
-**Measure:** Conversion Rate
+**Measures:**
 
-**Supporting context:** Conversion Rate 7D where useful.
+- Daily Conversion Rate
+- 7D Conversion Rate
 
 **Semantic constraint:** Session-date conversion.
 
----
-
-## Performance Context
-
-### Visual E3 — Recent Revenue Change
-
-**Business question:** How does recent revenue performance compare with the previous governed comparison period?
-
-**Recommended treatment:** Compact KPI/change indicator
-
-**Measures:**
-
-- Revenue WoW Change
-- Revenue WoW Change %
-
-**Constraint:** Treat as point-in-time comparison metrics. Do not aggregate across dates.
+The seven-day conversion measure remains appropriate because it is directly comparable with the daily conversion rate as a rate metric.
 
 ---
 
-### Visual E4 — Recent Conversion Change
+## Performance Comparison KPIs
 
-**Business question:** How does recent conversion performance compare with the previous governed comparison period?
+Two compact comparison indicators provide recent-period context:
 
-**Recommended treatment:** Compact KPI/change indicator
+### Revenue: Last 7D vs Previous 7D
 
-**Measures:**
+Uses the governed warehouse comparison metric.
 
-- Conversion Rate WoW Change
-- Conversion Rate WoW Change %
+### Conversion: Last 7D vs Previous 7D
 
-**Constraint:** Treat as point-in-time comparison metrics. Do not aggregate across dates.
+Uses the governed warehouse comparison metric.
+
+These are point-in-time comparison metrics and must not be summed across dates.
 
 ---
-
-## Executive Driver Context
-
-The Executive Overview may include a limited driver visual only if it helps direct the user toward deeper analysis.
-
-It must not duplicate the full Acquisition or Commerce pages.
-
-A compact comparison of traffic, transaction, revenue, or efficiency movement may be used to indicate where further investigation is warranted.
-
-Detailed channel contribution analysis belongs on the Acquisition page.
 
 ## Executive Filters
 
 Primary filter:
 
-- governed reporting date
+- Reporting Period
 
-Channel filtering must not be presented as a global executive filter because the executive and channel commercial populations intentionally use different semantic branches.
+The filter uses the governed reporting-date dimension.
+
+Channel filtering is not presented as a global executive filter because executive and channel commercial measures belong to different governed semantic branches.
+
+---
 
 ## Executive Interaction Rules
 
-- date context filters compatible executive visuals
-- trend visuals should cross-highlight only when analytical meaning remains clear
-- no channel slicer should artificially change executive headline metrics
-- navigation should provide direct access to Acquisition and Commerce analysis
+- Reporting Period filters compatible executive visuals.
+- Trend interactions must preserve clear analytical meaning.
+- No channel filter may artificially change executive headline metrics.
+- Navigation provides direct access to the other analytical pages.
 
 ---
 
@@ -207,130 +199,119 @@ Channel filtering must not be presented as a global executive filter because the
 
 ## Purpose
 
-Explain how acquisition channels contribute to traffic, purchasing activity, conversion, and session-attributed commercial outcomes.
+Explain how acquisition channels contribute to traffic, purchasing activity, conversion, session-attributed revenue, and commercial efficiency.
+
+## Subtitle
+
+**Traffic, conversion and session-attributed commercial performance by channel**
 
 ## Primary Business Questions
 
-The page must answer:
+The page answers:
 
-- Which channels drive traffic?
-- Which channels drive purchasing sessions?
-- Which channels convert efficiently?
-- Which channels contribute disproportionately or under-proportionately to commercial outcomes?
-- Which channels warrant further investigation?
+- Which channels generate the most traffic?
+- Which channels generate purchasing sessions?
+- Which channels convert most effectively?
+- Which channels contribute most to session-attributed purchase revenue?
+- Which channels generate the strongest revenue per session?
+- Which channels combine meaningful scale with commercial efficiency?
+- Which channels require further investigation?
 
 ## KPI Strip
 
-Recommended channel-context KPIs:
+Primary KPIs:
 
 1. Channel Sessions
 2. Channel Purchasing Sessions
 3. Channel Conversion Rate
-4. session-attributed channel purchase revenue
-5. session-attributed channel transaction count
+4. Revenue per Session
 
-Only governed measures already exposed by the semantic model may be used.
+`Channel Session Contribution` is not used as a headline KPI because at the unfiltered total context it evaluates to 100%, making it mathematically correct but weak as a decision-support KPI.
+
+---
 
 ## Filters
 
-Primary filters:
+Primary filter:
 
-- reporting date
-- channel group
+- Reporting Period
 
-Channel filtering must use `dim_channel`.
+Channel comparison is performed directly through the governed channel visuals.
 
-## Channel Comparison
+Channel semantics use `dim_channel`.
 
-### Visual A1 — Sessions by Channel
+---
+
+## Visual A1 — Sessions by Channel
 
 **Business question:** Which channels generate the most traffic?
 
-**Recommended visual:** Horizontal bar chart
+**Visual:** Horizontal bar chart
 
 **Category:** `dim_channel[channel_group]`
 
 **Measure:** Channel Sessions
 
-**Sort:** descending by Channel Sessions unless governed channel ordering is analytically preferable for a specific presentation.
+**Sort:** Descending by Channel Sessions.
+
+All governed channel groups are displayed where space permits so important low-volume channels are not hidden solely for visual convenience.
 
 ---
 
-### Visual A2 — Conversion Rate by Channel
+## Visual A2 — Conversion Rate by Channel
 
 **Business question:** Which channels convert most effectively?
 
-**Recommended visual:** Horizontal bar chart
+**Visual:** Horizontal bar chart
 
 **Category:** `dim_channel[channel_group]`
 
 **Measure:** Channel Conversion Rate
 
-**Constraint:** Do not interpret conversion rate without considering traffic volume.
+**Constraint:** Conversion must be interpreted together with channel traffic volume.
+
+Low-volume channels with unusually high conversion must not automatically be interpreted as the strongest acquisition channels.
 
 ---
 
-### Visual A3 — Session Contribution by Channel
+## Visual A3 — Revenue Share by Channel
 
-**Business question:** What share of traffic is generated by each channel?
+**Business question:** Which channels contribute most to session-attributed purchase revenue?
 
-**Recommended visual:** 100% contribution comparison or ranked bar chart
+**Visual:** Horizontal bar chart
 
 **Category:** `dim_channel[channel_group]`
 
-**Measure:** Channel Session Contribution
+**Measure:** Governed channel revenue contribution / revenue share
 
-**Constraint:** Contribution is non-additive across dates.
+**Semantic constraint:** Revenue is session-attributed commercial revenue, not transaction-date executive revenue.
+
+Contribution percentages are non-additive across dates.
 
 ---
 
-## Commercial Contribution
+## Visual A4 — Revenue per Session by Channel
 
-### Visual A4 — Session-Attributed Commercial Performance by Channel
+**Business question:** Which channels generate stronger commercial efficiency per session?
 
-**Business question:** Which channels are associated with the strongest commercial outcomes?
-
-**Recommended visual:** Ranked bar chart
+**Visual:** Horizontal bar chart
 
 **Category:** `dim_channel[channel_group]`
 
-**Measures:** governed session-attributed purchase revenue and/or transaction measure
+**Measure:** Revenue per Session
 
-**Semantic constraint:** These are session-attributed commercial metrics and must not be described as transaction-date executive revenue.
+**Semantic constraint:** Revenue and session populations must use compatible session-attributed semantics.
 
----
-
-## Efficiency vs Scale
-
-### Visual A5 — Channel Scale vs Conversion
-
-**Business question:** Which channels combine meaningful traffic scale with strong conversion performance?
-
-**Recommended visual:** Scatter plot, only if readability is acceptable with the limited channel population.
-
-**X-axis:** Channel Sessions
-
-**Y-axis:** Channel Conversion Rate
-
-**Category/Details:** Channel Group
-
-**Optional size:** governed session-attributed commercial measure if this improves interpretation without overstating precision.
-
-The visual should help distinguish:
-
-- high-volume / high-conversion channels
-- high-volume / low-conversion channels
-- low-volume / high-conversion channels
-- low-volume / low-conversion channels
+This visual provides the scale-versus-efficiency context without requiring a scatter plot.
 
 ---
 
 ## Acquisition Interaction Rules
 
-- date filters channel metrics through the governed date relationship
-- channel slicer filters the acquisition branch
-- channel selections may cross-highlight compatible acquisition visuals
-- acquisition interactions must not be extended artificially into unrelated semantic branches
+- Reporting Period filters the governed channel branch.
+- Channel selections may cross-highlight compatible acquisition visuals.
+- Acquisition interactions must not be propagated artificially into unrelated semantic branches.
+- Session-attributed commercial measures must remain clearly distinguished from transaction-date executive metrics.
 
 ---
 
@@ -338,19 +319,25 @@ The visual should help distinguish:
 
 ## Purpose
 
-Explain transaction-date ecommerce performance and distinguish changes in transaction volume from changes in order value.
+Explain transaction-date ecommerce performance and distinguish changes in revenue, transaction volume, order value, and basket quantity.
+
+## Subtitle
+
+**Revenue, transactions, order value and basket performance over time**
 
 ## Primary Business Questions
 
-The page must answer:
+The page answers:
 
 - How much purchase revenue was generated?
 - How many transactions occurred?
 - What is the Average Order Value?
 - How many items are purchased per transaction?
-- How are revenue, transactions, and AOV changing?
-- Are revenue changes more consistent with volume changes or order-value changes?
-- Are refunds material in the available data?
+- How is revenue changing?
+- How is transaction volume changing?
+- How is Average Order Value changing?
+- How is basket quantity changing?
+- Are observed revenue movements more consistent with volume or value changes?
 
 ## KPI Strip
 
@@ -360,37 +347,38 @@ Primary commerce KPIs:
 2. Total Transactions
 3. Average Order Value
 4. Items per Transaction
-5. Refund Value
+
+Refund Value is not given headline visual space unless refund activity is material and decision-useful.
+
+---
 
 ## Filters
 
 Primary filter:
 
-- governed reporting date
+- Reporting Period
 
-Commerce analysis must preserve transaction-date semantics.
+Commerce analysis preserves transaction-date semantics.
 
 ---
 
-## Commerce Trends
-
-### Visual C1 — Purchase Revenue Over Time
+## Visual C1 — Revenue Trend
 
 **Business question:** How is transaction-date purchase revenue changing?
 
-**Recommended visual:** Line chart
+**Visual:** Line chart
 
 **X-axis:** `dim_date[date_day]`
 
-**Measure:** Purchase Revenue
+**Measure:** Daily Revenue
 
 ---
 
-### Visual C2 — Transactions Over Time
+## Visual C2 — Transaction Trend
 
 **Business question:** How is transaction volume changing?
 
-**Recommended visual:** Line or column chart
+**Visual:** Line chart
 
 **X-axis:** `dim_date[date_day]`
 
@@ -398,11 +386,11 @@ Commerce analysis must preserve transaction-date semantics.
 
 ---
 
-### Visual C3 — Average Order Value Over Time
+## Visual C3 — Average Order Value Trend
 
-**Business question:** Is average transaction value changing?
+**Business question:** How is average transaction value changing?
 
-**Recommended visual:** Line chart
+**Visual:** Line chart
 
 **X-axis:** `dim_date[date_day]`
 
@@ -410,41 +398,33 @@ Commerce analysis must preserve transaction-date semantics.
 
 ---
 
-## Volume vs Value Diagnosis
+## Visual C4 — Items per Transaction Trend
 
-### Visual C4 — Revenue, Transactions and AOV Context
+**Business question:** How is basket quantity changing?
 
-**Business question:** Are revenue movements primarily associated with transaction volume or order value?
+**Visual:** Line chart
 
-The final implementation should provide a clear comparison between:
+**X-axis:** `dim_date[date_day]`
 
-- Purchase Revenue
-- Total Transactions
-- Average Order Value
+**Measure:** Items per Transaction
 
-The visual form should prioritize interpretability.
-
-Avoid forcing metrics with materially different units onto an ambiguous dual-axis chart if separate aligned trend visuals provide clearer interpretation.
+The report preserves real observed spikes instead of clipping or smoothing them solely for visual appearance.
 
 ---
 
-## Item Behaviour
+## Commerce Interpretation Rule
 
-### Visual C5 — Items per Transaction
+Revenue, transactions, Average Order Value, and Items per Transaction use separate trend visuals because they have different units and analytical meanings.
 
-**Business question:** Is basket quantity changing?
-
-**Recommended visual:** KPI plus trend where variation is analytically meaningful.
-
-**Measure:** Items per Transaction
+The report avoids forcing incompatible measures onto ambiguous dual-axis charts.
 
 ---
 
 ## Refund Context
 
-Refund Value should be displayed proportionately to its analytical importance.
+Refund information may be included when material and decision-useful.
 
-If the governed data contains no material refund activity, it should not consume a large visual area merely to fill the page.
+If refund activity is not material enough to change interpretation, it should not consume report space only to satisfy visual completeness.
 
 ---
 
@@ -452,21 +432,28 @@ If the governed data contains no material refund activity, it should not consume
 
 ## Purpose
 
-Provide analysis of observed pseudo-user behaviour and daily device/geography segment performance while preserving the different grains and filter semantics of the underlying models.
+Provide controlled analysis of observed user behaviour and device/geography segment performance while preserving differences in analytical grain and date semantics.
 
-This page must visually distinguish the two analytical populations.
+## Subtitle
+
+**User engagement, repeat purchasing behaviour and segment performance across the full observation period**
+
+This page is intentionally interpreted across the full observation period.
+
+A standard Reporting Period slicer is not used because the user-grain population is not governed by the standard daily reporting relationship.
 
 ---
 
-# 7.1 Observed User Behaviour Section
+# 7.1 Observed User Behaviour
 
 ## Primary Business Questions
+
+The section answers:
 
 - How many pseudo-users were observed?
 - How many observed users purchased?
 - How many users had multiple sessions?
 - How many users purchased across multiple sessions?
-- How many users purchased across multiple observed dates?
 
 ## KPI Strip
 
@@ -476,180 +463,183 @@ User-behaviour KPIs:
 2. Purchasing Users
 3. Multi-Session Users
 4. Repeat Purchasing Session Users
-5. Repeat Purchasing Date Users
+
+`Repeat Purchasing Date Users` is not included in the production KPI strip.
+
+---
 
 ## Critical Filter Rule
 
-The user-behaviour model is intentionally disconnected from `dim_date`.
+`bi_user_behavior` is intentionally disconnected from `dim_date`.
 
-Standard report date slicers must not be presented as controlling these user-grain KPIs.
+Standard report date slicers must not be presented as controlling user-grain KPIs.
 
-The visual design must make this distinction understandable rather than hiding it.
+The page therefore communicates explicitly that its user-behaviour metrics represent the full observation period.
 
-## Recommended User Behaviour Visual
-
-### Visual U1 — Observed User Behaviour Composition
-
-**Business question:** How does the observed user population break down into increasingly engaged behaviours?
-
-**Recommended treatment:** Compact comparison using KPI cards or bars.
-
-The visual must not imply that behavioural categories are necessarily mutually exclusive.
+User-level counts must be calculated from the user-grain model and must not be reconstructed by summing user metrics from daily segment tables.
 
 ---
 
-# 7.2 Segment Performance Section
+# 7.2 Device Performance
 
-## Primary Business Questions
+Device analysis uses the governed segment branch.
 
-- Which devices generate the most sessions?
-- How does conversion vary by device?
-- Which countries generate the most traffic?
-- Which segments show stronger or weaker commercial efficiency?
-- Which high-volume segments underperform on conversion?
-
-## Segment Filters
-
-Where useful:
-
-- reporting date
-- device category
-- country
-
-These filters apply to the governed segment branch.
-
----
-
-### Visual S1 — Sessions by Device
+## Visual S1 — Sessions by Device
 
 **Business question:** How is traffic distributed across device categories?
 
-**Recommended visual:** Bar chart
+**Visual:** Bar chart
 
-**Category:** device category
+**Category:** Device Category
 
 **Measure:** Segment Sessions
 
 ---
 
-### Visual S2 — Conversion Rate by Device
+## Visual S2 — Conversion Rate by Device
 
 **Business question:** How does conversion performance vary by device?
 
-**Recommended visual:** Bar chart
+**Visual:** Bar chart
 
-**Category:** device category
+**Category:** Device Category
 
 **Measure:** Segment Conversion Rate
 
 ---
 
-### Visual S3 — Sessions by Country
+## Visual S3 — Revenue by Device
 
-**Business question:** Which countries contribute the most traffic?
+**Business question:** Which devices generate the greatest session-attributed commercial value?
 
-**Recommended visual:** Ranked horizontal bar chart
+**Visual:** Bar chart
 
-**Category:** country
+**Category:** Device Category
 
-**Measure:** Segment Sessions
-
-A map should not be used merely because geography is available. A ranked comparison is preferred unless geographic position itself contributes analytical value.
+**Measure:** Session-attributed Purchase Revenue
 
 ---
 
-### Visual S4 — Segment Commercial Efficiency
+## Visual S4 — Revenue per Session by Device
 
-**Business question:** Which device/geography segments combine traffic scale with stronger commercial efficiency?
+**Business question:** Which device categories show stronger commercial efficiency per session?
 
-**Recommended visual:** ranked comparison or scatter plot depending on cardinality and readability.
+**Visual:** Bar chart
 
-Potential governed measures:
+**Category:** Device Category
 
-- Segment Sessions
-- Segment Conversion Rate
-- session-attributed purchase revenue
-- revenue per session
+**Measure:** Revenue per Session
 
-High-cardinality combinations should not be displayed if they reduce readability.
+---
+
+# 7.3 Country Performance
+
+## Visual S5 — Revenue by Country
+
+**Business question:** Which countries contribute the most session-attributed purchase revenue?
+
+**Visual:** Ranked horizontal bar chart
+
+**Category:** Country
+
+**Measure:** Session-attributed Purchase Revenue
+
+Natural scrolling is acceptable where country cardinality exceeds available visual space.
+
+A Top-N filter must not be introduced solely to remove a scrollbar if it would conceal analytically relevant countries.
+
+---
+
+## Visual S6 — Conversion Rate by Country
+
+**Business question:** How does conversion vary across countries?
+
+**Visual:** Ranked horizontal bar chart
+
+**Category:** Country
+
+**Measure:** Segment Conversion Rate
+
+Conversion must be interpreted with awareness of traffic scale.
 
 ---
 
 # 8. Navigation Architecture
 
-Primary navigation should provide direct access to:
+Primary navigation provides direct access to:
 
 - Executive Overview
 - Acquisition & Channel Performance
 - Commerce Performance
 - Customer Behaviour & Segmentation
 
-Navigation should remain in a consistent location across production pages.
+Navigation remains consistent across production pages.
 
 The current page should be visually identifiable.
 
-Navigation should not rely on users discovering Power BI page tabs.
+Navigation must not depend solely on users discovering Power BI page tabs.
 
 ---
 
 # 9. Slicer Architecture
 
-Slicers should be purposeful and page-specific.
+Slicers are purposeful and page-specific.
 
-## Date
+## Reporting Period
 
-Date filtering is relevant to:
+The Reporting Period slicer is used on:
 
 - Executive Overview
 - Acquisition & Channel Performance
 - Commerce Performance
-- Segment analysis
 
-Date filtering must not imply standard date filtering of disconnected user-behaviour KPIs.
+It is not used on Customer Behaviour & Segmentation because the user-grain branch is intentionally disconnected from the governed daily reporting relationship.
 
 ## Channel
 
-Channel filtering belongs primarily to Acquisition & Channel Performance.
+Channel context belongs to the governed acquisition analytical branch.
 
-It should not be synchronized globally where doing so would imply unsupported filtering of other analytical branches.
+It must not be synchronized globally where doing so would imply unsupported filtering of unrelated analytical populations.
 
 ## Device and Country
 
-Device and country filters belong to segment analysis.
+Device and country are used as analytical comparison dimensions on the Customer Behaviour & Segmentation page.
 
-They should not be presented as global report filters unless a later semantic design explicitly supports that behaviour.
+They are not treated as global report filters unless a future semantic design explicitly supports that behaviour.
 
 ---
 
 # 10. Tooltip Strategy
 
-Tooltips may be used to provide additional context without increasing page density.
+Tooltips may provide additional context without increasing visual density.
 
-Potential uses include:
+Useful tooltip content can include:
 
 - exact KPI values
-- supporting conversion context
+- date-specific trend values
+- conversion context
 - channel traffic and commercial context
-- date-specific trend context
-- segment performance context
+- device or geography context
 
-Tooltip pages should be created only when they provide information that materially improves interpretation.
+Dedicated tooltip pages are optional.
 
-They must not become hidden mini-reports containing excessive metrics.
+They should be created only when they materially improve interpretation.
+
+They must not become hidden mini-reports.
 
 ---
 
 # 11. Drill-Through Strategy
 
-Drill-through is optional rather than mandatory.
+Drill-through is optional.
 
 It should be implemented only when:
 
 - a meaningful lower analytical grain exists
-- the destination answers a distinct investigation question
-- filter context can be transferred without semantic ambiguity
+- the destination answers a distinct business question
+- filter context can transfer without semantic ambiguity
 
-No drill-through page should be created solely to demonstrate a Power BI feature.
+No drill-through page should be created only to demonstrate Power BI functionality.
 
 ---
 
@@ -659,99 +649,292 @@ Preferred visual families:
 
 - KPI cards for headline values
 - line charts for time trends
-- bar charts for categorical comparison
-- matrices for detailed comparison where necessary
-- scatter plots for scale-versus-efficiency questions when cardinality is appropriate
+- horizontal or vertical bar charts for categorical comparisons
+
+Tables, matrices, scatter plots, maps, and other visual types are used only when they improve analytical interpretation.
 
 Avoid by default:
 
-- pie charts with many categories
-- donut charts used only for decoration
+- decorative pie or donut charts
 - gauges
 - 3D charts
-- excessive combo charts
-- dense tables without an investigation purpose
+- unnecessary combo charts
+- dense tables without investigation value
 - maps when ranked comparisons answer the question more clearly
+- visuals that repeat information already communicated elsewhere
 
 ---
 
-# 13. Report Density Standard
+# 13. Visual System
 
-Each page should contain only the visuals required to answer its business questions.
+The production report uses a restrained professional design system.
 
-The target is not to maximize the number of visuals.
+General principles:
 
-A professional page should generally provide:
+- white background
+- restrained blue palette
+- minimal decorative styling
+- no unnecessary borders
+- no unnecessary shadows
+- consistent spacing
+- business-readable titles
+- deliberate whitespace
+
+## Typography
+
+### Page Title
+
+Segoe UI Semibold — 18 pt
+
+### Page Subtitle
+
+Segoe UI Regular — 11 pt
+
+### KPI Callout
+
+Segoe UI Semibold — 22 pt
+
+### KPI Label
+
+Segoe UI Regular — 10 pt
+
+### Chart Title
+
+Segoe UI Semibold — 12 pt
+
+### Legend
+
+9 pt
+
+### Axis Values
+
+9 pt
+
+### Axis Titles
+
+Segoe UI Semibold — 9 pt
+
+---
+
+# 14. Report Density Standard
+
+Each page contains only the visuals required to answer its business questions.
+
+The objective is not to maximize visual count.
+
+A production page should generally contain:
 
 - a concise KPI layer
-- two to four primary analytical visuals
-- limited supporting context
+- a limited number of primary analytical visuals
+- only necessary supporting context
 - deliberate whitespace
 
 Additional visuals require a distinct analytical purpose.
 
 ---
 
-# 14. Cross-Page Semantic Rules
+# 15. Business Narrative
 
-The report must preserve the following distinctions:
+The report follows the general analytical progression:
 
-### Executive
+**What happened → How is it changing → What is driving it → Where should the user investigate next**
 
-Headline commercial metrics use their governed executive semantics.
+Not every page must implement every narrative stage when the underlying grain does not support it.
 
-### Acquisition
+For example, full-observation-period user-behaviour KPIs must not be given artificial time-trend behavior merely to make the page structurally identical to date-connected pages.
+
+Titles, subtitles, KPI context, visual ordering, and supporting comparisons provide the page-level analytical narrative.
+
+---
+
+# 16. Cross-Page Semantic Rules
+
+The report preserves the following distinctions.
+
+## Executive
+
+Headline metrics use their governed executive semantics.
+
+## Acquisition
 
 Commercial outcomes are session-attributed.
 
-### Commerce
+## Commerce
 
 Commercial analysis is transaction-date based.
 
-### User Behaviour
+## User Behaviour
 
 Analysis is user-grain and disconnected from the standard daily reporting relationship.
 
-### Segmentation
+## Segmentation
 
-Analysis uses session-date and session-attributed segment semantics.
+Device and geography analysis uses governed session-date and session-attributed segment semantics.
 
-The visual layer must not conceal these differences for the sake of apparent consistency.
-
----
-
-# 15. Build Sequence
-
-Production implementation will follow this order:
-
-1. Executive Overview
-2. Acquisition & Channel Performance
-3. Commerce Performance
-4. Customer Behaviour & Segmentation
-
-Each page should be:
-
-**built → visually reviewed → semantically checked → retained as the production baseline**
-
-before proceeding to the next page.
-
-Cross-report interactions and visual-system standardization will then be completed across the full report.
+The visual layer must not conceal these distinctions for apparent consistency.
 
 ---
 
-# 16. P10B Acceptance Criteria
+# 17. Production Page Summary
 
-P10B is complete when:
+## Page 1 — Executive Overview
 
-1. Every production page has a defined purpose.
-2. Every page answers explicit business questions.
-3. KPI placement is defined before production development.
-4. Primary visual roles are defined.
-5. Filter scope is defined.
-6. User-behaviour and date-connected populations remain explicitly separated.
-7. Acquisition and executive commercial semantics remain explicitly separated.
-8. Navigation architecture is defined.
-9. Tooltip and drill-through usage is governed rather than feature-driven.
-10. Visual-density standards are established.
-11. No unsupported KPI or analytical population is introduced.
-12. The blueprint provides sufficient direction to begin production report development without redesigning the analytical architecture during page construction.
+KPI cards:
+
+- Purchase Revenue
+- Total Sessions
+- Purchasing Sessions
+- Conversion Rate
+- Total Transactions
+- Average Order Value
+
+Visuals:
+
+- Revenue Trend
+- Conversion Trend
+- Revenue: Last 7D vs Previous 7D
+- Conversion: Last 7D vs Previous 7D
+
+Filter:
+
+- Reporting Period
+
+---
+
+## Page 2 — Acquisition & Channel Performance
+
+KPI cards:
+
+- Channel Sessions
+- Channel Purchasing Sessions
+- Channel Conversion Rate
+- Revenue per Session
+
+Visuals:
+
+- Sessions by Channel
+- Conversion Rate by Channel
+- Revenue Share by Channel
+- Revenue per Session by Channel
+
+Filter:
+
+- Reporting Period
+
+---
+
+## Page 3 — Commerce Performance
+
+KPI cards:
+
+- Purchase Revenue
+- Total Transactions
+- Average Order Value
+- Items per Transaction
+
+Visuals:
+
+- Revenue Trend
+- Transaction Trend
+- Average Order Value Trend
+- Items per Transaction Trend
+
+Filter:
+
+- Reporting Period
+
+---
+
+## Page 4 — Customer Behaviour & Segmentation
+
+KPI cards:
+
+- Observed Users
+- Purchasing Users
+- Multi-Session Users
+- Repeat Purchasing Session Users
+
+Device visuals:
+
+- Sessions by Device
+- Conversion Rate by Device
+- Revenue by Device
+- Revenue per Session by Device
+
+Country visuals:
+
+- Revenue by Country
+- Conversion Rate by Country
+
+Filter:
+
+- no standard Reporting Period slicer
+
+Analytical context:
+
+- full observation period
+
+---
+
+# 18. Phase 10 Implementation Outcome
+
+The final Power BI report contains four production analytical pages built on the governed Phase 9 semantic model.
+
+The production implementation preserves:
+
+- governed KPI definitions
+- reporting-date semantics
+- transaction-date semantics
+- session-date semantics
+- session-attributed commercial semantics
+- user-grain isolation
+- controlled filter propagation
+- non-additive metric behavior
+- deliberate interaction design
+
+The final report favors analytical clarity over feature density.
+
+Features such as additional drill-through pages, dedicated tooltip pages, maps, scatter plots, or decorative visuals were not added where they did not provide sufficient decision value.
+
+---
+
+# 19. Phase 10 Blueprint Acceptance
+
+The production blueprint is satisfied when:
+
+1. Each production page has a clear business purpose.
+2. Page structure matches the governed semantic model.
+3. KPI placement is deliberate.
+4. Visual roles support explicit analytical questions.
+5. Reporting Period filtering is used only where semantically valid.
+6. User-grain and date-connected analytical populations remain separated.
+7. Acquisition and executive commercial semantics remain separated.
+8. Navigation is consistent.
+9. Visual density remains controlled.
+10. Unsupported metrics are not introduced.
+11. The report passes Phase 10 report-level QA and rendering review.
+12. The final report is ready for Phase 11 end-to-end validation.
+
+---
+
+# 20. Final Build Status
+
+Production implementation sequence:
+
+1. Executive Overview — Complete
+2. Acquisition & Channel Performance — Complete
+3. Commerce Performance — Complete
+4. Customer Behaviour & Segmentation — Complete
+5. Cross-report interaction review — Complete
+6. Visual-system standardization — Complete
+7. Business narrative review — Complete
+8. Report-level QA — Complete
+9. Performance and rendering review — Complete
+
+The final Power BI artifact is retained at:
+
+`power_bi/digital_commerce_performance_analytics.pbix`
+
+Phase 10 report implementation is complete through P10K.
+
+P10L — Report Handoff & Phase Closeout remains the active closeout work package until documentation, repository cleanup, checkpoint updates, and Phase 11 readiness are finalized.

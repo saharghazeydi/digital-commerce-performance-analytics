@@ -268,7 +268,6 @@ Approved screenshots must be stored in a purpose-specific location.
 Planned examples include:
 
 ```text
-powerbi/screenshots/
 docs/architecture/images/
 docs/data_quality/evidence/
 ```
