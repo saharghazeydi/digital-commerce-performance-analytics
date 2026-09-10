@@ -1573,3 +1573,120 @@ Repository closeout, Pull Request review, merge, and synchronization with `main`
 ## Next Approved Work Package
 
 P10A — Report Requirements, after Phase 9 closeout review and merge
+---
+
+# Checkpoint 10.1 — Power BI Report Accepted
+
+## Objective
+
+Complete and formally validate the production Power BI report built on the governed Phase 9 semantic model, including page design, KPI presentation, analytical visuals, filter behavior, business narrative, usability, rendering quality, and report handoff readiness.
+
+## Work Completed
+
+- implemented the final four-page Power BI report:
+  - Executive Overview
+  - Acquisition & Channel Performance
+  - Commerce Performance
+  - Customer Behaviour & Segmentation
+- implemented executive KPI cards, governed trend visuals, and recent seven-day comparison indicators
+- implemented acquisition visuals for channel sessions, conversion rate, session-attributed revenue share, and revenue per session
+- implemented commerce visuals for revenue, transactions, Average Order Value, and Items per Transaction
+- implemented user-behaviour KPIs at user grain
+- implemented device and country segment visuals
+- retained Page 4 as a full-observation-period analysis rather than applying an invalid standard reporting-date slicer to the disconnected user-grain model
+- standardized report typography, visual hierarchy, spacing, number formatting, labels, subtitles, and layout
+- removed low-value or redundant visuals
+- preserved governed semantic boundaries between session-date, transaction-date, session-attributed, and user-grain analytical populations
+- completed report-level slicer, interaction, navigation, readability, and usability QA
+- completed Power BI close/reopen rendering validation
+- validated final channel attribution behavior after the governed semantic fix
+- finalized and committed the production Power BI artifact
+- updated Phase 10 report requirements and page blueprint to reflect the approved final implementation
+- removed the obsolete `powerbi/` scaffold and retained `power_bi/` as the canonical Power BI project directory
+
+## Validation Performed
+
+- confirmed Executive Overview all-period KPIs:
+  - Purchase Revenue approximately 307.64K
+  - Total Sessions approximately 360K
+  - Purchasing Sessions 4,033
+  - Conversion Rate approximately 1.12%
+  - Total Transactions 4,451
+  - Average Order Value approximately 69.12
+- confirmed Reporting Period slicer behavior across 2020-11, 2020-12, 2021-01, and full-period context on Pages 1–3
+- confirmed date filtering changes connected KPI and trend visuals as intended
+- confirmed Page 4 does not use a standard Reporting Period slicer
+- confirmed Observed Users = 270,154
+- confirmed Purchasing Users = 3,702
+- confirmed Multi-Session Users = 47,364
+- confirmed Repeat Purchasing Session Users = 284
+- confirmed final governed channel session totals reconcile to 360,129 sessions
+- confirmed final channel distribution:
+  - Direct: 132,377
+  - Organic Search: 101,750
+  - Referral: 84,919
+  - Other: 25,364
+  - Paid Search: 7,683
+  - Unknown: 6,510
+  - Affiliate: 1,329
+  - Email: 197
+- confirmed channel purchasing sessions reconcile to 4,033
+- confirmed channel conversion and revenue-per-session measures render correctly under report filter context
+- confirmed the large Items per Transaction spike on 2020-12-30 reflects governed source data and was not artificially clipped
+- confirmed report pages reopen and render successfully in Power BI Desktop
+- confirmed navigation, slicers, cross-filtering, labels, visual sizing, and scrolling behavior are usable and intentional
+- confirmed no unintended blank visuals, broken interactions, or semantic inconsistencies were identified during final report QA
+
+## Evidence
+
+- `power_bi/digital_commerce_performance_analytics.pbix`
+- `power_bi/documentation/report_requirements.md`
+- `power_bi/documentation/report_page_blueprint.md`
+- `power_bi/documentation/semantic_model_handoff.md`
+- `power_bi/documentation/bi_serving_handoff.md`
+- `docs/project_management/project_tracker.md`
+- `docs/project_management/AI_PROJECT_CONTINUITY.md`
+- semantic attribution fix commit `fde130e`
+- final Power BI report commit `52d7238`
+
+## Decisions Made
+
+- `power_bi/` is the canonical Power BI directory
+- the obsolete `powerbi/` scaffold is removed
+- Power BI remains a presentation and semantic-consumption layer rather than an alternative transformation layer
+- Page 1 revenue trend displays Daily Revenue without plotting the warehouse rolling seven-day revenue sum on the same axis
+- Conversion Trend retains Daily Conversion Rate and 7D Conversion Rate because both remain directly comparable rate measures
+- Page 2 uses Revenue per Session instead of Channel Session Contribution as a headline efficiency KPI
+- Page 2 uses Revenue Share rather than presenting contribution terminology that could be misread as transaction-date executive revenue
+- low-volume channels are retained where they provide legitimate analytical context
+- Page 3 preserves real observed spikes rather than clipping them for aesthetics
+- Page 4 is intentionally interpreted across the full observation period
+- Page 4 user KPIs are calculated from `bi_user_behavior` and are not reconstructed from `bi_segment_daily`
+- no standard Reporting Period slicer is applied to Page 4 user-grain analysis
+- additional drill-through pages, tooltip pages, scatter plots, maps, and decorative visuals are not introduced where they do not provide sufficient analytical value
+- Phase 10 closes without duplicating the Phase 11 end-to-end validation scope
+
+## Known Limitations
+
+- the analytical source remains a static, obfuscated public GA4 ecommerce sample
+- the available analytical history covers approximately three months
+- authenticated `user_id` is unavailable
+- user metrics therefore represent observed pseudo-user behaviour rather than authenticated customer identity
+- channel attribution remains constrained by the source acquisition information available in the sample
+- some low-volume channels can show high conversion or revenue-per-session values and must be interpreted together with traffic scale
+- Power BI report validation remains primarily manual rather than automated
+- full end-to-end project validation remains the responsibility of Phase 11
+
+## Phase Decision
+
+**Phase 10 — Power BI Report is technically accepted.**
+
+The production report is complete through report implementation, interaction design, UX standardization, narrative review, report-level QA, rendering validation, documentation synchronization, and handoff preparation.
+
+The report preserves the governed analytical contracts established in the warehouse, executive KPI, serving, and semantic-model layers and does not introduce unsupported KPI logic, invalid date semantics, or alternative attribution behavior.
+
+No identified report-level semantic, usability, rendering, interaction, documentation, or handoff issue blocks progression to Phase 11.
+
+## Next Approved Work Package
+
+P11A — Source-to-Staging Reconciliation

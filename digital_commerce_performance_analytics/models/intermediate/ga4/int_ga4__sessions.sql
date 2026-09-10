@@ -6,6 +6,7 @@
         "medium"
     ]
 ) }}
+
 with session_events as (
 
     select *
@@ -106,6 +107,7 @@ session_enriched as (
 
         first_events.page_location as landing_page,
         first_events.page_title as landing_page_title,
+        first_events.page_referrer as landing_page_referrer,
 
         last_events.page_location as exit_page,
         last_events.page_title as exit_page_title,
@@ -114,24 +116,46 @@ session_enriched as (
         selected_acquisition_events.medium as medium,
         selected_acquisition_events.campaign as campaign,
 
-        coalesce(purchase_metrics.transaction_count, 0) as transaction_count,
+        selected_acquisition_events.session_key is not null
+            as has_selected_acquisition,
 
-        coalesce(purchase_metrics.purchase_revenue, 0) as purchase_revenue,
+        coalesce(
+            purchase_metrics.transaction_count,
+            0
+        ) as transaction_count,
 
-        coalesce(purchase_metrics.refund_value, 0) as refund_value,
+        coalesce(
+            purchase_metrics.purchase_revenue,
+            0
+        ) as purchase_revenue,
 
-        coalesce(purchase_metrics.shipping_value, 0) as shipping_value,
+        coalesce(
+            purchase_metrics.refund_value,
+            0
+        ) as refund_value,
 
-        coalesce(purchase_metrics.tax_value, 0) as tax_value,
+        coalesce(
+            purchase_metrics.shipping_value,
+            0
+        ) as shipping_value,
+
+        coalesce(
+            purchase_metrics.tax_value,
+            0
+        ) as tax_value,
 
         coalesce(
             purchase_metrics.total_item_quantity,
             0
         ) as total_item_quantity,
 
-        coalesce(purchase_metrics.unique_items, 0) as unique_items,
+        coalesce(
+            purchase_metrics.unique_items,
+            0
+        ) as unique_items,
 
-        purchase_metrics.transaction_count is not null as has_purchase
+        purchase_metrics.transaction_count is not null
+            as has_purchase
 
     from aggregated_sessions as sessions
 
