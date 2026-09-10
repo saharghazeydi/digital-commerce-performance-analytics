@@ -33,6 +33,7 @@ final as (
         country,
         landing_page,
         landing_page_title,
+        landing_page_referrer,
         exit_page,
         exit_page_title,
 
@@ -40,31 +41,55 @@ final as (
         source,
         medium,
         campaign,
+        has_selected_acquisition,
 
         case
-            when medium is null
-                or medium = '(data deleted)'
-                then 8
 
-            when medium = '(none)'
+            when has_selected_acquisition then
+
+                case
+                    when lower(trim(source)) = '(data deleted)'
+                        or lower(trim(medium)) = '(data deleted)'
+                        then 8
+
+                    when lower(trim(source)) = '(direct)'
+                        or lower(trim(medium)) = '(none)'
+                        then 1
+
+                    when lower(trim(medium)) = 'organic'
+                        then 2
+
+                    when lower(trim(medium)) = 'cpc'
+                        then 3
+
+                    when lower(trim(medium)) = 'referral'
+                        then 4
+
+                    when lower(trim(medium)) = 'email'
+                        then 5
+
+                    when lower(trim(medium)) = 'affiliate'
+                        then 6
+
+                    when nullif(trim(medium), '') is null
+                        then 8
+
+                    else 7
+                end
+
+            when nullif(trim(landing_page_referrer), '') is null
                 then 1
 
-            when medium = 'organic'
-                then 2
+            when lower(
+                regexp_extract(
+                    trim(landing_page_referrer),
+                    r'^https?://([^/:?#]+)'
+                )
+            ) = 'shop.googlemerchandisestore.com'
+                then 1
 
-            when medium = 'cpc'
-                then 3
+            else 8
 
-            when medium = 'referral'
-                then 4
-
-            when medium = 'email'
-                then 5
-
-            when medium = 'affiliate'
-                then 6
-
-            else 7
         end as channel_key,
 
         -- commercial measures
