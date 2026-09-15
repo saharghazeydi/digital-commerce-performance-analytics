@@ -6,12 +6,12 @@
 |---|---|
 | Project | Digital Commerce Performance Analytics |
 | Delivery Model | Analytics engineering and business intelligence |
-| Current Delivery Phase | Phase 11 — Final Validation |
-| Last Completed Phase | Phase 10 — Power BI Report |
-| Current Work Package | P11A — Source-to-Staging Reconciliation |
-| Next Approved Work Package | P11A — Source-to-Staging Reconciliation |
-| Repository Baseline | Phase 10 Power BI report implementation, semantic validation, report-level QA, performance/rendering review, documentation synchronization, repository cleanup, and formal handoff are complete; final PBIX is committed and Phase 11 validation is ready to begin |
-| Overall Delivery Progress | Phases 0–10 are complete and validated. Phase 10 delivered the final four-page Power BI report, interaction design, visual standardization, semantic and data validation, usability QA, rendering review, documentation synchronization, repository cleanup, and formal handoff. Phase 11 final validation is the next approved delivery phase. |
+| Current Delivery Phase | Phase 12 — Portfolio Packaging |
+| Last Completed Phase | Phase 11 — Final Validation |
+| Current Work Package | P12A — Repository Narrative |
+| Next Approved Work Package | P12A — Repository Narrative |
+| Repository Baseline | Phase 11 final validation is technically accepted. End-to-end reconciliation, the full dbt quality gate, repository audit, and final Power BI regression QA passed with no unresolved critical issues. Phase 11 closeout changes are pending the standard commit, pull-request review, and merge workflow. |
+| Overall Delivery Progress | Phases 0–11 are complete and validated. Phase 11 established final source-to-report validation coverage, confirmed 384 passing dbt nodes with zero warnings, errors, or skipped nodes, verified repository integrity, and completed final Power BI regression QA. Phase 12 — Portfolio Packaging is the next delivery phase. |
 
 ## Tracker Purpose
 
@@ -246,25 +246,24 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 
 ## Phase 11 — Final Validation
 
-**Phase status:** Planned
+**Phase status:** Complete
 
 **Delivery outcome:** Validate the complete analytical chain from source data through dbt models, BigQuery outputs, semantic measures, and report visuals.
 
 | ID | Work Package | Deliverable | Status |
 |---|---|---|---|
-| P11A | Source-to-Staging Reconciliation | Source and staging results reconciled | Planned |
-| P11B | Warehouse Reconciliation | Intermediate, core, and mart layers reconciled | Not Started |
-| P11C | BI Reconciliation | Serving, semantic-model, and report values reconciled | Not Started |
-| P11D | dbt Quality Gate | Full dbt parsing, build, test, and documentation validation | Not Started |
-| P11E | Repository Audit | Secrets, generated files, documentation, links, and structure reviewed | Not Started |
-| P11F | Power BI QA | Filters, totals, navigation, empty states, and interactions tested | Not Started |
-| P11G | Final Acceptance | All critical checks approved or explicitly documented | Not Started |
-
+| P11A | Source-to-Staging Reconciliation | Source and staging results reconciled | Complete |
+| P11B | Warehouse Reconciliation | Intermediate, core, and mart layers reconciled | Complete |
+| P11C | BI Reconciliation | Serving, semantic-model, and report values reconciled | Complete |
+| P11D | dbt Quality Gate | Full dbt parsing, build, test, and documentation validation | Complete |
+| P11E | Repository Audit | Secrets, generated files, documentation, links, and structure reviewed | Complete |
+| P11F | Power BI QA | Filters, totals, navigation, empty states, and interactions tested | Complete |
+| P11G | Final Acceptance | All critical checks approved or explicitly documented | Complete |
 ---
 
 ## Phase 12 — Portfolio Packaging
 
-**Phase status:** Not Started
+**Phase status:** Planned
 
 **Delivery outcome:** Package the technical implementation and business analysis as a reproducible, interview-ready analytics engineering case study.
 
@@ -280,42 +279,37 @@ Long-term scope, architecture, design principles, and target deliverables are ma
 | P12H | Portfolio Release | Final repository review and portfolio publication | Not Started |
 
 ---
-
 ## Current Focus
 
-### Phase 11 — Final Validation
+### Phase 11 — Final Validation Closeout
 
-Phase 10 is complete and formally accepted.
+Phase 11 has passed final acceptance.
 
-The production Power BI report now provides:
+Completed validation includes:
 
-- Executive Overview
-- Acquisition & Channel Performance
-- Commerce Performance
-- Customer Behaviour & Segmentation
-- governed Reporting Period filtering on date-responsive report pages
-- explicit separation of full-observation-period user behaviour from standard daily date filtering
-- validated executive, commerce, acquisition, user-behaviour, device, and geography metrics
-- standardized report titles, subtitles, KPI cards, typography, spacing, chart formatting, and visual hierarchy
-- validated slicer, interaction, navigation, rendering, and usability behaviour
-- governed channel attribution semantics following the GA4 session-channel refinement
+- source-to-staging reconciliation for GA4 events and items
+- intermediate-to-core reconciliation for sessions and transactions
+- existing core-to-business-mart reconciliation controls
+- BI-serving-to-upstream reconciliation across all five serving models
+- serving-layer KPI reconciliation against the final Power BI baseline
+- full-project dbt quality gate
+- repository integrity and exclusion-rule audit
+- final Power BI artifact and visual regression QA
+- formal Phase 11 validation summary and acceptance checkpoint
 
-Final validated report-level baseline values include:
+The final dbt quality gate completed successfully across 21 models and 363 data tests:
 
-- 360,129 sessions
-- 4,033 purchasing sessions
-- 4,451 transactions
-- 307,640 purchase revenue
-- approximately 1.12% overall conversion rate
-- 270,154 observed users
-- 3,702 purchasing users
-- 47,364 multi-session users
-- 284 repeat purchasing session users
+- 384 total nodes passed
+- 0 warnings
+- 0 errors
+- 0 skipped nodes
 
-The final Power BI artifact, Phase 10 documentation, repository cleanup, and formal checkpoint are complete.
+No unresolved critical data-quality, reconciliation, grain, semantic, repository, or Power BI regression issue remains.
+
+Phase 11 is technically accepted. The remaining closeout activity is limited to the standard Git commit, pull-request review, and merge workflow.
 
 ## Next Approved Work Package
 
-### P11A — Source-to-Staging Reconciliation
+### P12A — Repository Narrative
 
-Begin Phase 11 by independently reconciling the governed source population with the staging layer before progressing through downstream warehouse, BI, and full-project validation.
+After the Phase 11 closeout changes are merged into `main`, begin Phase 12 — Portfolio Packaging by refining the repository narrative for recruiter, hiring-manager, and interview consumption.

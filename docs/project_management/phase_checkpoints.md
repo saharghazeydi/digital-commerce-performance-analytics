@@ -1690,3 +1690,163 @@ No identified report-level semantic, usability, rendering, interaction, document
 ## Next Approved Work Package
 
 P11A — Source-to-Staging Reconciliation
+
+---
+
+# Checkpoint 11.1 — Final Validation Accepted
+
+## Phase
+
+Phase 11 — Final Validation
+
+## Work Packages
+
+- P11A — Source-to-Staging Reconciliation
+- P11B — Warehouse Reconciliation
+- P11C — BI Reconciliation
+- P11D — dbt Quality Gate
+- P11E — Repository Audit
+- P11F — Power BI QA
+- P11G — Final Acceptance
+
+## Validation Scope
+
+Phase 11 performed the final end-to-end validation of the governed analytical delivery chain from the approved GA4 source population through staging, intermediate models, the Core Warehouse, business marts, executive KPI models, BI serving datasets, the Power BI semantic model, and the final Power BI report.
+
+No new analytical features, KPI definitions, attribution rules, architecture, or report design were introduced during this phase.
+
+## Validation Evidence
+
+### Source-to-Staging
+
+Explicit reconciliation controls confirmed that:
+
+- `stg_ga4__events` reconciles to the approved-window GA4 source event population; and
+- `stg_ga4__items` reconciles to the approved-window source item-array population.
+
+The complete staging singular-test suite passed:
+
+- PASS=8
+- WARN=0
+- ERROR=0
+- SKIP=0
+
+### Intermediate-to-Core and Business Marts
+
+Explicit cardinality controls confirmed that:
+
+- `fct_sessions` preserves the governed `int_ga4__sessions` population; and
+- `fct_transactions` preserves the governed `int_ga4__transactions` population.
+
+Existing Core Warehouse and business-mart reconciliation and integrity controls were also executed successfully.
+
+Combined result:
+
+- PASS=23
+- WARN=0
+- ERROR=0
+- SKIP=0
+
+### BI Serving Layer
+
+All five BI serving datasets were explicitly reconciled to their governed upstream models:
+
+- `bi_channel_daily`
+- `bi_commerce_daily`
+- `bi_executive_daily`
+- `bi_segment_daily`
+- `bi_user_behavior`
+
+Serving reconciliation result:
+
+- PASS=5
+- WARN=0
+- ERROR=0
+- SKIP=0
+
+Direct serving-layer KPI checks also reconciled to the final Power BI baseline.
+
+### Full dbt Quality Gate
+
+The complete project-level `dbt build` completed successfully across:
+
+- 21 models
+- 363 data tests
+
+Final result:
+
+- PASS=384
+- WARN=0
+- ERROR=0
+- SKIP=0
+- NO-OP=0
+- REUSED=0
+- TOTAL=384
+
+### Repository Audit
+
+The repository audit confirmed that:
+
+- generated dbt artifacts and local logs remain ignored;
+- virtual-environment, credential, local-data, IDE, and temporary Power BI artifacts remain excluded;
+- no suspicious generated or local-data artifacts are tracked;
+- `power_bi/` remains the canonical Power BI directory; and
+- no blocking repository-governance issue remains.
+
+### Power BI QA
+
+The canonical PBIX was reopened in Power BI Desktop and passed final regression QA.
+
+Validation confirmed that:
+
+- all four production report pages render successfully;
+- no broken or unexpected blank visuals are present;
+- governed KPI baselines remain aligned;
+- report navigation remains functional;
+- intended slicers and interactions remain functional; and
+- no report or semantic-model regression requiring remediation was identified.
+
+## Final Validated Business Baseline
+
+- Sessions: 360,129
+- Purchasing Sessions: 4,033
+- Transactions: 4,451
+- Purchase Revenue: 307,640
+- Overall Conversion Rate: approximately 1.12%
+- Average Order Value: approximately 69.12
+- Observed Users: 270,154
+- Purchasing Users: 3,702
+- Multi-Session Users: 47,364
+- Repeat Purchasing Session Users: 284
+
+## Known Limitations
+
+The final acceptance preserves the documented project limitations, including:
+
+- static and obfuscated public GA4 ecommerce source data;
+- approximately three months of analytical history;
+- absence of authenticated `user_id`;
+- pseudo-user rather than authenticated-customer user metrics;
+- source-constrained acquisition information;
+- no unsupported profitability, CAC, ROAS, lifetime-value, churn, or formal-retention metrics;
+- no unsupported multi-touch attribution;
+- primarily manual Power BI regression QA; and
+- no automated CI implementation.
+
+These are governed scope boundaries and do not represent failed acceptance criteria.
+
+## Phase Decision
+
+Phase 11 has passed the final validation gate.
+
+P11A through P11F have passed their technical acceptance criteria, and P11G confirms that no unresolved critical data-quality, reconciliation, grain, semantic, repository, or Power BI regression issue remains.
+
+The project is technically accepted for Phase 11 closeout, subject only to the standard documentation commit, pull-request review, and merge workflow.
+
+**Phase 11 — Final Validation: ACCEPTED**
+
+## Next Approved Work Package
+
+**P12A — Repository Narrative**
+
+Proceed to Phase 12 — Portfolio Packaging after the Phase 11 closeout changes are committed, reviewed, and merged into `main`.
