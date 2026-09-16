@@ -111,7 +111,12 @@ Detailed artifact rules are maintained in:
 
 ```text
 docs/project_management/development_workflow.md
-| `docs/project_management/reproduction_guide.md` | Environment setup, BigQuery/dbt configuration, execution, validation, and Power BI reproduction guidance |
+```
+
+Environment setup and reproduction guidance is maintained in:
+
+```text
+docs/project_management/reproduction_guide.md
 ```
 
 ---

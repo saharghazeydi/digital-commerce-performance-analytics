@@ -129,7 +129,7 @@ Reusable analytical entities establish deterministic session and transaction log
 
 Primary models:
 
-- `int_ga4__events_base`
+- `int_ga4__session_events`
 - `int_ga4__sessions`
 - `int_ga4__transactions`
 
