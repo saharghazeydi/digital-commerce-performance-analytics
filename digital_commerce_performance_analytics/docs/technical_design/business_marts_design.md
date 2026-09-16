@@ -140,7 +140,7 @@ Where measures use different attribution semantics, those semantics must remain 
 
 ---
 
-# 3. Phase 6 Planned Mart Architecture
+# 3. Phase 6 Mart Architecture
 
 The approved Phase 6 mart scope is:
 
@@ -153,7 +153,7 @@ The approved Phase 6 mart scope is:
 | P6G | Validation | Mart integrity and reconciliation |
 | P6H | Performance Optimization | Serving efficiency and final optimization |
 
-Each mart is implemented only after its grain, KPI contract, attribution semantics, and reconciliation requirements are confirmed.
+Each mart was implemented after its grain, KPI contract, attribution semantics, and reconciliation requirements were confirmed.
 
 ---
 
@@ -540,7 +540,7 @@ The approved serving grain is:
 
 > One row per calendar date.
 
-The planned model is:
+The implemented model is:
 
 `mart_ecommerce_daily`
 
@@ -713,7 +713,7 @@ The governed warehouse inputs are:
 
 ---
 
-# 11. Planned Ecommerce Mart Model
+# 11. Implemented Ecommerce Mart Model
 
 Model name:
 
@@ -1078,19 +1078,20 @@ with:
 81 observed transaction dates
 ```
 
-Because the mart preserves the relevant session analytical date spine, the current static dataset is expected to produce:
+Because the mart preserves the relevant session analytical date spine, the implemented mart contains:
+
 
 ```text
 92 daily mart rows
 ```
 
-This expected value must be validated after implementation.
+This row count was validated against the governed analytical date coverage.
 
 ---
 
 # 23. Ecommerce Materialization Strategy
 
-`mart_ecommerce_daily` should be materialized as a table.
+`mart_ecommerce_daily` is materialized as a table.
 
 Rationale:
 
@@ -1149,7 +1150,7 @@ These limitations must remain explicit rather than being hidden through unsuppor
 
 # 26. P6D Implementation Contract
 
-P6D is approved to implement:
+P6D implemented:
 
 `mart_ecommerce_daily`
 
@@ -1180,23 +1181,23 @@ The implementation must:
 
 ---
 
-# 27. P6D Implementation Sequence
+# 27. P6D Implementation Outcome
 
-After this design is approved, P6D proceeds with:
+P6D implemented and validated `mart_ecommerce_daily` against the approved design and KPI contracts.
 
-1. implement `mart_ecommerce_daily.sql`
-2. update `_business__models.yml`
-3. add structural and relationship tests
-4. add session-date reconciliation tests
-5. add transaction-date reconciliation tests
-6. add session-cohort attribution reconciliation tests
-7. add derived-KPI formula tests
-8. run `dbt parse`
-9. run targeted `dbt build`
-10. inspect reconciliation outputs
-11. commit the completed P6D implementation
+The completed implementation included:
 
-P6E begins only after P6D implementation and validation are complete.
+1. `mart_ecommerce_daily.sql`
+2. business-model schema documentation
+3. structural and relationship tests
+4. session-date reconciliation tests
+5. transaction-date reconciliation tests
+6. session-cohort attribution reconciliation tests
+7. derived-KPI formula tests
+8. dbt parsing and targeted build validation
+
+P6D was completed before work proceeded to P6E.
+
 ---
 
 # 28. Customer Behavior Mart
@@ -1232,7 +1233,7 @@ The approved grain is:
 
 > One row per `user_pseudo_id`.
 
-The planned model is:
+The implemented model is:
 
 `mart_user_behavior`
 
@@ -1630,9 +1631,9 @@ The governed session population currently contains:
 270,154
 ```
 
-distinct observed `user_pseudo_id` values.
+rows in `mart_user_behavior`.
 
-Therefore, the current static dataset is expected to produce:
+The mart also contains:
 
 ```text
 270,154
@@ -1648,7 +1649,7 @@ The mart must also contain:
 
 distinct non-null `user_pseudo_id` values.
 
-This expected population must be validated after implementation.
+This population was validated against the governed pseudo-user population.
 
 ---
 
@@ -1811,7 +1812,7 @@ The test suite must make fact-fanout errors detectable through reconciliation fa
 
 # 44. Customer Behavior Materialization Strategy
 
-`mart_user_behavior` should be materialized as a table.
+`mart_user_behavior` is materialized as a table.
 
 Rationale:
 
@@ -1877,7 +1878,7 @@ These limitations must remain explicit in downstream interpretation.
 
 # 47. P6E Implementation Contract
 
-P6E is approved to implement:
+P6E implemented:
 
 `mart_user_behavior`
 
@@ -1911,24 +1912,23 @@ The implementation must:
 
 ---
 
-# 48. P6E Implementation Sequence
+# 48. P6E Implementation Outcome
 
-After this design is approved, P6E proceeds with:
+P6E implemented and validated `mart_user_behavior` against the approved pseudo-user and behavioral contracts.
 
-1. implement `mart_user_behavior.sql`
-2. update `_business__models.yml`
-3. add structural and uniqueness tests
-4. add session-population reconciliation tests
-5. add transaction-population reconciliation tests
-6. add behavioral-population reconciliation tests
-7. add date-consistency tests
-8. add behavioral-flag consistency tests
-9. run `dbt parse`
-10. run targeted `dbt build`
-11. inspect reconciliation outputs
-12. commit the completed P6E implementation
+The completed implementation included:
 
-P6F begins only after P6E implementation and validation are complete.
+1. `mart_user_behavior.sql`
+2. business-model schema documentation
+3. structural and uniqueness tests
+4. session-population reconciliation tests
+5. transaction-population reconciliation tests
+6. behavioral-population reconciliation tests
+7. date-consistency tests
+8. behavioral-flag consistency tests
+9. dbt parsing and targeted build validation
+
+P6E was completed before work proceeded to P6F.
 ---
 
 # 49. Device / Geography Performance Mart
@@ -1959,7 +1959,7 @@ The approved grain is:
 
 > One row per `session_date + device_category + country`.
 
-The planned model is:
+The implemented model is:
 
 `mart_segment_daily`
 
@@ -1975,11 +1975,11 @@ Profiling of the governed `fct_sessions` population identified:
 | Countries | 109 |
 | Observed session-date + device-category + country combinations | 17,052 |
 
-The current static dataset is therefore expected to produce:
+The implemented mart contains:
 
 `17,052`
 
-mart rows after governed country normalization, subject to final implementation validation.
+rows after governed country normalization, consistent with the validated segment grain.
 
 ---
 
@@ -2308,13 +2308,13 @@ session_date + device_category + country
 
 combinations.
 
-Therefore, the current static P6F mart is expected to contain:
+Therefore, the implemented P6F mart contains:
 
 ```text
 17,052 rows
 ```
 
-This value must be validated after normalization and implementation.
+This value was validated after governed normalization and implementation.
 
 The mart remains substantially smaller than `fct_sessions`, making it appropriate as a BI-serving aggregate.
 
@@ -2477,7 +2477,7 @@ The test suite must make population loss or duplication detectable.
 
 # 66. Materialization Strategy
 
-`mart_segment_daily` should be materialized as a table.
+`mart_segment_daily` is materialized as a table.
 
 Rationale:
 
@@ -2543,7 +2543,7 @@ These limitations must remain explicit in downstream interpretation.
 
 # 69. P6F Implementation Contract
 
-P6F is approved to implement:
+P6F implemented:
 
 `mart_segment_daily`
 
@@ -2577,22 +2577,21 @@ The implementation must:
 
 ---
 
-# 70. P6F Implementation Sequence
+# 70. P6F Implementation Outcome
 
-After this design is approved, P6F proceeds with:
+P6F implemented and validated `mart_segment_daily` against the approved device, geography, attribution, and normalization contracts.
 
-1. implement `mart_segment_daily.sql`
-2. update `_business__models.yml`
-3. add structural and relationship tests
-4. add composite-grain uniqueness validation
-5. add session-population reconciliation tests
-6. add purchasing-session reconciliation tests
-7. add transaction and purchase-revenue reconciliation tests
-8. add KPI formula tests
-9. add segment-normalization tests
-10. run `dbt parse`
-11. run targeted `dbt build`
-12. inspect reconciliation outputs
-13. commit the completed P6F implementation
+The completed implementation included:
 
-P6G begins only after P6F implementation and validation are complete.
+1. `mart_segment_daily.sql`
+2. business-model schema documentation
+3. structural and relationship tests
+4. composite-grain uniqueness validation
+5. session-population reconciliation
+6. purchasing-session reconciliation
+7. transaction and purchase-revenue reconciliation
+8. KPI formula tests
+9. segment-normalization tests
+10. dbt parsing and targeted build validation
+
+P6F was completed before final Phase 6 validation and optimization work.

@@ -86,7 +86,6 @@ models:
                 values: [true, false]
                 quote: false
 
-
   - name: fct_sessions
     description: >
       Canonical session-grain fact table for the core warehouse. Contains
@@ -148,11 +147,22 @@ models:
       - name: platform
         description: GA4 platform associated with the session.
 
+      - name: device_category
+        description: Device category associated with the governed session.
+
+      - name: country
+        description: Country associated with the governed session.
+
       - name: landing_page
         description: Landing-page URL selected from the first session event.
 
       - name: landing_page_title
         description: Page title associated with the landing page.
+
+      - name: landing_page_referrer
+        description: >
+          Page referrer recorded on the first event of the governed session and
+          used as fallback context when explicit acquisition attributes are unavailable.
 
       - name: exit_page
         description: Exit-page URL selected from the final session event.
@@ -169,10 +179,24 @@ models:
       - name: campaign
         description: Governed session acquisition campaign.
 
+      - name: has_selected_acquisition
+        description: >
+          Boolean flag indicating whether an explicit governed acquisition event
+          was selected for the session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
       - name: channel_key
         description: >
-          Governed acquisition channel key derived from the session medium and
-          used to join the session fact to dim_channel.
+          Governed acquisition channel key derived from explicit session
+          acquisition attributes when available, with landing-page referrer
+          context used for governed fallback classification when explicit
+          acquisition attributes are unavailable. Used to join the session
+          fact to dim_channel.
         data_tests:
           - not_null
           - relationships:
@@ -223,7 +247,6 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
-
 
   - name: fct_transactions
     description: >
@@ -337,7 +360,6 @@ models:
         description: Number of unique purchased items in the transaction.
         data_tests:
           - not_null
-
 
   - name: dim_channel
     description: >

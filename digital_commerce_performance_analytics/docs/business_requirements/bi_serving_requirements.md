@@ -22,7 +22,7 @@ The BI Serving Layer sits between the governed analytical models produced in Pha
 
 Its purpose is to provide stable, business-readable, consumption-oriented datasets without moving governed business logic into Power BI or unnecessarily duplicating upstream analytical models.
 
-This document defines requirements only. It does not prescribe the final number, names, or physical implementation of serving models. Those decisions belong to P8B — Serving Architecture & Model Contracts.
+This document defines the approved consumption and serving requirements that governed the Phase 8 implementation. The final number, names, and physical implementation of serving models were subsequently defined in P8B — Serving Architecture & Model Contracts.
 
 ---
 
@@ -71,7 +71,7 @@ These responsibilities remain owned by the upstream analytical layers.
 
 The primary downstream consumer is the Power BI semantic model.
 
-The eventual report is intended to support leadership and analytical consumers who need to understand:
+The implemented report supports leadership and analytical consumers who need to understand:
 
 - overall digital-commerce performance
 - short-term executive trends
@@ -349,7 +349,7 @@ The serving layer should avoid exposing:
 
 Required keys and additive components may remain exposed even when they are not intended for direct report presentation, because they may be required by the Power BI semantic model or reconciliation controls.
 
-Final visibility, display folders, formatting, and user-facing field organization belong to Phase 9.
+Final visibility, display folders, formatting, and user-facing field organization are owned by the downstream Power BI semantic model.
 
 ---
 
@@ -377,7 +377,7 @@ The current analytical dataset covers a bounded historical observation window.
 
 The serving layer must support reliable refresh from its governed upstream dbt models.
 
-The initial Power BI consumption design should assume Import mode unless P8E performance analysis identifies a justified reason for another storage strategy.
+TPower BI consumption uses Import mode, consistent with the bounded historical dataset and the approved refresh and performance strategy.
 
 The serving layer must not introduce incremental processing solely for architectural appearance.
 
@@ -461,7 +461,7 @@ A serving model must not combine datasets merely because they share a date or di
 
 In particular, the executive headline/trend branch and session-attributed channel-driver branch must remain semantically distinguishable.
 
-The final number and structure of serving models will be approved in P8B.
+The approved P8B architecture implements five purpose-specific BI serving models aligned with the required analytical subject areas.
 
 ---
 
@@ -487,7 +487,7 @@ Any future requirement for these metrics must be treated as a new analytics-engi
 
 # 17. Validation Requirements
 
-Before Phase 8 is accepted, serving outputs must be validated for:
+Serving outputs are required to be validated for:
 
 - declared grain
 - uniqueness
@@ -508,12 +508,12 @@ Serving reconciliation must compare only semantically compatible populations.
 
 # 18. P8A Decision
 
-The BI Serving Layer will provide a controlled consumption boundary between governed dbt analytical outputs and the Power BI semantic model.
+The BI Serving Layer provides a controlled consumption boundary between governed dbt analytical outputs and the Power BI semantic model.
 
-Serving architecture will be designed around the actual analytical requirements of executive, acquisition, commerce, observed-user, and segment reporting rather than mechanically reproducing every upstream model.
+The serving architecture is organized around the analytical requirements of executive, acquisition, commerce, observed-user, and segment reporting rather than mechanically reproducing every upstream model.
 
 Governed metric definitions and attribution semantics remain owned upstream.
 
-Power BI will consume governed serving outputs and will not reconstruct core analytical logic.
+Power BI consumes governed serving outputs and does not reconstruct core analytical logic.
 
-The exact serving-model architecture, model count, grains, keys, dependencies, and field contracts will be defined in P8B — Serving Architecture & Model Contracts.
+The final serving-model architecture, including model count, grains, keys, dependencies, and field contracts, was defined in P8B — Serving Architecture & Model Contracts and implemented through five governed BI serving models.

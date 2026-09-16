@@ -74,7 +74,7 @@ One row per calendar date.
 
 Provide a governed calendar dimension for consistent time-series analysis and downstream BI reporting.
 
-### Expected Attributes
+### Implemented Attributes
 
 - `date_day`
 - `year`
@@ -116,7 +116,7 @@ One row per `session_key`.
 
 Provide the canonical session fact table for behavioral, acquisition, conversion, and commercial analysis.
 
-### Expected Measures
+### Implemented Measures
 
 - `session_duration_seconds`
 - `event_count`
@@ -129,7 +129,7 @@ Provide the canonical session fact table for behavioral, acquisition, conversion
 - `unique_items`
 - `has_purchase`
 
-### Expected Descriptive Attributes and References
+### Implemented Descriptive Attributes and References
 
 - `user_pseudo_id`
 - `ga_session_id`
@@ -387,7 +387,7 @@ Warehouse transformations must preserve these validated business totals unless a
 
 # Phase 5 Quality Gates
 
-Before Phase 5 is considered complete:
+Phase 5 completion required the following quality gates:
 
 - `dim_date` must contain one row per calendar date.
 - `dim_date.date_day` must be unique and non-null.
@@ -407,12 +407,13 @@ Before Phase 5 is considered complete:
 - dependency-aware dbt builds must pass.
 - manual warehouse reconciliation must be completed.
 - warehouse documentation must be complete.
+These quality gates were completed before Phase 5 was closed and the downstream business-mart layer was developed.
 
 ---
 
 # Approved Phase 5 Scope
 
-The initial Phase 5 warehouse architecture is:
+The implemented Phase 5 warehouse architecture is:
 
 `dim_date`
 
@@ -422,7 +423,7 @@ The initial Phase 5 warehouse architecture is:
 
 The architecture deliberately remains lean.
 
-The following dimensions are not approved for initial implementation:
+The following dimensions were intentionally excluded from the Phase 5 implementation:
 
 - `dim_acquisition`
 - `dim_platform`
@@ -433,9 +434,9 @@ They may be introduced in a future phase only when analytical requirements justi
 
 ---
 
-# Implementation Sequence
+# Implementation Sequence and Outcome
 
-The approved implementation sequence is:
+Phase 5 was implemented in the following approved sequence:
 
 1. Finalize core warehouse entity and grain design.
 2. Build and validate `dim_date`.
@@ -445,3 +446,5 @@ The approved implementation sequence is:
 6. Reconcile warehouse outputs against Phase 4 baselines.
 7. Complete Phase 5 documentation and quality gates.
 8. Close Phase 5 before downstream KPI and reporting marts are developed.
+
+Phase 5 was completed with the governed core warehouse models, required tests, reconciliation checks, and documentation in place before downstream KPI and business-mart development proceeded.

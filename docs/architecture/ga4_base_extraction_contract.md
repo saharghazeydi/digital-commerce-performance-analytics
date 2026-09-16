@@ -4,7 +4,7 @@
 
 This document defines the approved field-level extraction contract for the GA4 staging layer.
 
-It translates the validated source structure and the approved staging architecture into explicit extraction rules before dbt transformation models are implemented.
+It translates the validated source structure and the approved staging architecture into explicit extraction rules implemented by the dbt staging models.
 
 The contract is source-aligned and does not introduce downstream business logic, governed order construction, session aggregation, KPI calculations, or final transaction deduplication.
 
@@ -53,6 +53,8 @@ The staging model must preserve raw event multiplicity. Repeated purchase events
 | `event_name` | `event_name` | STRING | Direct extraction |
 | `user_pseudo_id` | `user_pseudo_id` | STRING | Direct extraction |
 | `platform` | `platform` | STRING | Direct extraction |
+| `device_category` | `device.category` | STRING | Direct extraction from the nested device record |
+| `country` | `geo.country` | STRING | Direct extraction from the nested geo record |
 
 ---
 
@@ -78,7 +80,7 @@ Session aggregation and governed session construction do not belong in staging.
 
 ## Page Context Parameters
 
-The following scalar page-context parameters may be promoted from `event_params` into the event staging model.
+The following scalar page-context parameters are promoted from `event_params` into the event staging model.
 
 | Staging Field | GA4 Parameter | Value Slot | Target Type |
 |---|---|---|---|
@@ -92,7 +94,7 @@ These parameters are not expected to be populated for every event and must not r
 
 ## Event-Level Acquisition Parameters
 
-The following observed scalar parameters may be extracted where required for downstream acquisition analysis.
+The following observed scalar parameters are extracted for downstream acquisition analysis.
 
 | Staging Field | GA4 Parameter | Value Slot | Target Type |
 |---|---|---|---|
@@ -287,11 +289,13 @@ Field-level profiling confirmed:
 
 Profiling was performed using bounded GA4 daily shards before transformation implementation.
 
+The resulting extraction rules were subsequently implemented in the dbt staging models and validated against the same approved source window.
+
 ---
 
-## Acceptance Criteria
+## Acceptance Criteria and Implementation Status
 
-This extraction contract is accepted when:
+This extraction contract was accepted against the following criteria:
 
 - required raw fields have verified source paths and types;
 - scalar `event_params` extraction rules are explicit;
@@ -302,7 +306,7 @@ This extraction contract is accepted when:
 - wildcard source-window controls remain mandatory;
 - no business KPI logic is introduced into staging.
 
-Once accepted, implementation may proceed to the dbt staging models.
+These criteria were satisfied during staging implementation and subsequently verified through source-to-staging reconciliation and dbt quality checks.
 
 ## Event Staging Validation Results
 

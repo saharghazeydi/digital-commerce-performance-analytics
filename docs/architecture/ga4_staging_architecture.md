@@ -8,7 +8,7 @@ The staging layer establishes a controlled boundary between the raw GA4 export s
 
 Its purpose is to standardize source access, field extraction, naming, typing, grain, and data-quality responsibilities before business logic is introduced.
 
-This document defines architectural rules only. Detailed transformation logic is implemented in subsequent work packages.
+This document defines the architectural rules implemented by the GA4 staging layer. Detailed field-level extraction rules are documented separately in the GA4 Base Extraction Contract.
 
 ---
 
@@ -75,13 +75,13 @@ The staging layer follows these principles:
 
 ---
 
-## Proposed Staging Structure
+## Implemented Staging Structure
 
-The GA4 staging layer will reside under:
+The GA4 staging layer resides under:
 
 `models/staging/ga4/`
 
-The intended structure is:
+The implemented structure is:
 
 models/
 └── staging/
@@ -143,10 +143,6 @@ At minimum, event-level models should retain relevant source fields such as:
 - `user_pseudo_id`
 - `event_bundle_sequence_id`
 - `batch_event_index` where available and useful
-
-A durable event surrogate key may be introduced if required for reliable relationships between staging models.
-
-Any surrogate-key design must be deterministic and based only on stable source attributes.
 
 ---
 
@@ -289,25 +285,21 @@ Any model intended to represent the full approved project history must explicitl
 
 ## Materialization Strategy
 
-Staging models should default to lightweight relational transformations.
+The implemented staging models use lightweight `view` materializations.
 
-The initial preferred materialization is:
+This preserves a transparent source-aligned transformation boundary while avoiding unnecessary physical duplication of the bounded GA4 source data.
 
-`view`
+Materialization decisions are defined in the dbt project configuration and may be reconsidered only when supported by measured performance, cost, or downstream reuse requirements.
 
-This preserves a transparent transformation boundary while the staging layer is being developed and validated.
-
-Materialization may later be changed when supported by measured performance, cost, or downstream reuse requirements.
-
-Materialization changes must not be made solely as premature optimization.
+Materialization changes should not be made solely as premature optimization.
 
 ---
 
 ## Testing Responsibilities
 
-Staging tests should validate structural and source-contract assumptions.
+Staging tests validate structural and source-contract assumptions.
 
-Appropriate staging tests include:
+Implemented staging quality controls include:
 
 - required-field `not_null` checks where source profiling supports the expectation;
 - accepted values for tightly controlled categorical fields where appropriate;
@@ -323,7 +315,7 @@ Known source defects must not be converted into failing tests unless the transfo
 
 ## Documentation Responsibilities
 
-Each staging model must document:
+Each staging model documents:
 
 - model purpose;
 - row grain;
@@ -332,7 +324,7 @@ Each staging model must document:
 - material source assumptions;
 - relevant source limitations.
 
-Important columns used for joins, entity identity, business calculations, or downstream interpretation should receive explicit dbt descriptions.
+Important columns used for joins, entity identity, business calculations, or downstream interpretation receive explicit dbt descriptions.
 
 Documentation should explain analytical meaning rather than simply repeat column names.
 
@@ -365,23 +357,9 @@ Those responsibilities belong to downstream transformation layers.
 
 ---
 
-## Downstream Direction
+## Acceptance Criteria and Implementation Status
 
-After this architecture is accepted, implementation proceeds incrementally.
-
-The next work package is:
-
-**P3C — Base Extraction Logic**
-
-P3C will implement the controlled event-level extraction required to establish the first staging model while preserving the architectural boundaries defined here.
-
-Subsequent work packages will introduce repeated-field staging models, testing, documentation, and downstream entity construction.
-
----
-
-## Acceptance Criteria
-
-This staging architecture is accepted when:
+The staging architecture was accepted against the following criteria:
 
 - model grains are explicitly defined;
 - staging responsibilities are separated from downstream business logic;
@@ -392,3 +370,7 @@ This staging architecture is accepted when:
 - materialization strategy is defined;
 - staging testing and documentation responsibilities are established;
 - the architecture is reviewed through the repository Pull Request workflow.
+
+These criteria were satisfied during implementation. The staging layer now consists of the governed source definition, `stg_ga4__events`, `stg_ga4__items`, model and column documentation, and automated source-contract and reconciliation tests.
+
+Final Phase 11 validation confirmed that the staging models reconcile to the approved bounded GA4 source population and participate in the successful project-level dbt quality gate.

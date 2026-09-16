@@ -104,7 +104,7 @@ Use:
 Power BI Import mode
 ```
 
-for the initial semantic model.
+for the implemented Power BI semantic model.
 
 ## Rationale
 
@@ -283,7 +283,7 @@ The existing view strategy is simpler and more reliable for the current scope.
 
 ## Current Decision
 
-Do not configure Power BI incremental refresh in Phase 9.
+Power BI incremental refresh is not configured in the implemented semantic model.
 
 A standard Import refresh is sufficient because:
 
@@ -299,7 +299,7 @@ Incremental refresh should be introduced only when full refresh becomes material
 
 # 13. Current Refresh Pattern
 
-The current portfolio dataset represents a governed historical analytical dataset rather than a continuously operating production source.
+The current governed dataset represents a governed historical analytical dataset rather than a continuously operating production source.
 
 For the present project implementation, the appropriate refresh pattern is:
 
@@ -349,7 +349,7 @@ The BI tool should not independently compensate for incomplete upstream data.
 
 No real-time freshness requirement has been defined for the current project.
 
-For the present portfolio implementation:
+For the pcurrent project implementation:
 
 ```text
 manual / on-demand refresh
@@ -411,7 +411,7 @@ Unused warehouse columns should not be imported merely because they exist.
 
 The current serving models already reduce upstream schemas to BI-oriented interfaces.
 
-Phase 9 should preserve this discipline by avoiding unnecessary duplicated fields.
+The implemented Power BI semantic model preserves this discipline by avoiding unnecessary duplicated fields.
 
 Examples include:
 
@@ -426,7 +426,7 @@ Examples include:
 
 Once imported, report performance will depend primarily on Power BI semantic-model design rather than BigQuery scan performance.
 
-Phase 9 should therefore prioritize:
+The implemented semantic model therefore follows these performance principles:
 
 - clear star-schema relationships
 - one-directional filtering where appropriate
@@ -573,29 +573,25 @@ Performance engineering must remain evidence-driven.
 
 ---
 
-# 24. Phase 9 Handoff
+# 24. Implemented Power BI Architecture
 
-Phase 9 should begin with the following storage and refresh assumptions:
+The Phase 8 storage and refresh decisions were carried forward into the implemented Power BI solution:
 
-```text
-BigQuery serving views
-        ↓
-Power BI Import
-        ↓
-semantic model
-        ↓
-report layer
-```
+    BigQuery serving views
+            ↓
+    Power BI Import
+            ↓
+    governed semantic model
+            ↓
+    four-page analytical report
 
-No incremental-refresh parameters are required initially.
+The final implementation does not use Power BI incremental refresh or DirectQuery.
 
-No DirectQuery configuration is required.
+No additional serving-layer physical optimization was required before or during semantic-model implementation.
 
-No serving-layer physical optimization is required before semantic-model implementation.
+The completed Power BI solution validated that the lightweight serving architecture was sufficient for the current dataset and reporting workload.
 
-The Power BI model should first be built and measured under this simple architecture.
-
-Only observed bottlenecks should trigger optimization work.
+Future optimization should continue to be driven by observed performance bottlenecks rather than architectural complexity introduced in advance.
 
 ---
 

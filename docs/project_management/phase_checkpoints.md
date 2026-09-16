@@ -27,7 +27,6 @@ Define the business objective, project scope, target users, analytical architect
 
 - reviewed project scope for consistency
 - confirmed alignment with the intended GA4 ecommerce analytical domain
-- removed dependencies on historical portfolio projects
 - confirmed architecture is internally consistent
 
 ## Evidence
@@ -980,9 +979,7 @@ Implement and formally validate the governed business-mart layer on top of the C
 - `digital_commerce_performance_analytics/tests/assert_business_marts_cross_mart_reconciliation.sql`
 - `digital_commerce_performance_analytics/tests/assert_business_marts_consistent_date_coverage.sql`
 - `digital_commerce_performance_analytics/tests/assert_business_marts_daily_reconciliation.sql`
-- `validation/reports/p6f_validation_summary.md`
-- `validation/reports/p6g_validation_summary.md`
-- `validation/reports/p6h_performance_optimization_summary.md`
+- `validation/reports/phase6_validation_summary.md` — consolidated Phase 6 validation evidence preserving the original P6F, P6G, and P6H results
 - `docs/project_management/project_tracker.md`
 
 ## Decisions Made
@@ -1645,7 +1642,6 @@ Complete and formally validate the production Power BI report built on the gover
 - `power_bi/documentation/semantic_model_handoff.md`
 - `power_bi/documentation/bi_serving_handoff.md`
 - `docs/project_management/project_tracker.md`
-- `docs/project_management/AI_PROJECT_CONTINUITY.md`
 - semantic attribution fix commit `fde130e`
 - final Power BI report commit `52d7238`
 
@@ -1849,4 +1845,86 @@ The project is technically accepted for Phase 11 closeout, subject only to the s
 
 **P12A — Repository Narrative**
 
-Proceed to Phase 12 — Portfolio Packaging after the Phase 11 closeout changes are committed, reviewed, and merged into `main`.
+Proceed to Phase 12 — Documentation & Release after the Phase 11 closeout changes are committed, reviewed, and merged into `main`.
+---
+
+## Checkpoint 12.1 — Documentation & Release Accepted
+
+**Date:** 2026-09-16
+**Phase:** Phase 12 — Documentation & Release
+**Status:** Accepted
+
+### Scope Completed
+
+Phase 12 finalized the project documentation and release package for the implemented analytics solution.
+
+Completed release work includes:
+
+- finalized repository-level project narrative and documentation structure;
+- finalized implemented-architecture documentation and architecture asset;
+- reconciled business requirements and technical-design documentation with the implemented analytical model;
+- consolidated and organized validation evidence;
+- finalized Power BI report documentation and durable report screenshots;
+- added an end-to-end reproduction guide;
+- removed unused scaffold directories and obsolete placeholder files;
+- archived and removed the internal AI continuity log from the repository;
+- reconciled current release documentation with the final implemented dbt state;
+- completed repository-wide terminology, path, artifact, and whitespace checks.
+
+### Final dbt Quality Gate
+
+The final release build completed successfully with:
+
+    13 table models
+    8 view models
+    367 data tests
+    388 total selected resources
+
+    PASS=388
+    WARN=0
+    ERROR=0
+    SKIP=0
+    NO-OP=0
+    REUSED=0
+    TOTAL=388
+
+This supersedes the current release baseline recorded during Phase 11 while preserving Phase 11 validation evidence as an accurate historical checkpoint.
+
+### Final Analytical Baseline
+
+The released analytical solution retains the reconciled business baseline:
+
+- Sessions: 360,129
+- Purchasing Sessions: 4,033
+- Conversion Rate: 1.12%
+- Transactions: 4,451
+- Purchase Revenue: $307,640
+- Average Order Value: $69.12
+- Observed Users: 270,154
+- Purchasing Users: 3,702
+- Multi-Session Users: 47,364
+- Repeat Purchasing-Session Users: 284
+
+### Release QA
+
+Final release checks confirmed:
+
+- the complete dbt project builds successfully;
+- all 388 selected dbt resources pass;
+- no dbt warnings, errors, or skipped resources remain;
+- repository terminology contains no interview, job-search, or portfolio-packaging framing;
+- obsolete `scripts/` references have been removed;
+- the archived internal continuity log has no remaining repository references;
+- generated and local-only artifacts remain excluded from version control;
+- architecture and Power BI presentation assets are present;
+- the reproduction guide reflects the validated environment and execution path;
+- repository documentation reflects the implemented analytical architecture and current release baseline;
+- `git diff --check` reports no whitespace errors.
+
+### Project Closure
+
+Phase 12 — Documentation & Release is accepted.
+
+The Digital Commerce Performance Analytics project is complete for the current defined scope. The analytical pipeline, governed KPI framework, validation evidence, Power BI reporting layer, architecture documentation, and reproduction guidance are finalized.
+
+Any future work should be opened as a separately scoped enhancement rather than as continuation of the current project release.

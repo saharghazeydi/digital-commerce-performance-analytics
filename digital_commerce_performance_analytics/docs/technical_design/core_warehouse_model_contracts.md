@@ -14,9 +14,9 @@ P5B — Core Fact and Dimension Model Design
 
 ## Purpose
 
-Define the implementation contract for each approved Phase 5 warehouse model before SQL development begins.
+Document the approved implementation contracts that governed the Phase 5 core warehouse models.
 
-These contracts specify model grain, upstream dependency, keys, columns, measures, materialization, and required quality rules.
+These contracts specify model grain, upstream dependency, keys, columns, measures, materialization, and required quality rules, and remain the reference for validating the implemented warehouse structure.
 
 ---
 
@@ -163,7 +163,7 @@ Table
 
 The model must preserve the validated Phase 4 session population and commercial totals.
 
-Expected baseline:
+Validated reconciliation baseline:
 
 - sessions: 360,129
 - purchasing sessions: 4,033
@@ -247,7 +247,7 @@ Table
 
 ## Reconciliation Requirements
 
-Expected Phase 4 baseline:
+Validated Phase 4 reconciliation baseline:
 
 - transactions: 4,451
 - purchasing users: 3,702
@@ -298,7 +298,7 @@ These rules are owned by the Phase 4 intermediate layer.
 
 ---
 
-# Approved Implementation Order
+# Approved Implementation Order and Outcome
 
 1. `dim_date`
 2. `fct_sessions`
@@ -307,4 +307,4 @@ These rules are owned by the Phase 4 intermediate layer.
 5. warehouse business-rule tests
 6. cross-model reconciliation
 
-Implementation must follow these contracts unless a documented design change is approved.
+Phase 5 was implemented and validated against these contracts. The approved model grains, upstream ownership rules, quality requirements, and cross-model reconciliation controls were preserved in the completed core warehouse layer.

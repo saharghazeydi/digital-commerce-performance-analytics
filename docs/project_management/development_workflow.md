@@ -46,7 +46,7 @@ Only validated, reusable, and project-relevant work is promoted into the reposit
 
 The following artifacts may be committed when they support a durable project deliverable:
 
-* dbt models, macros, tests, seeds, and snapshots
+* dbt models, macros, and tests
 * approved SQL transformation logic
 * model and column documentation
 * architecture documentation and diagrams
@@ -54,7 +54,6 @@ The following artifacts may be committed when they support a durable project del
 * source-assessment and data-quality findings
 * KPI definitions and business rules
 * Power BI project assets and approved report screenshots
-* scripts required to reproduce or validate the project
 * environment dependency files
 * repository configuration and governance documents
 * curated validation evidence that remains useful after the work package is complete
@@ -127,16 +126,15 @@ Promoted SQL must follow project naming, formatting, testing, documentation, and
 
 Promoted transformation logic must be placed according to responsibility:
 
-| Layer          | Responsibility                                                                          |
-| -------------- | --------------------------------------------------------------------------------------- |
-| Source         | Source declarations, metadata, freshness, and upstream traceability                     |
-| Staging        | Source-aligned extraction, naming, casting, and minimal cleaning                        |
-| Intermediate   | Reusable transformations, entity construction, deduplication, and shared business logic |
-| Core           | Governed facts, dimensions, keys, relationships, and documented grains                  |
-| Business Marts | Domain-oriented business metrics and analytical outputs                                 |
-| BI Serving     | Stable, business-readable datasets optimized for Power BI                               |
-
-Business logic must not be placed in a lower layer merely because it is convenient.
+| Layer | Responsibility |
+|---|---|
+| Source | Source declarations, metadata, and upstream traceability |
+| Staging | Source-aligned extraction, naming, typing, and minimal cleaning |
+| Intermediate | Reusable transformations, entity construction, deduplication, and shared business logic |
+| Core | Governed facts, dimensions, keys, relationships, and documented grains |
+| Business Marts | Domain-oriented business metrics and analytical outputs |
+| Executive KPI | Leadership-level KPIs, trends, contribution metrics, and governed executive semantics |
+| BI Serving | Stable, business-readable interfaces for Power BI consumption |
 
 ---
 
@@ -178,11 +176,12 @@ Documentation is not postponed until the entire phase is complete when individua
 | `docs/project_management/project_tracker.md`      | Current phase, work-package status, focus, and upcoming milestones            |
 | `docs/project_management/phase_checkpoints.md`    | Validated milestone evidence, decisions, limitations, and acceptance          |
 | `docs/project_management/development_workflow.md` | Repository operating rules and artifact lifecycle                             |
+| `docs/project_management/reproduction_guide.md` | Environment setup, BigQuery/dbt configuration, execution, validation, and Power BI reproduction guidance |
 | `docs/architecture/`                              | Target and implemented architecture documentation                             |
 | `docs/decisions/`                                 | Significant architectural and technical decisions                             |
 | `docs/data_quality/`                              | Durable source-quality findings, controls, limitations, and reconciliations   |
 | dbt documentation                                 | Model purpose, grain, columns, tests, lineage, and implementation assumptions |
-| Power BI documentation                            | Semantic model, measures, relationships, interactions, and report design      |
+| Power BI documentation and assets | Semantic model, measures, relationships, report design, canonical PBIX, and approved report screenshots |
 
 The Project Tracker must not be used as a detailed analysis notebook.
 
@@ -244,8 +243,7 @@ Screenshots may be retained when they provide durable visual evidence that canno
 * final Power BI semantic-model relationships
 * approved architecture diagrams
 * dbt lineage or documentation views
-* important user-interface configuration that is part of the reproduction guide
-* final validation evidence required for the portfolio narrative
+* final visual validation evidence when text, tests, or executable queries cannot represent the evidence adequately
 
 ### Screenshot Timing
 
@@ -255,7 +253,7 @@ Final screenshots are captured only after:
 * validation has passed
 * naming and formatting are stable
 * temporary or sensitive content has been removed
-* the image has a defined documentation or portfolio purpose
+* the image has a defined documentation or durable project purpose
 
 Screenshots must not be captured merely because a task was completed.
 
@@ -263,16 +261,18 @@ Screenshots must not be captured merely because a task was completed.
 
 ## Screenshot Storage
 
-Approved screenshots must be stored in a purpose-specific location.
+Approved visual assets must be stored in the repository location associated with their durable purpose.
 
-Planned examples include:
+Implemented asset locations include:
 
-```text
-docs/architecture/images/
-docs/data_quality/evidence/
-```
+    docs/architecture/assets/
+    power_bi/assets/
 
-A directory should be created only when the first approved artifact for that directory exists.
+`docs/architecture/assets/` contains approved architecture visuals.
+
+`power_bi/assets/` contains approved final report-page screenshots.
+
+Additional asset directories should be created only when a durable project artifact requires them.
 
 Screenshot filenames must be descriptive and stable.
 
@@ -280,9 +280,10 @@ Examples:
 
 ```text
 executive_overview.png
-power_bi_semantic_model.png
-dbt_lineage_business_marts.png
-source_reconciliation_summary.png
+acquisition_channel_performance.png
+commerce_performance.png
+customer_behaviour_segmentation.png
+analytics_architecture.png
 ```
 
 Avoid filenames such as:
@@ -297,7 +298,7 @@ image-new.png
 
 ## Validation Evidence Policy
 
-Validation evidence should be committed only when it remains useful for review, reproduction, or portfolio defense.
+Validation evidence should be committed only when it remains useful for review, reproduction, auditability, or future technical reference.
 
 Preferred evidence formats are:
 
@@ -316,7 +317,7 @@ Text, tests, and executable code are preferred over screenshots.
 * `main` represents the latest reviewed and accepted project state.
 * Direct development on `main` is prohibited.
 * Each logical change uses a dedicated branch.
-* A branch should represent one work package or one coherent change.
+* A branch should represent one work package, release package, or other coherent change.
 * Unrelated cleanup must not be bundled into a feature branch.
 * Completed branches are deleted after merge.
 
@@ -396,7 +397,7 @@ A work package is complete only when:
 3. Results have been reconciled where applicable.
 4. Durable findings and decisions have been documented.
 5. Known limitations have been recorded.
-6. The Project Tracker reflects the correct next state.
+6. The Project Tracker reflects the correct next state or formal project closure.
 7. The relevant phase checkpoint has been updated when acceptance is required.
 8. Changes have been reviewed and merged through a Pull Request.
 9. Local `main` has been synchronized with `origin/main`.
@@ -415,27 +416,14 @@ A phase is complete only when:
 * unresolved risks are explicitly accepted or deferred
 * required documentation is current
 * the phase checkpoint records formal acceptance
-* the Project Tracker identifies the next approved phase
+* the Project Tracker records either the next approved phase or formal project closure
 * all phase changes have been merged into `main`
-
----
-
-## Phase 2 Working Rule
-
-During Source Feasibility and Profiling:
-
-* exploratory SQL remains in BigQuery unless promoted
-* screenshots may be shared for review but are not committed by default
-* durable source findings are documented after validation
-* source limitations and assumptions are recorded
-* dbt implementation does not begin until the relevant feasibility decisions are approved
-* source profiling must inform model grains, keys, tests, KPI feasibility, and cost controls
 
 ---
 
 ## Governance Review
 
-This workflow may be updated when the project exposes a genuine process gap.
+This workflow may be updated when a genuine process gap is identified during active development or a formally approved future enhancement.
 
 Changes must:
 

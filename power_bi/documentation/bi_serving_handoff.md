@@ -422,7 +422,7 @@ Power BI Import mode
 Standard full refresh
 ```
 
-For the current portfolio implementation:
+For the current project implementation:
 
 - manual/on-demand refresh is sufficient.
 

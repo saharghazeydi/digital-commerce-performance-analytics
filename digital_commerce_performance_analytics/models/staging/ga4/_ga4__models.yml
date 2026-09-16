@@ -31,6 +31,12 @@ models:
       - name: platform
         description: Platform from which the event was generated, such as WEB.
 
+      - name: device_category
+        description: Device category associated with the event, sourced from the GA4 device record.
+
+      - name: country
+        description: Country associated with the event, sourced from the GA4 geographic record.
+
       - name: ga_session_id
         description: GA4 session identifier extracted from event_params.
         data_tests:

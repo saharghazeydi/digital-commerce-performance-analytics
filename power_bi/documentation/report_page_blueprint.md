@@ -935,6 +935,6 @@ The final Power BI artifact is retained at:
 
 `power_bi/digital_commerce_performance_analytics.pbix`
 
-Phase 10 report implementation is complete through P10K.
+Phase 10 report implementation and handoff are complete through P10L.
 
-P10L — Report Handoff & Phase Closeout remains the active closeout work package until documentation, repository cleanup, checkpoint updates, and Phase 11 readiness are finalized.
+The report subsequently passed Phase 11 end-to-end validation and is retained as the final Power BI reporting artifact for final documentation and release.

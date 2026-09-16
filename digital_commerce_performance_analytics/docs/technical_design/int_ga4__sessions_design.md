@@ -2,7 +2,7 @@
 
 ## Document Status
 
-* **Status:** Approved for Implementation
+* **Status:** Implemented and Validated
 * **Model owner:** Analytics Engineering
 * **Model layer:** Intermediate
 * **Target model:** `int_ga4__sessions`
@@ -14,7 +14,7 @@
 
 ## 1. Objective
 
-Build a reusable session-grain intermediate model from the GA4 event-grain staging layer.
+Document the implemented reusable session-grain intermediate model built from the GA4 event-grain staging layer.
 
 The model consolidates event-level records into exactly one row per GA4 session while providing consistent session attributes, acquisition information, behavioral metrics, and ecommerce outcomes for downstream marts, semantic models, and BI reporting.
 
@@ -57,66 +57,68 @@ Profiling confirmed that this composite key uniquely identifies every session in
 
 * `{{ ref('stg_ga4__events') }}`
 
-### Excluded from the Initial Model
+### Excluded from the Session Model
 
 * `stg_ga4__items`
 
 The item-grain staging model is intentionally excluded because joining item-level records into the session aggregation would multiply event rows and distort session-level metrics.
 
-Item-level analysis will be implemented separately in a dedicated intermediate model.
+Item-level logic is handled separately from the session-grain model to prevent item-level records from multiplying event or session populations.
 
 ---
 
-## 5. Proposed Output Columns
+## 5. Model Output Contract
 
 ### Session Identifiers
 
-* `session_key`
-* `user_pseudo_id`
-* `ga_session_id`
-* `ga_session_number`
+- `session_key`
+- `user_pseudo_id`
+- `ga_session_id`
+- `ga_session_number`
 
 ### Session Timing
 
-* `session_date`
-* `session_start_timestamp`
-* `session_end_timestamp`
-* `session_duration_seconds`
+- `session_date`
+- `session_start_timestamp`
+- `session_end_timestamp`
+- `session_duration_seconds`
 
 ### Session Context
 
-* `platform`
-* `landing_page_location`
-* `landing_page_title`
-* `landing_page_referrer`
+- `platform`
+- `device_category`
+- `country`
+- `landing_page`
+- `landing_page_title`
+- `landing_page_referrer`
+- `exit_page`
+- `exit_page_title`
 
 ### Acquisition Attributes
 
-* `session_source`
-* `session_medium`
-* `session_campaign`
+- `source`
+- `medium`
+- `campaign`
+- `has_selected_acquisition`
 
 ### Behavioral Measures
 
-* `event_count`
-* `page_view_count`
-* `view_item_count`
-* `add_to_cart_count`
-* `begin_checkout_count`
-* `purchase_event_count`
+- `event_count`
 
 ### Ecommerce Outcomes
 
-* `is_converting_session`
-* `transaction_count`
-* `purchase_revenue`
-* `tax_value`
-* `purchased_item_quantity`
-* `purchased_unique_items`
+- `transaction_count`
+- `purchase_revenue`
+- `refund_value`
+- `shipping_value`
+- `tax_value`
+- `total_item_quantity`
+- `unique_items`
+- `has_purchase`
 
 ---
 
-## 6. Proposed Business Rules
+## 6. Governed Business Rules
 
 ### 6.1 Session Key
 
@@ -198,16 +200,13 @@ Each measure represents the count of matching raw events within the session.
 
 ---
 
-### 6.9 Converting Session
+### 6.9 Purchasing Session
 
-`is_converting_session` is `TRUE` when the session contains at least one valid purchase event.
+`has_purchase` is `TRUE` when the session contains at least one retained valid transaction after purchase-event validation and deduplication.
 
-A valid purchase event satisfies all of the following:
+A valid purchase requires a normalized transaction identifier that is not null, blank, `'(not set)'`, or `'not set'`.
 
-* `event_name = 'purchase'`
-* `transaction_id IS NOT NULL`
-* `transaction_id <> ''`
-* `transaction_id <> '(not set)'`
+The session-level flag therefore represents the presence of at least one governed valid transaction rather than the presence of an unvalidated raw purchase event.
 
 ---
 
@@ -244,22 +243,22 @@ Cross-user or cross-session transaction ID collisions are treated as source data
 
 ### 6.12 Ecommerce Metrics
 
-Session ecommerce metrics are calculated only from valid purchase events after within-session purchase deduplication.
+Session ecommerce metrics are calculated only from retained valid purchase events after transaction validation and deduplication.
 
-The model publishes:
+The implemented model publishes:
 
-* purchase revenue;
-* tax value;
-* purchased item quantity;
-* purchased unique items.
+- `transaction_count`
+- `purchase_revenue`
+- `refund_value`
+- `shipping_value`
+- `tax_value`
+- `total_item_quantity`
+- `unique_items`
+- `has_purchase`
 
-Profiling confirmed:
+Commercial values are aggregated at session grain. Null commercial values from retained purchase records are normalized to zero during session aggregation.
 
-* no populated `shipping_value`;
-* no refund events;
-* no populated `refund_value`.
-
-Accordingly, shipping and refund metrics are intentionally excluded from the initial session model.
+Although source profiling identified no populated refund or shipping values in the approved observation window, these governed fields are retained in the implemented session contract to preserve a stable downstream commercial schema.
 
 ---
 
@@ -288,7 +287,7 @@ All implemented business rules are based on source profiling rather than assumpt
 
 ### Generic Tests
 
-The model will include at least the following generic tests:
+The model is governed by generic tests including:
 
 * `not_null` on `session_key`;
 * `unique` on `session_key`;
@@ -297,11 +296,11 @@ The model will include at least the following generic tests:
 * `not_null` on `session_date`;
 * `not_null` on `session_start_timestamp`;
 * `not_null` on `session_end_timestamp`;
-* accepted values for `is_converting_session`.
+*  accepted values for `has_purchase`.
 
 ### Singular Tests
 
-The model will include reconciliation and business-rule validation tests including:
+The model is governed by reconciliation and business-rule validation tests including:
 
 * session end is not earlier than session start;
 * session duration is non-negative;
@@ -321,14 +320,14 @@ The model will include reconciliation and business-rule validation tests includi
 * Avoid joining the item-grain staging model.
 * Publish only reusable session-level logic.
 * Select only columns required by the model contract.
-* Materialization will be selected after downstream workload evaluation.
-* If materialized as a BigQuery table, consider partitioning by `session_date` and clustering on commonly filtered dimensions.
+* The model is materialized as a BigQuery table to avoid repeated session-level aggregation by downstream consumers.
+* The table is partitioned by `session_date`; additional clustering is only justified where observed downstream query patterns provide a measurable benefit.
 
 ---
 
 ## 10. Acceptance Criteria
 
-Implementation is complete when:
+The implemented model is required to satisfy the following acceptance criteria:
 
 1. The model returns exactly one row per validated session key.
 2. Session grain is documented and enforced through tests.
@@ -350,21 +349,25 @@ Implementation is complete when:
 
 ### Materialization
 
-The initial `int_ga4__sessions` model will be materialized as a BigQuery table.
+`int_ga4__sessions` is materialized as a BigQuery table.
 
 The session model aggregates approximately 4.30 million staged events into approximately 360 thousand session records. Materializing the result as a table prevents repeated session-level aggregation by downstream models and provides a stable reusable analytical entity.
 
-The model will be partitioned by `session_date`.
+The implemented model is clustered by:
 
-Clustering fields will be selected during implementation only where they provide a justified downstream filtering or query-performance benefit.
+- `user_pseudo_id`
+- `source`
+- `medium`
+
+No table partitioning is configured in the current model implementation.
 
 ### Surrogate-Key Implementation
 
-The project will use a reusable internal dbt macro to generate deterministic surrogate keys.
+The project uses a reusable internal dbt macro to generate deterministic surrogate keys.
 
-The macro will be maintained within the project `macros` directory rather than introducing `dbt_utils` solely for surrogate-key generation.
+The macro is maintained within the project `macros` directory rather than introducing `dbt_utils` solely for surrogate-key generation.
 
-This keeps the project self-contained while providing consistent key-generation logic for session, transaction, and future warehouse entities.
+This keeps the project self-contained while providing consistent key-generation logic for session, transaction, and downstream warehouse entities.
 
 ---
 
@@ -383,6 +386,6 @@ This keeps the project self-contained while providing consistent key-generation 
 | Cross-user transaction exceptions | **Approved exception handling** | Fifteen transaction IDs were shared across users or sessions and contained conflicting revenue values. These are treated as source data-quality exceptions and are not globally deduplicated using `transaction_id` alone. |
 | Purchase revenue rule | **Approved** | Use ecommerce values from the retained valid purchase event after within-session purchase deduplication. Duplicate purchase events are never summed. |
 | Ecommerce aggregation rule | **Approved** | Session ecommerce metrics are calculated only from valid deduplicated purchase events. |
-| Refund and shipping metrics | **Approved** | Profiling identified zero refund events, zero populated `refund_value`, and zero populated `shipping_value`. Refund and shipping metrics are intentionally excluded from the initial session model. |
-| Materialization | **Approved** | Materialize `int_ga4__sessions` as a BigQuery table partitioned by `session_date`. This avoids repeated aggregation of approximately 4.30 million staged events by downstream consumers. |
+| Refund and shipping metrics | **Implemented** | Profiling identified zero refund events, zero populated `refund_value`, and zero populated `shipping_value` in the approved observation window. The implemented session model nevertheless retains `refund_value` and `shipping_value` as governed commercial fields to preserve a stable downstream schema. |
+| Materialization | **Implemented** | Materialize `int_ga4__sessions` as a BigQuery table clustered by `user_pseudo_id`, `source`, and `medium`. The current implementation does not configure table partitioning. This avoids repeated aggregation of approximately 4.30 million staged events by downstream consumers while supporting common analytical access patterns. |
 | Surrogate-key implementation | **Approved** | Use a reusable internal dbt macro maintained in the project `macros` directory. Do not introduce `dbt_utils` solely for surrogate-key generation. |

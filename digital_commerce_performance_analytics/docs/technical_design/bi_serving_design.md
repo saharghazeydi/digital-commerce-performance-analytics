@@ -73,9 +73,9 @@ The BI Serving Layer must not reconstruct their upstream logic.
 
 # 4. Serving Architecture Decision
 
-The approved serving architecture contains four BI-oriented fact or analytical datasets and two governed dimensions.
+The approved serving architecture contains five BI-oriented analytical datasets and two governed dimensions.
 
-The planned serving datasets are:
+The implemented serving datasets are:
 
 ```text
 bi_executive_daily
@@ -211,7 +211,7 @@ Required fields include:
 - `conversion_wow_absolute_change`
 - `conversion_wow_pct_change`
 
-The additive components must remain available even when some are hidden from report consumers in Phase 9.
+The additive components must remain available in the semantic model even when some are hidden from report consumers.
 
 ---
 
@@ -633,11 +633,11 @@ date_day
 
 The governed `dim_date` is already the authoritative calendar dimension.
 
-Phase 8 will not create a duplicate BI-specific date dimension unless implementation evidence demonstrates a genuine serving requirement.
+Phase 8 does not create a duplicate BI-specific date dimension because no separate serving requirement was identified.
 
-Power BI should consume the governed date dimension for reusable calendar attributes.
+Power BI consumes the governed date dimension for reusable calendar attributes.
 
-Final date relationships and semantic-model configuration belong to Phase 9.
+Final date relationships and semantic-model configuration are owned by the implemented Power BI semantic model.
 
 ---
 
@@ -657,11 +657,11 @@ One row per governed channel.
 
 The governed `dim_channel` remains the authoritative channel dimension.
 
-Phase 8 will not create a duplicate BI-specific channel dimension solely for naming symmetry.
+Phase 8 does not create a duplicate BI-specific channel dimension solely for naming symmetry.
 
 The dimension provides the governed channel key, classification, description, and presentation order.
 
-Final relationship configuration belongs to Phase 9.
+Final relationship configuration is owned by the implemented Power BI semantic model.
 
 ---
 
@@ -683,7 +683,7 @@ Expected relationship fields include:
 
 Those fields represent descriptive pseudo-user lifecycle observations rather than a single fact-date grain.
 
-The exact Power BI relationship configuration is deferred to Phase 9.
+The exact relationship configuration is implemented and governed in the downstream Power BI semantic model.
 
 ---
 
@@ -707,7 +707,7 @@ Cross-subject comparisons must respect semantic compatibility rather than rely o
 
 # 24. Field Naming Strategy
 
-The serving layer will preserve governed upstream names where those names are already clear and semantically safe.
+The serving layer preserves governed upstream names where those names are already clear and semantically safe.
 
 Renaming is justified when it:
 
@@ -719,7 +719,7 @@ Renaming is justified when it:
 
 Renaming is not justified merely to make every serving field look different from its upstream source.
 
-P8D will finalize the business-facing naming and field-exposure interface.
+P8D subsequently finalized the business-facing naming and field-exposure interface.
 
 ---
 
@@ -727,7 +727,7 @@ P8D will finalize the business-facing naming and field-exposure interface.
 
 P8B does not assume that every serving model requires a physically materialized table.
 
-The appropriate materialization will be determined during implementation and performance review based on:
+The appropriate materialization was evaluated during implementation and performance review based on:
 
 - model complexity
 - downstream reuse
@@ -736,6 +736,7 @@ The appropriate materialization will be determined during implementation and per
 - data volume
 - operational simplicity
 
+The resulting P8E decision retains all five serving models as lightweight BigQuery views.
 Simple serving projections should not be materialized unnecessarily merely to make the architecture appear more complex.
 
 Likewise, materialization should not be avoided where it provides a measurable downstream benefit.
@@ -744,7 +745,7 @@ Likewise, materialization should not be avoided where it provides a measurable d
 
 # 26. Power BI Storage Assumption
 
-The initial downstream design assumes Power BI Import mode.
+The implemented downstream design uses Power BI Import mode.
 
 This is appropriate for the current bounded analytical dataset unless later performance evidence indicates otherwise.
 
@@ -860,9 +861,9 @@ Introducing incremental models, partitioning, clustering, DirectQuery, or comple
 
 ---
 
-# 30. Planned Dependency Flow
+# 30. Implemented Dependency Flow
 
-The planned serving dependency flow is:
+The implemented serving dependency flow is:
 
 ```text
 executive_kpi_daily
@@ -916,7 +917,7 @@ and are consumed directly rather than duplicated without justification.
 
 ---
 
-# 31. Planned Serving Model Summary
+# 31. Implemented Serving Model Summary
 
 | Model | Grain | Primary Source | Primary BI Purpose |
 |---|---|---|---|
@@ -930,11 +931,11 @@ and are consumed directly rather than duplicated without justification.
 
 ---
 
-# 32. Implementation Requirements for P8C
+# 32. P8C Implementation Outcome
 
-P8C must implement the approved serving architecture while preserving the contracts in this document.
+P8C implemented the approved serving architecture while preserving the contracts defined in this document.
 
-Implementation must verify for each serving model:
+Implementation verified for each serving model:
 
 - source dependency
 - declared grain
@@ -944,17 +945,15 @@ Implementation must verify for each serving model:
 - business-field exposure
 - absence of unintended row multiplication
 
-P8C must not introduce new KPI definitions.
+No new KPI definitions were introduced in the serving layer.
 
-If implementation reveals that a proposed serving model adds no meaningful consumption boundary and is only a mechanical copy of its source, that model must be reconsidered rather than retained solely because it appears in this design.
-
-Any such change must be documented before the architecture is treated as final.
+The five implemented serving models provide distinct consumption boundaries and preserve their governed upstream analytical semantics.
 
 ---
 
 # 33. Validation Expectations
 
-Later Phase 8 validation must confirm:
+Phase 8 validation was required to confirm:
 
 - serving grain uniqueness
 - dimension-key integrity
@@ -971,30 +970,26 @@ The executive, channel, commerce, user-behaviour, and segment branches must be r
 
 ---
 
-# 34. P8B Design Decision
+# 34. P8B Design Decision and Implementation Status
 
-The BI Serving Layer will use a small set of purpose-driven serving datasets rather than mechanically reproducing the upstream warehouse.
+The BI Serving Layer uses a small set of purpose-driven serving datasets rather than mechanically reproducing the upstream warehouse.
 
-The approved planned analytical serving interfaces are:
+The implemented analytical serving interfaces are:
 
-```text
-bi_executive_daily
-bi_channel_daily
-bi_commerce_daily
-bi_user_behavior
-bi_segment_daily
-```
+    bi_executive_daily
+    bi_channel_daily
+    bi_commerce_daily
+    bi_user_behavior
+    bi_segment_daily
 
 The governed dimensions:
 
-```text
-dim_date
-dim_channel
-```
+    dim_date
+    dim_channel
 
-will be consumed directly unless later implementation evidence justifies a BI-specific derivative.
+are consumed directly without unnecessary BI-specific derivatives.
 
-`executive_kpi_trends_daily` will serve as the source of the consolidated executive serving dataset because it already carries the governed base executive KPIs together with approved rolling and Week-over-Week metrics.
+`executive_kpi_trends_daily` serves as the source of the consolidated executive serving dataset because it carries the governed base executive KPIs together with the approved rolling and Week-over-Week metrics.
 
 The channel-driver branch remains separate because its grain and session-attributed commercial semantics differ from the headline executive branch.
 
@@ -1002,6 +997,6 @@ Commerce remains separate to provide broader transaction-date commercial analysi
 
 Observed pseudo-user behaviour remains separate because its grain is the pseudo-user rather than date.
 
-Device and geography performance remain separate because their grain is session date × device × country.
+Device and geography performance remain separate because its grain is session date × device × country.
 
-This architecture establishes the model contracts for P8C while deliberately avoiding unnecessary duplication, incompatible flattening, and migration of governed business logic into Power BI.
+The implemented architecture preserves the P8B model contracts while avoiding unnecessary duplication, incompatible flattening, and migration of governed business logic into Power BI.
