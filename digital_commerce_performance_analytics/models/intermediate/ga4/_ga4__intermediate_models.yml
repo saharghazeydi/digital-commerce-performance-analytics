@@ -168,11 +168,20 @@ models:
       - name: platform
         description: Platform recorded on the first event of the session.
 
+      - name: device_category
+        description: Device category recorded on the first event of the session.
+
+      - name: country
+        description: Country recorded on the first event of the session.
+
       - name: landing_page
         description: Page location recorded on the first event of the session.
 
       - name: landing_page_title
         description: Page title recorded on the first event of the session.
+
+      - name: landing_page_referrer
+        description: Page referrer recorded on the first event of the session.
 
       - name: exit_page
         description: Page location recorded on the final event of the session.
@@ -188,6 +197,17 @@ models:
 
       - name: campaign
         description: Selected acquisition campaign for the session.
+
+      - name: has_selected_acquisition
+        description: >
+          Boolean flag indicating whether a governed acquisition event was
+          selected for the session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
 
       - name: transaction_count
         description: >

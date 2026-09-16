@@ -90,4 +90,4 @@ This decision applies to the GA4 source used by the Digital Commerce Performance
 Analytics project.
 
 It does not define transaction identity for unrelated datasets or previous
-portfolio projects.
+analytics projects.

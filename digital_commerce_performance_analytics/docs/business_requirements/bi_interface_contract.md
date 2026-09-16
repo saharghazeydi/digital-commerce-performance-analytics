@@ -18,7 +18,8 @@ P8D — Business Naming & BI Interface
 
 This document defines the business-facing interface contract for the governed BI Serving Layer.
 
-It establishes how serving-model fields should be interpreted and presented when consumed by the Phase 9 Power BI semantic model.
+It establishes how serving-model fields are interpreted and presented in the implemented Power BI semantic model.
+
 
 The contract defines:
 
@@ -31,9 +32,9 @@ The contract defines:
 - non-additive metric handling
 - semantic distinctions that must remain visible to report developers
 
-This document does not implement Power BI relationships, DAX measures, display folders, or report visuals.
+This document does not define the implementation details of Power BI relationships, DAX measures, display folders, or report visuals.
 
-Those responsibilities belong to later phases.
+Those responsibilities are implemented and documented in the downstream Power BI semantic-model and report layers.
 
 ---
 
@@ -254,7 +255,7 @@ Executive KPI and governed trend reporting.
 
 # 7. Executive Measure Interface
 
-Phase 9 should expose explicit semantic-model measures for the main executive KPIs.
+The implemented Power BI semantic model exposes explicit measures for the main executive KPIs.
 
 Expected business measures include:
 
@@ -319,7 +320,7 @@ These fields are date-specific analytical outputs.
 
 They must not be summed or averaged across multiple dates.
 
-Phase 9 should expose them through explicit measures that return the appropriate value for the active date context.
+The implemented Power BI semantic model exposes these metrics through explicit measures that return the appropriate value for the active date context.
 
 The semantic model must not reconstruct a competing definition of the governed seven-day or Week-over-Week logic.
 
@@ -382,7 +383,7 @@ SUM(Channel Session-Attributed Purchase Revenue)
 SUM(All Compatible Session-Attributed Purchase Revenue)
 ```
 
-The exact DAX implementation and filter-context handling belong to Phase 9.
+The exact DAX implementation and filter-context handling are owned by the implemented Power BI semantic model.
 
 Daily contribution columns must not be summed or averaged across dates.
 
@@ -404,7 +405,7 @@ Channel Sort Order
 
 Where the same descriptive channel fields also exist in `bi_channel_daily`, the semantic model should prefer the authoritative dimension fields for slicing and grouping.
 
-Redundant fact-side descriptive fields may be hidden in Phase 9.
+Redundant fact-side descriptive fields may be hidden in the Power BI semantic model.
 
 ---
 
@@ -612,7 +613,7 @@ Expected business-facing calendar fields may include:
 - Week
 - Day
 
-The exact exposed calendar fields depend on the existing governed `dim_date` schema and will be finalized during Phase 9 semantic-model implementation.
+The exposed calendar fields are governed by the existing `dim_date` schema and the implemented Power BI semantic-model design.
 
 The semantic model should mark the appropriate field as the model date column where required by the chosen Power BI design.
 
@@ -760,7 +761,7 @@ Session-attributed measures must retain an explicit attribution qualifier when a
 
 # 25. Semantic Model Boundaries
 
-Phase 9 Power BI may:
+The Power BI semantic model may:
 
 - rename fields for presentation
 - hide technical fields
@@ -771,7 +772,7 @@ Phase 9 Power BI may:
 - configure relationships
 - configure date behaviour
 
-Phase 9 Power BI must not:
+The Power BI semantic model must not:
 
 - redefine sessionization
 - redefine purchasing sessions
@@ -789,36 +790,37 @@ A requirement for new business logic must return to the governed analytics-engin
 
 ---
 
-# 26. Phase 9 Handoff Expectations
+# 26. Power BI Implementation Handoff
 
-The Power BI semantic-model implementation should receive:
+The Power BI semantic model was implemented using the governed BI interface defined by this contract, including:
 
 - the five governed BI serving datasets
 - `dim_date`
 - `dim_channel`
-- this interface contract
 - the BI serving technical design
 - the Executive KPI Reference
 - the upstream KPI contracts
 
-Phase 9 should then implement:
+The implemented semantic model includes:
 
-- BigQuery connection
+- BigQuery connectivity
 - semantic-model relationships
-- date model
+- a governed date model
 - explicit DAX measures
-- field visibility
+- controlled field visibility
 - business-facing labels
-- formatting
+- measure formatting
 - sorting
 - display folders
 - semantic-model validation
+
+The Power BI implementation preserves the governed metric definitions, grains, attribution semantics, and aggregation rules defined upstream.
 
 ---
 
 # 27. P8D Decision
 
-The BI Serving Layer will preserve stable technical field names while the Power BI semantic model provides the final business-facing presentation layer.
+The BI Serving Layer preserves stable technical field names while the Power BI semantic model provides the final business-facing presentation layer.
 
 The interface deliberately distinguishes:
 
@@ -832,7 +834,7 @@ The interface deliberately distinguishes:
 
 Technical and helper fields remain available where required but should normally be hidden from report authors.
 
-Explicit semantic-model measures will be preferred over implicit aggregation.
+Explicit semantic-model measures are preferred over implicit aggregation.
 
 Most importantly, business-friendly naming must never erase the governed distinctions between:
 
@@ -842,4 +844,4 @@ Most importantly, business-friendly naming must never erase the governed distinc
 - pseudo-user observations
 - authenticated customer concepts
 
-This contract defines the approved BI-facing interface to be carried forward into Phase 9.
+This contract defines the approved BI-facing interface implemented in the downstream Power BI semantic model and report.

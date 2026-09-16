@@ -279,7 +279,7 @@ Known limitations include:
   context.
 
 These limitations will be carried forward into model documentation and final
-portfolio documentation where relevant.
+project documentation where relevant.
 
 ---
 

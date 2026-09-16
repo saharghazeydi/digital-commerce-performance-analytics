@@ -10,13 +10,13 @@ Phase 6 — Business Marts
 
 ## Purpose
 
-Define the intended consumers, business decisions, analytical questions, required grains, and downstream use cases for the Business Marts layer before mart implementation begins.
+Define the approved consumers, business decisions, analytical questions, grains, and downstream use cases that govern the implemented Business Marts layer.
 
 The Business Marts layer must consume governed Core Warehouse entities and must not reconstruct source, staging, sessionization, transaction-deduplication, or channel-classification logic.
 
 ## Approved Upstream Core Models
 
-The Business Marts layer will consume the following governed Core Warehouse models:
+The Business Marts layer consumes the following governed Core Warehouse models:
 
 - `dim_date`
 - `dim_channel`
@@ -77,13 +77,15 @@ The mart should answer:
 - How does channel performance change by date?
 - What proportion of traffic is classified as Unknown or Other?
 
-## Candidate Grain
+## Approved Grain
 
 One row per:
 
-`date_day + channel_key`
+`session_date + channel_key`
 
-Additional source-level breakdown may be provided when required by downstream analysis.
+`session_date` uses the governed session date from `fct_sessions`.
+
+Channel performance is governed at the channel-group level through `channel_key`; source-, medium-, and campaign-level breakdowns are not part of the implemented mart grain.
 
 ## Required Upstream Models
 
@@ -92,25 +94,22 @@ Additional source-level breakdown may be provided when required by downstream an
 - `dim_channel`
 - `dim_date`
 
-## Candidate Measures
+## Required Measures
 
 - session_count
 - purchasing_session_count
-- transaction_count
-- purchase_revenue
-- refund_value
-- total_item_quantity
 - conversion_rate
-- average_order_value
-- revenue_per_session
+- session_attributed_transaction_count
+- session_attributed_purchase_revenue
+- session_contribution
+- purchasing_session_contribution
+- transaction_contribution
+- revenue_contribution
 
-## Candidate Dimensions
+## Required Dimensions
 
-- date
-- channel
-- source
-- medium
-- campaign
+- session date
+- governed channel
 
 ---
 
@@ -149,11 +148,13 @@ The mart should answer:
 - How do revenue and conversion change over time?
 - Are changes in revenue driven by traffic, conversion, or order value?
 
-## Candidate Grain
+## Approved Grain
 
 One row per:
 
 `date_day`
+
+`date_day` is the governed reporting date used to align the compatible daily metric families exposed by the mart.
 
 ## Required Upstream Models
 
@@ -161,7 +162,7 @@ One row per:
 - `fct_transactions`
 - `dim_date`
 
-## Candidate Measures
+## Required Measures
 
 - session_count
 - purchasing_session_count
@@ -175,13 +176,9 @@ One row per:
 - average_order_value
 - revenue_per_session
 
-## Candidate Dimensions
+## Required Dimension
 
-- date
-- year
-- quarter
-- month
-- week
+- governed date
 
 ---
 
@@ -505,7 +502,7 @@ Measures from different grains must not be combined without controlled aggregati
 
 ## KPI Ownership
 
-KPI formulas will be formally defined in P6B before mart SQL implementation.
+KPI formulas are governed by the approved P6B KPI contracts.
 
 No mart may introduce a conflicting local KPI definition.
 
@@ -535,3 +532,18 @@ The approved Phase 6 sequence is:
 6. P6F — Device / Geography Mart
 7. P6G — Mart Validation
 8. P6H — Performance Optimization
+
+---
+
+# Phase 6 Implementation Status
+
+The approved Business Marts requirements were implemented through four governed marts:
+
+- `mart_channel_daily`
+- `mart_ecommerce_daily`
+- `mart_user_behavior`
+- `mart_segment_daily`
+
+The implemented marts preserve the approved grains, KPI contracts, attribution semantics, and reconciliation requirements defined across Phase 6.
+
+Phase 6 validation and performance-optimization work was completed in P6G and P6H, with durable validation evidence maintained in the project validation documentation.

@@ -1,10 +1,10 @@
-# Phase 11 â€” Final Validation Summary
+# Phase 11 — Final Validation Summary
 
 ## 1. Purpose
 
-This document records the final end-to-end validation and reconciliation evidence for Phase 11 â€” Final Validation.
+This document records the final end-to-end validation and reconciliation evidence for Phase 11 — Final Validation.
 
-The objective of Phase 11 is to confirm that the complete analytical chain remains internally consistent and portfolio-ready across:
+The objective of Phase 11 is to confirm that the complete analytical chain remains internally consistent and release-ready across:
 
 - the governed GA4 source population;
 - source-aligned staging models;
@@ -17,11 +17,11 @@ The objective of Phase 11 is to confirm that the complete analytical chain remai
 - the final Power BI report; and
 - the project repository.
 
-Phase 11 does not introduce new analytical features, KPI definitions, attribution rules, architecture, or report design. It verifies the final governed implementation delivered through Phases 0â€“10.
+Phase 11 does not introduce new analytical features, KPI definitions, attribution rules, architecture, or report design. It verifies the final governed implementation delivered through Phases 0–10.
 
 ---
 
-## 2. P11A â€” Source-to-Staging Reconciliation
+## 2. P11A — Source-to-Staging Reconciliation
 
 ### Objective
 
@@ -64,11 +64,11 @@ Existing staging controls also validate:
 
 ### Result
 
-**P11A â€” Source-to-Staging Reconciliation: PASS**
+**P11A — Source-to-Staging Reconciliation: PASS**
 
 ---
 
-## 3. P11B â€” Warehouse Reconciliation
+## 3. P11B — Warehouse Reconciliation
 
 ### Objective
 
@@ -123,11 +123,11 @@ The validated analytical baseline remains:
 
 ### Result
 
-**P11B â€” Warehouse Reconciliation: PASS**
+**P11B — Warehouse Reconciliation: PASS**
 
 ---
 
-## 4. P11C â€” BI Reconciliation
+## 4. P11C — BI Reconciliation
 
 ### Objective
 
@@ -184,11 +184,11 @@ These values reconcile to the governed Power BI report baseline.
 
 ### Result
 
-**P11C â€” BI Reconciliation: PASS**
+**P11C — BI Reconciliation: PASS**
 
 ---
 
-## 5. P11D â€” dbt Quality Gate
+## 5. P11D — dbt Quality Gate
 
 ### Objective
 
@@ -222,11 +222,11 @@ No dbt model, test, dependency, or project-level quality-gate failure remains.
 
 ### Result
 
-**P11D â€” dbt Quality Gate: PASS**
+**P11D — dbt Quality Gate: PASS**
 
 ---
 
-## 6. P11E â€” Repository Audit
+## 6. P11E — Repository Audit
 
 ### Objective
 
@@ -260,11 +260,11 @@ The tracked repository remains organized across the approved project areas:
 
 ### Result
 
-**P11E â€” Repository Audit: PASS**
+**P11E — Repository Audit: PASS**
 
 ---
 
-## 7. P11F â€” Power BI QA
+## 7. P11F — Power BI QA
 
 ### Objective
 
@@ -317,7 +317,7 @@ The final report continues to expose the governed analytical baseline:
 
 ### Result
 
-**P11F â€” Power BI QA: PASS**
+**P11F — Power BI QA: PASS**
 
 ---
 
@@ -326,21 +326,21 @@ The final report continues to expose the governed analytical baseline:
 Phase 11 now provides explicit validation across the complete analytical delivery chain:
 
     GA4 Source
-        â†“
+        ↓
     Staging
-        â†“
+        ↓
     Intermediate Models
-        â†“
+        ↓
     Core Warehouse
-        â†“
+        ↓
     Business Marts
-        â†“
+        ↓
     Executive KPI Layer
-        â†“
+        ↓
     BI Serving Layer
-        â†“
+        ↓
     Power BI Semantic Model
-        â†“
+        ↓
     Power BI Report
 
 Validation combines:
@@ -397,16 +397,16 @@ Evidence demonstrates that:
 
 No unresolved critical data-quality, grain, reconciliation, semantic, repository, or report-regression issue has been identified.
 
-**P11A â€” Source-to-Staging Reconciliation: PASS**
+**P11A — Source-to-Staging Reconciliation: PASS**
 
-**P11B â€” Warehouse Reconciliation: PASS**
+**P11B — Warehouse Reconciliation: PASS**
 
-**P11C â€” BI Reconciliation: PASS**
+**P11C — BI Reconciliation: PASS**
 
-**P11D â€” dbt Quality Gate: PASS**
+**P11D — dbt Quality Gate: PASS**
 
-**P11E â€” Repository Audit: PASS**
+**P11E — Repository Audit: PASS**
 
-**P11F â€” Power BI QA: PASS**
+**P11F — Power BI QA: PASS**
 
-Phase 11 is ready for **P11G â€” Final Acceptance and formal phase closeout**.
+Phase 11 is ready for **P11G — Final Acceptance and formal phase closeout**.

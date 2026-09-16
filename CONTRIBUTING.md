@@ -20,7 +20,7 @@ Development must be completed on a dedicated branch rather than directly on `mai
 
 The `main` branch represents the latest reviewed and accepted project state.
 
-Each branch should contain one approved work package or one coherent logical change.
+Each branch should contain one approved work package, release package, or other coherent logical change.
 
 Recommended branch names include:
 
@@ -113,6 +113,12 @@ Detailed artifact rules are maintained in:
 docs/project_management/development_workflow.md
 ```
 
+Environment setup and reproduction guidance is maintained in:
+
+```text
+docs/project_management/reproduction_guide.md
+```
+
 ---
 
 ## Documentation Requirements
@@ -144,7 +150,7 @@ Documentation responsibilities are divided as follows:
 | `docs/decisions/` | Significant architectural and technical decisions |
 | `docs/data_quality/` | Durable data-quality findings and controls |
 | dbt documentation | Models, grains, columns, tests, assumptions, and lineage |
-| Power BI documentation | Semantic model, measures, relationships, and report behaviour |
+| Power BI documentation and assets | Semantic model, measures, relationships, report behaviour, canonical PBIX, and approved report screenshots |
 
 The Project Tracker must not be used as an exploratory analysis notebook.
 
@@ -164,7 +170,7 @@ Before work is merged, complete all applicable checks:
 6. Build relevant dbt models when transformation logic is affected.
 7. Run relevant dbt tests.
 8. Reconcile source, model, KPI, or reporting outputs where applicable.
-9. Record known risks, assumptions, limitations, or deferred work.
+9. Record known risks, assumptions, limitations, or intentionally deferred future enhancements.
 10. Confirm the change belongs to the approved work package.
 
 Documentation-only changes do not require a full `dbt build` unless they modify dbt configuration or document behaviour that should be technically verified.
@@ -209,7 +215,7 @@ Before merge, confirm that:
 - durable findings and decisions are recorded
 - applicable validation has passed
 - repository standards are followed
-- the next project state is clear
+- the next project state or formal project closure is clear
 
 ---
 
@@ -222,7 +228,7 @@ A work package is complete only when:
 3. Results have been reconciled where applicable.
 4. Durable findings and decisions have been documented.
 5. Known limitations have been recorded.
-6. The Project Tracker reflects the correct next state.
+6. The Project Tracker reflects the correct next state or formal project closure.
 7. The relevant phase checkpoint has been updated when required.
 8. The changes have been reviewed and merged through a Pull Request.
 9. Local `main` has been synchronized with `origin/main`.
